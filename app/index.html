@@ -183,7 +183,7 @@ textarea{min-height:70px;resize:vertical}
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.5.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.6.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -210,6 +210,7 @@ var PRESETS=[
   {n:"Tomate (hidro)",c:"Hortalizas",e:"🍅",type:"hidro",check:3,sol:14,phMin:5.5,phMax:6.5,ecMin:2.0,ecMax:3.5}
 ];
 var CATS=["Aromáticas","Hortalizas","Frutales","Flores","Interior y follaje","Suculentas y cactus","Árboles y arbustos","Otras"];
+var REM_SUG_ARBOL=[["🌳","Abonar al inicio de lluvias",180],["✂️","Poda de formación",365],["🍊","Revisar flores y frutos",14],["🐛","Revisar tronco y hojas",30]];
 var REM_SUG=[["🔄","Rotar la maceta",14],["🧽","Limpiar hojas",30],["✂️","Podar",60],["🐛","Revisar plagas",7],["🪴","Trasplantar",365],["💦","Rociar hojas",3]];
 var EMOJIS=["🌿","🌱","🪴","🌵","🌸","🌺","🌻","🌷","🍅","🥬","🍓","🌶️","🫑","🥒","🍋","🌳","🎋","🍀"];
 
@@ -314,8 +315,8 @@ function timeline(p){
   return t.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.t||0)-(b.t||0);});
 }
 function photosOf(p){return timeline(p).filter(function(l){return l.thumb;});}
-var ICON={agua:"💧",abono:"🧪",medicion:"📏",solucion:"🔄",salud:"🩺",nota:"📝",rem:"🔔",inspeccion:"🔍",foto:"📸"};
-var KINDNAME={agua:"Riego",abono:"Abono",medicion:"Medición",solucion:"Cambio de solución",salud:"Revisión de salud",nota:"Nota",rem:"Recordatorio",inspeccion:"Inspección preventiva",foto:"Foto de seguimiento"};
+var ICON={cosecha:"🧺",agua:"💧",abono:"🧪",medicion:"📏",solucion:"🔄",salud:"🩺",nota:"📝",rem:"🔔",inspeccion:"🔍",foto:"📸"};
+var KINDNAME={agua:"Riego",abono:"Abono",medicion:"Medición",solucion:"Cambio de solución",salud:"Revisión de salud",nota:"Nota",cosecha:"Cosecha",rem:"Recordatorio",inspeccion:"Inspección preventiva",foto:"Foto de seguimiento"};
 
 /* ---------- guardar ---------- */
 function save(){
@@ -414,7 +415,7 @@ function taskRow(t){
   var title=t.kind==="trat"?esc(t.label):esc(t.label)+' · '+esc(t.p.name);
   if(t.p.resp)title+='<span class="who">👤 '+esc(shortName(t.p.resp))+'</span>';
   var plx=placeOf(t.p);
-  if(t.kind==="agua"&&t.days<=0&&plx&&plx.out&&rainsToday(plx))right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="rained" data-p="'+t.p.id+'">🌧️ Llovió</button><button class="btn sm ghost" data-a="done" data-p="'+t.p.id+'" data-k="agua">Regué</button></div>';
+  if(t.kind==="agua"&&t.days<=0&&plx&&plantOut(t.p)&&rainsToday(plx))right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="rained" data-p="'+t.p.id+'">🌧️ Llovió</button><button class="btn sm ghost" data-a="done" data-p="'+t.p.id+'" data-k="agua">Regué</button></div>';
   return '<div class="task'+(late||pr===1?" late":"")+'"><div class="ico i-'+t.kind+'">'+(t.icon||ICON[t.kind])+'</div><div class="t">'+chip+'<b>'+title+'</b><small>'+(t.kind==="trat"?t.p.emoji+' '+esc(t.p.name)+' · ':t.p.emoji+' ')+when+'</small></div>'+right+'</div>';
 }
 
@@ -461,14 +462,16 @@ function plantCard(p){
   var ts=tasksFor(p), late=ts.filter(function(t){return t.days<=0;}), hh=healthOf(p), al=readingAlert(p);
   var badge=hh?'<span class="badge b-bad">Revisar salud</span>':al?'<span class="badge b-bad">Fuera de rango</span>':late.length?'<span class="badge b-warn">'+late.map(function(t){return t.label.split(" ")[0];}).join(" · ")+'</span>':'<span class="badge b-ok">Al día</span>';
   var next=ts.slice().sort(function(a,b){return a.days-b.days;})[0];
-  return '<button class="pcard" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img class="thumb" src="'+p.thumb+'" alt="">':'<span class="em">'+p.emoji+'</span>')+'<b>'+(p.thumb?p.emoji+' ':'')+esc(p.name)+'</b><small>'+(p.type==="hidro"?"💧 Hidroponía":"Tierra")+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+badge+'<small>'+next.label+': '+nice(next.due)+'</small>'+(function(){var lp=photosOf(p).slice(-1)[0];return lp?'<small>📸 Última foto: '+nice(lp.d)+'</small>':'';})()+'</button>';
+  return '<button class="pcard" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img class="thumb" src="'+p.thumb+'" alt="">':'<span class="em">'+p.emoji+'</span>')+'<b>'+(p.thumb?p.emoji+' ':'')+esc(p.name)+'</b><small>'+(p.type==="hidro"?"💧 Hidro":(plantOut(p)?"🌤️ Exterior":"🏠 Interior"))+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+badge+'<small>'+next.label+': '+nice(next.due)+'</small>'+(function(){var lp=photosOf(p).slice(-1)[0];return lp?'<small>📸 Última foto: '+nice(lp.d)+'</small>':'';})()+'</button>';
 }
 function catOf(p){return p.category&&CATS.indexOf(p.category)>=0?p.category:"Otras";}
 function viewPlantas(){
   if(!S.plants.length)return '<div class="empty"><div class="big">📷</div><p>Toma una foto de tu planta y la identifico por ti.</p><br><button class="btn" data-a="new">+ Agregar planta</button></div>';
   var PLs=places().filter(function(pl){return S.plants.some(function(p){return p.placeId===pl.id;});});
   var src=ui.pcat?S.plants.filter(function(p){return ui.pcat==="_none"?!p.placeId:p.placeId===ui.pcat;}):S.plants;
-  var plChips=PLs.length?'<div class="chips" style="margin-bottom:6px">'+[["","📍 Todos los lugares"]].concat(PLs.map(function(pl){return [pl.id,(pl.out?"🌤️ ":"🏠 ")+pl.name];})).map(function(x){return '<button class="chip'+((ui.pcat||"")===x[0]?" on":"")+'" data-a="pcat" data-v="'+x[0]+'">'+esc(x[1])+'</button>';}).join("")+'</div>':'';
+  if(ui.pexp)src=src.filter(function(p){return ui.pexp==="tree"?isTree(p):ui.pexp==="out"?plantOut(p):!plantOut(p);});
+  var expChips='<div class="chips" style="margin-bottom:6px">'+[["","Todas"],["in","🏠 Interior"],["out","🌤️ Exterior"],["tree","🌳 Árboles y frutales"]].map(function(x){return '<button class="chip'+((ui.pexp||"")===x[0]?" on":"")+'" data-a="pexp" data-v="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>';
+  var plChips=expChips+(PLs.length?'<div class="chips" style="margin-bottom:6px">'+[["","📍 Todos los lugares"]].concat(PLs.map(function(pl){return [pl.id,(pl.out?"🌤️ ":"🏠 ")+pl.name];})).map(function(x){return '<button class="chip'+((ui.pcat||"")===x[0]?" on":"")+'" data-a="pcat" data-v="'+x[0]+'">'+esc(x[1])+'</button>';}).join("")+'</div>':'');
   var used=CATS.filter(function(c){return src.some(function(p){return catOf(p)===c;});});
   if(ui.cat&&used.indexOf(ui.cat)<0)ui.cat="";
   var h=plChips+'<div class="chips" style="margin-bottom:6px"><button class="chip'+(!ui.cat?" on":"")+'" data-a="cat" data-v="">Todas ('+src.length+')</button>'+used.map(function(c){var n=src.filter(function(p){return catOf(p)===c;}).length;return '<button class="chip'+(ui.cat===c?" on":"")+'" data-a="cat" data-v="'+esc(c)+'">'+esc(c)+' ('+n+')</button>';}).join("")+'</div>';
@@ -546,11 +549,20 @@ function recetario(){
   R.filter(function(r){return !c||r.cat===c;}).forEach(function(r){h+='<button class="rec" data-a="receta" data-v="'+r.id+'"><span class="re">'+r.emoji+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(r.nombre)+'</b><small style="color:var(--muted)">'+esc(r.para.join(" · "))+'</small><br><span class="lvl '+LVL[r.nivel][1]+'">'+LVL[r.nivel][0]+'</span></span><span style="color:var(--muted)">›</span></button>';});
   return h+'</div>';
 }
+function viewCosecha(p){
+  var cs=plantLog(p.id).filter(function(l){return l.kind==="cosecha";});
+  var h='<button class="x" data-a="close">✕</button><h2>🧺 Cosecha · '+esc(p.name)+'</h2>';
+  h+='<div class="row"><label class="f"><span>Cantidad</span><input type="number" step="0.1" inputmode="decimal" id="cs-q" placeholder="12"></label><label class="f"><span>Unidad</span><input type="text" id="cs-u" placeholder="frutos, kg, manojos" value="'+esc(cs[0]&&cs[0].unit||"")+'"></label></div>';
+  h+='<label class="f"><span>Nota (opcional)</span><input type="text" id="cs-n" placeholder="Ej.: dulces, algunos con mancha"></label><button class="btn block" data-a="cos-save" data-p="'+p.id+'">Guardar cosecha</button>';
+  if(cs.length){var tot={};cs.forEach(function(c){if(c.qty!=null){tot[c.unit]=(tot[c.unit]||0)+c.qty;}});
+    h+='<div class="sec">Historial de cosechas</div><div class="card">'+(Object.keys(tot).length?'<p style="font-size:14px;margin-bottom:6px"><b>Total:</b> '+Object.keys(tot).map(function(u){return Math.round(tot[u]*10)/10+" "+esc(u);}).join(" · ")+'</p>':'')+cs.slice(0,15).map(function(c){return '<div class="log"><span class="d">'+short(c.d)+'</span><span>'+(c.qty!=null?c.qty+" ":"")+esc(c.unit||"")+(c.text?" · "+esc(c.text):"")+(c.by?' <span class="who">'+esc(shortName(c.by))+'</span>':'')+'</span></div>';}).join("")+'</div>';}
+  return h;
+}
 function viewLugar(){
   var L=ui.lugar||(ui.lugar={id:null,name:"",area:"",lat:null,lon:null,out:false,busy:false,err:""});
   var h='<button class="x" data-a="close">✕</button><h2>'+(L.id?"Editar lugar":"Nuevo lugar")+'</h2>';
   h+='<label class="f"><span>Nombre</span><input type="text" id="pl-name" value="'+esc(L.name)+'" placeholder="Ej.: Casa, Finca, Oficina"></label>';
-  h+='<div class="seg"><button data-a="pl-out" data-v="0" class="'+(!L.out?"on":"")+'">🏠 Bajo techo</button><button data-a="pl-out" data-v="1" class="'+(L.out?"on":"")+'">🌤️ Al aire libre</button></div>';
+  h+='<p style="font-size:13px;color:var(--muted);margin-bottom:6px">La mayoría de plantas aquí están… (cada planta se puede cambiar)</p><div class="seg"><button data-a="pl-out" data-v="0" class="'+(!L.out?"on":"")+'">🏠 Bajo techo</button><button data-a="pl-out" data-v="1" class="'+(L.out?"on":"")+'">🌤️ Al aire libre</button></div>';
   h+='<div class="card" style="font-size:14px"><b>Ubicación</b>'+(L.area?'<p style="margin:6px 0">📍 '+esc(L.area)+(L.lat!=null?' <span style="color:var(--muted)">('+L.lat.toFixed(3)+', '+L.lon.toFixed(3)+')</span>':'')+'</p>':'<p style="color:var(--muted);margin:6px 0">Sirve para el clima y los consejos de cada zona.</p>');
   h+='<button class="btn sm block" data-a="pl-geo"'+(L.busy?" disabled":"")+'>'+(L.busy?"Buscando…":"📍 Usar mi ubicación actual")+'</button>';
   h+='<div class="row" style="align-items:flex-end;margin-top:10px"><label class="f" style="flex:2;margin:0"><span>O escribe la zona</span><input type="text" id="pl-q" placeholder="Ej.: La Fortuna, San Carlos"></label><button class="btn sm ghost" style="flex:none" data-a="pl-search">Buscar</button></div>';
@@ -583,9 +595,12 @@ function recFor(text){for(var i=0;i<REC_KEYS.length;i++)if(REC_KEYS[i][0].test(t
 /* ---- Lugares (se guardan como registros kind "lugar" para que se sincronicen) ---- */
 function places(){return S.log.filter(function(l){return l.kind==="lugar";}).sort(function(a,b){return (a.t||0)-(b.t||0);});}
 function placeById(id){return places().filter(function(x){return x.id===id;})[0]||null;}
+function isTree(p){var c=catOf(p);return c==="Frutales"||c==="Árboles y arbustos";}
+function canHarvest(p){var c=catOf(p);return c==="Frutales"||c==="Hortalizas"||c==="Aromáticas";}
+function plantOut(p){if(p&&p.exp)return p.exp==="out";var pl=placeOf(p);return !!(pl&&pl.out);}
 function placeOf(p){return p&&p.placeId?placeById(p.placeId):null;}
 function placeLabel(p){var pl=placeOf(p);return pl?(pl.name+(p.place?" · "+p.place:"")):(p&&p.place)||"";}
-function placeCtx(p){var pl=placeOf(p);if(!pl)return p.place||"";return pl.name+(pl.area?" ("+pl.area+", Costa Rica)":"")+(pl.out?", al aire libre":", bajo techo")+(p.place?", "+p.place:"");}
+function placeCtx(p){var pl=placeOf(p);if(!pl)return p.place||"";return pl.name+(pl.area?" ("+pl.area+", Costa Rica)":"")+(plantOut(p)?", al aire libre":", bajo techo")+(p.place?", "+p.place:"");}
 /* ---- Clima por lugar: Open-Meteo, gratis y sin clave; se guarda 1 vez al día ---- */
 var WX={};
 function wxFor(pl){
@@ -608,7 +623,8 @@ function wxLine(pl){
   var w=wxFor(pl);if(!w)return "";
   var r0=w.rain[0]||0,p0=w.prob[0]||0,r1=w.rain[1]||0;
   var ic=r0>=5||p0>=70?"🌧️":r0>=1||p0>=40?"🌦️":"☀️";
-  var tip=r0>=5||p0>=70?(pl.out?"Lloverá: las plantas de aquí no necesitan riego hoy.":"Día lluvioso: ventila para evitar hongos."):((w.tmax[0]||0)>=31?"Mucho calor: revisa la tierra en la tarde.":r1>=5?"Mañana llueve.":"");
+  var nOut=S.plants.filter(function(p){return p.placeId===pl.id&&plantOut(p);}).length;
+  var tip=r0>=5||p0>=70?(nOut?"Lloverá: "+(nOut===1?"la planta al aire libre no necesita":"las "+nOut+" plantas al aire libre no necesitan")+" riego hoy.":"Día lluvioso: ventila las de adentro para evitar hongos."):((w.tmax[0]||0)>=31?"Mucho calor: revisa la tierra en la tarde.":r1>=5?"Mañana llueve.":"");
   return '<div class="wx"><span style="font-size:24px">'+ic+'</span><span style="flex:1"><b>'+esc(pl.name)+(pl.area?' · '+esc(pl.area):'')+'</b><br>Hoy '+Math.round(w.tmin[0])+'–'+Math.round(w.tmax[0])+' °C · lluvia '+(Math.round(r0*10)/10)+' mm ('+p0+' %)'+(tip?'<br>'+esc(tip):'')+'</span></div>';
 }
 /* ---- Personas ---- */
@@ -632,6 +648,7 @@ function viewSheet(){
   else if(s.k==="ajustes")h+=viewAjustes();
   else if(s.k==="receta")h+=viewReceta(s.id);
   else if(s.k==="lugar")h+=viewLugar();
+  else if(s.k==="cosecha")h+=viewCosecha(plant(s.pid));
   else if(s.k==="plant")h+=viewPlant(plant(s.pid));
   else if(s.k==="medir")h+=viewMedir(plant(s.pid));
   return h+'</div></div>';
@@ -655,6 +672,8 @@ function viewForm(){
   h+='<div class="row"><label class="f"><span>Categoría</span><select id="f-cat">'+CATS.map(function(c){return '<option'+((f.category||"Otras")===c?" selected":"")+'>'+c+'</option>';}).join("")+'</select></label><label class="f"><span>Nombre científico</span><input type="text" id="f-sci" value="'+esc(f.sci||"")+'" placeholder="Opcional"></label></div>';
   var PL=places();
   h+='<div class="row" style="align-items:flex-end"><label class="f" style="flex:2"><span>Lugar</span><select id="f-placeid"><option value="">— Sin lugar —</option>'+PL.map(function(x){return '<option value="'+x.id+'"'+(f.placeId===x.id?" selected":"")+'>'+esc(x.name)+(x.area?' · '+esc(x.area):'')+'</option>';}).join("")+'</select></label><button class="btn sm ghost" style="flex:none;margin-bottom:12px" data-a="newplace">＋ Lugar</button></div>';
+  var fo=f.exp?f.exp==="out":!!(placeById(f.placeId)&&placeById(f.placeId).out);
+  h+='<div class="seg"><button data-a="fexp" data-v="in" class="'+(!fo?"on":"")+'">🏠 Interior / bajo techo</button><button data-a="fexp" data-v="out" class="'+(fo?"on":"")+'">🌤️ Exterior</button></div>';
   h+='<label class="f"><span>Detalle de dónde está</span><input type="text" id="f-place" value="'+esc(f.place||"")+'" placeholder="Ej.: balcón, junto a la ventana"></label>';
   var MM=(ui.members&&ui.members.m)||[];
   if(MM.length>1||f.resp)h+='<label class="f"><span>Responsable</span><select id="f-resp"><option value="">Todos en el jardín</option>'+MM.map(function(m){return '<option value="'+esc(m.email)+'"'+(f.resp===m.email?" selected":"")+'>'+esc(shortName(m.email))+' ('+esc(m.email)+')</option>';}).join("")+'</select></label>';
@@ -681,6 +700,7 @@ function viewPlant(p){
   h+='<div class="actions">';
   if(p.type==="hidro")h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="medicion">📏 Medir</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="solucion">🔄 Cambié solución</button>';
   else h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="agua">💧 Regué</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="abono">🧪 Aboné</button>';
+  if(canHarvest(p))h+='<button class="btn sm ghost" data-a="cosecha" data-p="'+p.id+'">🧺 Cosecha</button>';
   h+='<label class="btn sm line" for="fu-d-'+p.id+'">📸 Foto de seguimiento</label><input type="file" accept="image/*" capture="environment" id="fu-d-'+p.id+'" data-fu="'+p.id+'" style="display:none"><button class="btn sm line" data-a="checkhealth" data-p="'+p.id+'">🩺 Revisar salud</button></div>';
   if(ui.fuBusy===p.id)h+='<div class="read" style="background:var(--leafbg);color:var(--leaf)"><span class="spin">🌿</span> Comparando con la foto anterior…</div>';
   if(hh)h+='<div class="actions" style="margin-top:0"><button class="btn sm ghost" data-a="healed" data-p="'+p.id+'">✓ Marcar como recuperada</button></div>';
@@ -691,7 +711,7 @@ function viewPlant(p){
   if(p.notes)h+='<div class="card" style="font-size:14px">📝 '+esc(p.notes)+'</div>';
   h+=treatCard(p)+evoCard(p)+careCard(p)+propCard(p)+remCard(p)+diaryCard(p);
   var lg=plantLog(p.id).slice(0,15);
-  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+(l.note==="lluvia"?" (lluvia)":"")+(l.by?' <span class="who">'+esc(shortName(l.by))+'</span>':'')+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
+  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="cosecha"?": "+(l.qty!=null?l.qty+" ":"")+(l.unit||""):l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+(l.note==="lluvia"?" (lluvia)":"")+(l.by?' <span class="who">'+esc(shortName(l.by))+'</span>':'')+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
   h+='<div class="actions"><button class="btn sm line" data-a="edit" data-p="'+p.id+'">✏️ Editar</button><button class="btn sm danger" data-a="del">🗑 Eliminar</button></div>';
   if(ui.confirmDel)h+='<div class="confirm"><b>¿Eliminar «'+esc(p.name)+'» y su historial?</b><div class="actions"><button class="btn sm danger" data-a="delyes" data-p="'+p.id+'">Sí, eliminar</button><button class="btn sm line" data-a="delno">Cancelar</button></div></div>';
   return h;
@@ -757,9 +777,9 @@ function newKid(p,method){
 function careCard(p){
   var h='<div class="sec">Ficha de cuidado</div>';
   if(ui.careBusy===p.id)return h+'<div class="card"><span class="spin">🌿</span> Preparando la ficha…</div>';
-  if(!p.care)return h+'<div class="card" style="font-size:14px;color:var(--muted)">Aún no tiene ficha.'+(SAMPLE?'<div class="actions"><button class="btn sm ghost" data-a="mkcare" data-p="'+p.id+'">✨ Crear ficha con Claude</button></div>':'')+'</div>';
+  if(!p.care)return h+'<div class="card" style="font-size:14px;color:var(--muted)">Aún no tiene ficha.'+(SAMPLE?'<div class="actions"><button class="btn sm ghost" data-a="mkcare" data-p="'+p.id+'">✨ Crear ficha con IA</button></div>':'')+'</div>';
   var c=p.care;
-  h+='<div class="card">'+[["☀️ Luz",c.light],["💧 Riego",c.water],["💨 Humedad",c.humidity],["🌡️ Temperatura",c.temp]].filter(function(x){return x[1];}).map(function(x){return '<div class="kv" style="gap:12px"><span style="flex:none">'+x[0]+'</span><b style="text-align:right;font-weight:500">'+esc(x[1])+'</b></div>';}).join("");
+  h+='<div class="card">'+[["☀️ Luz",c.light],["💧 Riego",c.water],["💨 Humedad",c.humidity],["🌡️ Temperatura",c.temp],["🌸 Floración y cosecha",c.season]].filter(function(x){return x[1];}).map(function(x){return '<div class="kv" style="gap:12px"><span style="flex:none">'+x[0]+'</span><b style="text-align:right;font-weight:500">'+esc(x[1])+'</b></div>';}).join("");
   if(c.tips&&c.tips.length)h+='<b style="display:block;margin-top:10px;font-size:14px">Consejos</b><ul style="padding-left:18px;font-size:14px;margin-top:4px">'+c.tips.map(function(t){return '<li style="margin-bottom:3px">'+esc(t)+'</li>';}).join("")+'</ul>';
   return h+'</div>';
 }
@@ -768,7 +788,8 @@ function remCard(p){
   var h='<div class="sec">Recordatorios</div><div class="card">';
   if(!rs.length)h+='<p style="color:var(--muted);font-size:14px;margin-bottom:8px">Agrega tareas extra como rotar la maceta, podar o revisar plagas.</p>';
   ts.forEach(function(t){h+='<div class="kv" style="align-items:center;gap:8px"><span style="flex:1;color:var(--ink)">'+t.icon+' '+esc(t.label)+'<br><small style="color:var(--muted)">cada '+(rs.filter(function(r){return r.id===t.remId;})[0].every)+' días · '+(t.days<0?'<b style="color:var(--rust)">atrasado</b>':nice(t.due))+'</small></span>'+(t.days<=0?'<button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="rem" data-r="'+t.remId+'">Listo ✓</button>':'')+'<button style="color:var(--muted);padding:6px" data-a="remdel" data-p="'+p.id+'" data-v="'+t.remId+'" aria-label="Quitar">✕</button></div>';});
-  h+='<div class="chips" style="margin:10px 0">'+REM_SUG.filter(function(x){return !rs.some(function(r){return r.label===x[1];});}).map(function(x,i){return '<button class="chip" data-a="remsug" data-p="'+p.id+'" data-v="'+REM_SUG.indexOf(x)+'">+ '+x[0]+' '+x[1]+'</button>';}).join("")+'</div>';
+  var SUG=isTree(p)?REM_SUG_ARBOL.concat(REM_SUG.filter(function(x){return x[1]!=="Rotar la maceta"&&x[1]!=="Trasplantar";})):REM_SUG;
+  h+='<div class="chips" style="margin:10px 0">'+SUG.filter(function(x){return !rs.some(function(r){return r.label===x[1];});}).map(function(x,i){return '<button class="chip" data-a="remsug" data-p="'+p.id+'" data-v="'+esc(x[0]+"|"+x[1]+"|"+x[2])+'">+ '+x[0]+' '+x[1]+'</button>';}).join("")+'</div>';
   h+='<div class="row" style="align-items:flex-end"><label class="f" style="flex:2;margin:0"><span>Otro recordatorio</span><input type="text" id="r-label" placeholder="Ej.: Cosechar hojas"></label><label class="f" style="margin:0"><span>Cada (días)</span><input type="number" min="1" id="r-every" value="7"></label></div><button class="btn sm block" style="margin-top:8px" data-a="remadd" data-p="'+p.id+'">+ Agregar recordatorio</button>';
   return h+'</div>';
 }
@@ -873,12 +894,12 @@ function onPlantPhoto(e){var file=e.target.files&&e.target.files[0];if(!file||!u
 function clampN(x,lo,hi,def){x=parseFloat(x);return isNaN(x)?def:Math.min(hi,Math.max(lo,x));}
 function careFrom(r){
   var c=r.care||{};
-  return {light:String(c.light||""),water:String(c.water||""),humidity:String(c.humidity||""),temp:String(c.temp||""),tips:(c.tips||[]).map(String).slice(0,5)};
+  return {light:String(c.light||""),water:String(c.water||""),humidity:String(c.humidity||""),temp:String(c.temp||""),season:String(c.season||""),tips:(c.tips||[]).map(String).slice(0,5)};
 }
 function remsFrom(r){
   return (r.reminders||[]).slice(0,4).map(function(x){return {id:uid(),label:String(x.label||"Recordatorio").slice(0,40),every:Math.round(clampN(x.every,1,365,14)),icon:String(x.icon||"🔔").slice(0,4),start:today()};}).filter(function(x){return !/regar|abonar|riego|abono/i.test(x.label);});
 }
-var CARE_SCHEMA='"care":{"light":"luz que necesita, frase corta","water":"cómo regarla, frase corta","humidity":"humedad ideal, frase corta","temp":"rango de temperatura","tips":["2 a 4 consejos prácticos para Costa Rica"]},"reminders":[{"label":"tarea extra de cuidado (NO riego ni abono), máx 4 palabras","every":días,"icon":"un emoji"}] (1 a 3)';
+var CARE_SCHEMA='"care":{"light":"luz que necesita, frase corta","water":"cómo regarla, frase corta","humidity":"humedad ideal, frase corta","temp":"rango de temperatura","season":"solo si florece o da fruto o cosecha: en qué meses ocurre en Costa Rica; si no aplica, vacío","tips":["2 a 4 consejos prácticos para Costa Rica"]},"reminders":[{"label":"tarea extra de cuidado (NO riego ni abono), máx 4 palabras","every":días,"icon":"un emoji"}] (1 a 3)';
 function identify(blob,thumb){
   function manual(msg){var f=newForm("tierra");f.thumb=thumb;ui.form=f;ui.idBusy=null;ui.idInfo=msg;openSheet({k:"form"});}
   if(!SAMPLE){manual("No pude conectar con Claude para reconocerla. Completa el nombre a mano; la foto ya quedó guardada.");return;}
@@ -933,7 +954,7 @@ function viewAjustes(){
   var h='<button class="x" data-a="close">✕</button><h2>Ajustes</h2>';
   h+=accountCard();
   var PL2=places();
-  h+='<div class="sec">Lugares</div><div class="card" style="font-size:14px">'+(PL2.length?PL2.map(function(x){var n=S.plants.filter(function(p){return p.placeId===x.id;}).length;return '<button class="rec" data-a="editplace" data-v="'+x.id+'"><span class="re">'+(x.out?"🌤️":"🏠")+'</span><span style="flex:1"><b>'+esc(x.name)+'</b><br><small style="color:var(--muted)">'+(x.area?"📍 "+esc(x.area)+" · ":"")+n+(n===1?" planta":" plantas")+'</small></span><span style="color:var(--muted)">›</span></button>';}).join(""):'<p style="color:var(--muted)">Agrega dónde tienes plantas (casa, finca, oficina) para ver el clima de cada zona.</p>')+'<button class="btn sm ghost" style="margin-top:8px" data-a="newplace">＋ Agregar lugar</button></div>';
+  h+='<div class="sec">Lugares</div><div class="card" style="font-size:14px">'+(PL2.length?PL2.map(function(x){var ps=S.plants.filter(function(p){return p.placeId===x.id;}),n=ps.length,no=ps.filter(plantOut).length,nt=ps.filter(isTree).length;return '<button class="rec" data-a="editplace" data-v="'+x.id+'"><span class="re">'+(x.out?"🌤️":"🏠")+'</span><span style="flex:1"><b>'+esc(x.name)+'</b><br><small style="color:var(--muted)">'+(x.area?"📍 "+esc(x.area)+"<br>":"")+n+(n===1?" planta":" plantas")+(n?" · 🏠 "+(n-no)+" adentro · 🌤️ "+no+" afuera"+(nt?" · 🌳 "+nt+" árboles/frutales":""):"")+'</small></span><span style="color:var(--muted)">›</span></button>';}).join(""):'<p style="color:var(--muted)">Agrega dónde tienes plantas (casa, finca, oficina) para ver el clima de cada zona.</p>')+'<button class="btn sm ghost" style="margin-top:8px" data-a="newplace">＋ Agregar lugar</button></div>';
   h+='<div class="sec">Respaldo</div><div class="card">';
   h+='<p style="font-size:14px;color:var(--muted);margin-bottom:10px">Tus datos se guardan en este teléfono. Descarga un respaldo de vez en cuando y guárdalo en tu Drive u OneDrive.</p>';
   h+='<div class="actions"><button class="btn sm" data-a="exportar">⬇️ Exportar respaldo</button><label class="btn sm ghost" for="impfile">⬆️ Importar respaldo</label><input id="impfile" type="file" accept=".json,.html,.htm,application/json,text/html" style="display:none"></div>';
@@ -1139,6 +1160,10 @@ document.addEventListener("click",function(e){
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
   else if(a==="pcat"){ui.pcat=v;render();}
+  else if(a==="pexp"){ui.pexp=v;render();}
+  else if(a==="fexp"){readForm();ui.form.exp=v;render();}
+  else if(a==="cosecha"){openSheet({k:"cosecha",pid:pid});}
+  else if(a==="cos-save"){var q=parseFloat(document.getElementById("cs-q").value),un=(document.getElementById("cs-u").value||"").trim(),nt=(document.getElementById("cs-n").value||"").trim();addLog({plantId:pid,kind:"cosecha",qty:isNaN(q)?null:q,unit:un||"unidades",text:nt});var pc=plant(pid);showToast("🧺 Cosecha anotada: "+(isNaN(q)?"":q+" ")+(un||"unidades")+" de "+pc.name+".");ui.sheet={k:"plant",pid:pid};save();render();}
   else if(a==="newplace"){if(ui.sheet&&ui.sheet.k==="form")readForm();ui.backTo=ui.sheet;ui.lugar=null;openSheet({k:"lugar"});}
   else if(a==="editplace"){var pe=placeById(v);ui.backTo=ui.sheet;ui.lugar={id:pe.id,name:pe.name,area:pe.area||"",lat:pe.lat,lon:pe.lon,out:!!pe.out,busy:false,err:""};openSheet({k:"lugar"});}
   else if(a==="pl-out"){readLugar();ui.lugar.out=v==="1";render();}
@@ -1181,7 +1206,7 @@ document.addEventListener("click",function(e){
   else if(a==="toastundo"){var u=ui.toast&&ui.toast.undo;S.log=S.log.filter(function(l){return l.id!==u;});showToast("Deshecho.",null,2500);save();render();}
   else if(a==="healed"){var ph0=plant(pid);if(ph0&&ph0.treatment&&ph0.treatment.active){ph0.treatment.active=false;ph0.treatment.end=today();ph0.treatment.outcome="Recuperada";}showToast("🎉 ¡Qué bien! Queda anotado que se recuperó.");addLog({plantId:pid,kind:"salud",sev:"sana",title:"Recuperada ✅",why:"Marcada como recuperada.",steps:[],other:[],src:"manual"});save();render();}
   else if(a==="mkcare"){mkCare(plant(pid));}
-  else if(a==="remsug"){var pp=plant(pid),sg=REM_SUG[+v];pp.reminders=pp.reminders||[];pp.reminders.push({id:uid(),icon:sg[0],label:sg[1],every:sg[2],start:today()});save();render();}
+  else if(a==="remsug"){var pp=plant(pid),sg=String(v).split("|");pp.reminders=pp.reminders||[];pp.reminders.push({id:uid(),icon:sg[0],label:sg[1],every:+sg[2]||30,start:today()});save();render();}
   else if(a==="remadd"){var pp2=plant(pid),lb=(document.getElementById("r-label").value||"").trim(),ev=parseInt(document.getElementById("r-every").value,10);if(!lb){document.getElementById("r-label").focus();return;}pp2.reminders=pp2.reminders||[];pp2.reminders.push({id:uid(),icon:"🔔",label:lb.slice(0,40),every:Math.max(1,ev||7),start:today()});save();render();}
   else if(a==="remdel"){var pp3=plant(pid);pp3.reminders=(pp3.reminders||[]).filter(function(r){return r.id!==v;});save();render();}
   else if(a==="noteadd"){var tx=(document.getElementById("n-text").value||"").trim();if(!tx&&!ui.noteThumb){document.getElementById("n-text").focus();return;}var ne={plantId:pid,kind:"nota",text:tx.slice(0,500)};if(ui.noteThumb)ne.thumb=ui.noteThumb;addLog(ne);ui.noteText="";ui.noteThumb="";save();render();}
