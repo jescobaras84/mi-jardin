@@ -1,0 +1,6 @@
+*-respaldo-*.html
+datos*.json
+.env
+.dev.vars
+node_modules/
+.wrangler/

@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Jardín</title>
+<meta name="theme-color" content="#2f6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mi Jardín">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style id="app-css">
+@font-face{font-family:Fraunces;font-weight:600;font-display:swap;src:url(fonts/fraunces-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Fraunces;font-weight:700;font-display:swap;src:url(fonts/fraunces-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:500;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format("woff2")}
+:root{
+  --bg:#f4f1e8; --card:#fffdf7; --ink:#1f2a1f; --muted:#6b7565; --line:#e3dfd2;
+  --leaf:#2f6b3a; --leaf2:#4f9a5c; --leafbg:#e4efe0; --sun:#e0a526; --sunbg:#fbf0d4;
+  --rust:#b5482e; --rustbg:#f8e3dc; --water:#2c74a8; --waterbg:#e0edf6;
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding:env(safe-area-inset-top) 0 calc(150px + env(safe-area-inset-bottom))}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+[data-a],label[for]{cursor:pointer;-webkit-tap-highlight-color:rgba(47,107,58,.12)}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px}
+header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+header.top h1{font-size:28px;color:var(--leaf)}
+header.top .date{color:var(--muted);font-size:13px;text-transform:capitalize}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:99px;background:var(--leafbg);color:var(--leaf);font-weight:600}
+.saving{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:50;opacity:0;transition:.3s}
+.saving.on{opacity:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.sec{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:20px 2px 8px}
+.task{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}
+.task .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:21px;flex:none}
+.task .t{flex:1;min-width:0}
+.task .t b{display:block;font-weight:600}
+.task .t small{color:var(--muted)}
+.task.late{border-color:#e8b9a9;background:#fff8f5}
+.i-agua{background:var(--waterbg)} .i-abono{background:var(--sunbg)} .i-medicion{background:var(--leafbg)} .i-solucion{background:#ece4f6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:12px;font-weight:600;background:var(--leaf);color:#fff;min-height:42px}
+.btn.sm{padding:7px 12px;min-height:36px;font-size:14px}
+.btn.ghost{background:var(--leafbg);color:var(--leaf)}
+.btn.line{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.danger{background:var(--rustbg);color:var(--rust)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.empty{text-align:center;padding:30px 16px;color:var(--muted)}
+.empty .big{font-size:46px;margin-bottom:6px}
+.hero{background:linear-gradient(135deg,#2f6b3a,#4f9a5c);color:#fff;border-radius:20px;padding:18px;margin-bottom:6px}
+.hero h2{font-size:22px;margin-bottom:2px}
+.hero p{opacity:.9;font-size:14px}
+.stats{display:flex;gap:8px;margin-top:12px}
+.stat{flex:1;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 10px}
+.stat b{font-size:20px;display:block;font-family:Fraunces,serif}
+.stat span{font-size:12px;opacity:.9}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.pcard .em{font-size:34px}
+.pcard b{font-weight:600}
+.pcard small{color:var(--muted);font-size:12px}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;display:inline-block;width:max-content}
+.b-ok{background:var(--leafbg);color:var(--leaf)} .b-warn{background:var(--sunbg);color:#8a6110} .b-bad{background:var(--rustbg);color:var(--rust)} .b-hid{background:var(--waterbg);color:var(--water)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,247,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;color:var(--muted);font-weight:500;border-radius:12px}
+nav.tabs button .e{font-size:22px;filter:grayscale(1);opacity:.6}
+nav.tabs button.on{color:var(--leaf)}
+nav.tabs button.on .e{filter:none;opacity:1}
+.fab{position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:18px;background:var(--leaf);color:#fff;font-size:28px;box-shadow:0 8px 20px rgba(47,107,58,.35);z-index:15}
+label.f{display:block;margin-bottom:12px}
+label.f span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:16px}
+textarea{min-height:70px;resize:vertical}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.seg{display:flex;background:#ece8db;border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;padding:9px;border-radius:10px;font-weight:600;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--leaf);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:13px}
+.chip.on{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.emo{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.emo button{width:42px;height:42px;border-radius:12px;font-size:22px;background:#fff;border:1px solid var(--line)}
+.emo button.on{border:2px solid var(--leaf);background:var(--leafbg)}
+.sheet-bg{position:fixed;inset:0;background:rgba(20,30,20,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:22px;margin-bottom:12px}
+.sheet .x{float:right;font-size:22px;color:var(--muted);padding:0 6px}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv:last-child{border:0}
+.kv span{color:var(--muted)}
+.log{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:10px}
+.log:last-child{border:0}
+.log .d{color:var(--muted);min-width:64px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.read{border-radius:12px;padding:10px;display:flex;gap:8px;margin-top:8px;font-size:14px}
+.photo-drop{border:2px dashed var(--line);border-radius:16px;padding:20px;text-align:center;background:#fff;color:var(--muted);display:block}
+.photo-drop img{max-width:100%;max-height:260px;border-radius:12px;display:block;margin:0 auto}
+.diag h3{font-size:19px;margin-bottom:4px}
+.diag ul{padding-left:18px;margin:6px 0}
+.diag li{margin-bottom:4px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.confirm{background:var(--rustbg);border-radius:12px;padding:12px;margin-top:10px}
+.spark{display:block;width:100%;height:56px}
+.thumb{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;display:block;background:#e9e5d8}
+.hero-img{width:100%;max-height:240px;object-fit:cover;border-radius:16px;display:block;margin-bottom:10px}
+.i-rem{background:#fde8ef} .i-nota{background:#eee}
+.big-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
+.big-opt .bi{font-size:30px;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--leafbg);flex:none}
+.big-opt b{display:block;font-size:16px}
+.big-opt small{color:var(--muted)}
+.idbox{display:flex;gap:12px;align-items:center;background:var(--leafbg);border-radius:14px;padding:10px;margin-bottom:14px;font-size:14px;color:#24502c}
+.idbox img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}
+.diary{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.diary:last-child{border:0}
+.diary img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}
+ .alert{background:#fff8f5;border:1px solid #e8b9a9;border-radius:14px;padding:12px;margin-bottom:8px}
+.alert .head{display:flex;gap:12px;align-items:center;width:100%;text-align:left}
+.alert .head img,.alert .head .ico{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;display:grid;place-items:center;font-size:22px;background:var(--rustbg)}
+.alert .acts{display:flex;gap:6px;margin-top:10px}
+.alert .acts>*{flex:1;font-size:13px;padding:8px 6px;min-height:38px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp figure{margin:0}
+.cmp img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.cmp figcaption{font-size:12px;color:var(--muted);margin-top:4px;text-align:center}
+.tl{position:relative;padding-left:18px}
+.tl:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-i{position:relative;padding:0 0 14px}
+.tl-i:before{content:"";position:absolute;left:-17px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--dot,#9aa494);border:2px solid var(--card)}
+.tl-i .rowx{display:flex;gap:10px}
+.tl-i img{width:72px;height:72px;object-fit:cover;border-radius:10px;flex:none}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 2px}
+.dots i{width:14px;height:14px;border-radius:4px;display:block}
+.trend{font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px}
+.t-mejor{background:var(--leafbg);color:var(--leaf)} .t-igual{background:#ece8db;color:#5d5a4e} .t-peor{background:var(--rustbg);color:var(--rust)}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:536px;margin:0 auto;background:#1f2a1f;color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:14px;animation:tin .25s ease}
+.toast button{color:#9fd8a8;font-weight:600;padding:6px 8px;flex:none}
+@keyframes tin{from{transform:translateY(20px);opacity:0}}
+.when{font-size:12px;font-weight:600;color:var(--muted);background:#ece8db;border-radius:99px;padding:6px 10px;flex:none}
+.prio{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;margin-right:4px;vertical-align:1px}
+.p1{background:var(--rustbg);color:var(--rust)} .p2{background:var(--sunbg);color:#8a6110}
+.i-trat{background:var(--rustbg)} .i-control{background:#e7e2f5} .i-inspeccion{background:#e6eef7}
+.bar{height:8px;border-radius:99px;background:#ece8db;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--leaf2);border-radius:99px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.step:last-child{border:0}
+.step .ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:14px;background:#fff}
+.step.done{color:var(--muted);text-decoration:line-through}
+.step.done .ck{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.season{background:#eef3fa;border-radius:14px;padding:12px 14px;margin:12px 0 0;font-size:14px;color:#244a68}
+.season ul{padding-left:18px;margin-top:6px}
+.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.banner{background:var(--sunbg);color:#7a560e;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.tip{background:var(--leafbg);border-radius:14px;padding:12px 14px;font-size:14px;color:#24502c}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script id="state" type="application/json">{"v":0,"plants":[],"log":[]}</script>
+<script src="js/store.js"></script>
+<script id="app-js">
+(function(){
+"use strict";
+var LS_KEY="miJardin.v1", APP_VERSION="0.1.0";
+var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
+
+/* ---------- datos ---------- */
+function readState(){
+  var s=null;
+  try{ s=JSON.parse(document.getElementById("state").textContent); }catch(e){}
+  try{ var l=localStorage.getItem(LS_KEY); if(l){ var ls=JSON.parse(l); if(!s||(ls.v||0)>(s.v||0)) s=ls; } }catch(e){}
+  s=s||{v:0,plants:[],log:[]}; s.plants=s.plants||[]; s.log=s.log||[];
+  return s;
+}
+var S={v:0,plants:[],log:[]};
+function normState(s){s=s||{};s.v=s.v||0;s.plants=Array.isArray(s.plants)?s.plants:[];s.log=Array.isArray(s.log)?s.log:[];return s;}
+
+var PRESETS=[
+  {n:"Albahaca",c:"Aromáticas",e:"🌿",type:"tierra",water:2,feed:14},
+  {n:"Tomate",c:"Hortalizas",e:"🍅",type:"tierra",water:2,feed:14},
+  {n:"Orquídea",c:"Flores",e:"🌸",type:"tierra",water:7,feed:21},
+  {n:"Suculenta / cactus",c:"Suculentas y cactus",e:"🌵",type:"tierra",water:10,feed:30},
+  {n:"Helecho",c:"Interior y follaje",e:"🌱",type:"tierra",water:3,feed:30},
+  {n:"Potos / Monstera",c:"Interior y follaje",e:"🪴",type:"tierra",water:7,feed:30},
+  {n:"Lechuga (hidro)",c:"Hortalizas",e:"🥬",type:"hidro",check:3,sol:14,phMin:5.5,phMax:6.5,ecMin:0.8,ecMax:1.2},
+  {n:"Albahaca (hidro)",c:"Aromáticas",e:"🌿",type:"hidro",check:3,sol:14,phMin:5.5,phMax:6.5,ecMin:1.0,ecMax:1.6},
+  {n:"Fresa (hidro)",c:"Frutales",e:"🍓",type:"hidro",check:3,sol:14,phMin:5.5,phMax:6.2,ecMin:1.0,ecMax:1.5},
+  {n:"Tomate (hidro)",c:"Hortalizas",e:"🍅",type:"hidro",check:3,sol:14,phMin:5.5,phMax:6.5,ecMin:2.0,ecMax:3.5}
+];
+var CATS=["Aromáticas","Hortalizas","Frutales","Flores","Interior y follaje","Suculentas y cactus","Árboles y arbustos","Otras"];
+var REM_SUG=[["🔄","Rotar la maceta",14],["🧽","Limpiar hojas",30],["✂️","Podar",60],["🐛","Revisar plagas",7],["🪴","Trasplantar",365],["💦","Rociar hojas",3]];
+var EMOJIS=["🌿","🌱","🪴","🌵","🌸","🌺","🌻","🌷","🍅","🥬","🍓","🌶️","🫑","🥒","🍋","🌳","🎋","🍀"];
+
+var SYMPTOMS=[
+ ["amarillas_abajo","Hojas de abajo amarillas"],["amarillas_nuevas","Hojas nuevas pálidas"],
+ ["manchas_cafe","Manchas cafés o negras"],["polvo_blanco","Polvo blanco en hojas"],
+ ["telaranas","Telarañas finas / puntitos"],["insectos","Insectos pequeños"],
+ ["algodon","Bolitas de algodón blanco"],["puntas_quemadas","Puntas secas o quemadas"],
+ ["marchita","Marchita con tierra húmeda"],["tallo_blando","Tallo blando u oscuro"],
+ ["raiz_cafe","Raíces cafés o con baba (hidro)"],["mosquitas","Mosquitas en la tierra"],
+ ["hojas_rizadas","Hojas enrolladas o deformes"],["crece_lento","No crece / se estancó"]
+];
+var RULES={
+ amarillas_abajo:["Exceso de riego o falta de nitrógeno","Deja secar los primeros 2–3 cm de tierra antes de regar. Si el riego está bien, aplica abono balanceado."],
+ amarillas_nuevas:["Falta de hierro, a menudo por pH alto","En hidroponía, baja el pH a 5.5–6.2. En tierra, usa un abono con micronutrientes (quelato de hierro)."],
+ manchas_cafe:["Posible hongo o bacteria (mancha foliar)","Corta las hojas afectadas con tijera limpia, no mojes las hojas al regar y mejora la ventilación. Aísla la planta."],
+ polvo_blanco:["Oídio (hongo)","Retira hojas muy afectadas. Rocía una mezcla de 1 parte de leche por 9 de agua o bicarbonato (1 cucharadita por litro) cada 5–7 días."],
+ telaranas:["Araña roja (ácaro)","Lava las hojas por debajo con agua, sube la humedad y aplica jabón potásico o aceite de neem cada 5 días."],
+ insectos:["Pulgón u otro insecto chupador","Quítalos con agua a presión y aplica jabón potásico o neem. Revisa el envés de las hojas."],
+ algodon:["Cochinilla algodonosa","Límpialas con un algodón con alcohol y luego aplica jabón potásico. Aísla la planta."],
+ puntas_quemadas:["Exceso de sales o abono (EC alta), o aire seco","Riega abundante para lavar sales. En hidro, baja la EC con agua limpia. No abones por 2 semanas."],
+ marchita:["Pudrición de raíz por exceso de agua","Deja de regar, revisa las raíces y corta las podridas. Trasplanta a sustrato seco con buen drenaje."],
+ tallo_blando:["Pudrición del tallo (hongo)","Corta la parte sana para hacer esqueje si es posible. Reduce el riego y desinfecta la maceta."],
+ raiz_cafe:["Pudrición de raíz (Pythium) en hidroponía","Cambia toda la solución, lava el sistema, agrega oxigenación y mantén el agua por debajo de 24 °C. Recorta raíces dañadas."],
+ mosquitas:["Mosca del sustrato por humedad","Deja secar más la tierra entre riegos y usa trampas amarillas adhesivas."],
+ hojas_rizadas:["Plagas, calor fuerte o exceso de abono","Revisa el envés por insectos, protege del sol directo de mediodía y revisa la dosis de abono."],
+ crece_lento:["Poca luz o falta de nutrientes","Muévela a un lugar con más luz indirecta y revisa el calendario de abono (o la EC en hidro)."]
+};
+
+/* ---------- utilidades ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function pad(n){return (n<10?"0":"")+n;}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function today(){return iso(new Date());}
+function parse(s){var p=(s||today()).split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function addDays(s,n){var d=parse(s);d.setDate(d.getDate()+n);return iso(d);}
+function diff(a,b){return Math.round((parse(a)-parse(b))/86400000);}
+function nice(s){var n=diff(s,today());if(n===0)return "hoy";if(n===-1)return "ayer";if(n===1)return "mañana";if(n<0)return "hace "+(-n)+" días";if(n<7)return "en "+n+" días";return parse(s).toLocaleDateString("es",{day:"numeric",month:"short"});}
+function short(s){return parse(s).toLocaleDateString("es",{day:"numeric",month:"short"});}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function plant(id){for(var i=0;i<S.plants.length;i++)if(S.plants[i].id===id)return S.plants[i];return null;}
+function plantLog(id){return S.log.filter(function(l){return l.plantId===id;}).sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:(b.t||0)-(a.t||0);});}
+function lastOf(id,kind){var l=plantLog(id).filter(function(x){return x.kind===kind;});return l[0]||null;}
+
+/* tareas de cada planta */
+function tasksFor(p){
+  var out=[];
+  if(p.type==="hidro"){
+    var lm=lastOf(p.id,"medicion"), ls=lastOf(p.id,"solucion");
+    out.push({kind:"medicion",label:"Medir pH y EC",due:addDays(lm?lm.d:p.created,p.check||3)});
+    out.push({kind:"solucion",label:"Cambiar solución nutritiva",due:addDays(ls?ls.d:(p.lastSol||p.created),p.sol||14)});
+  }else{
+    var la=lastOf(p.id,"agua"), lf=lastOf(p.id,"abono");
+    out.push({kind:"agua",label:"Regar",due:addDays(la?la.d:(p.lastWater||p.created),p.water||3)});
+    out.push({kind:"abono",label:"Abonar",due:addDays(lf?lf.d:(p.lastFeed||p.created),p.feed||21)});
+  }
+  (p.reminders||[]).forEach(function(r){
+    var l=plantLog(p.id).filter(function(x){return x.kind==="rem"&&x.remId===r.id;})[0];
+    out.push({kind:"rem",remId:r.id,icon:r.icon||"🔔",label:r.label,due:addDays(l?l.d:(r.start||p.created),r.every)});
+  });
+  var tr=p.treatment;
+  if(tr&&tr.active){
+    tr.steps.forEach(function(st){if(!st.done)out.push({kind:"trat",stepId:st.id,icon:st.icon||"💊",label:st.action,due:addDays(tr.start,st.day),sev:tr.sev,prio:tr.priority});});
+    var lph=photosOf(p).slice(-1)[0],base=lph&&lph.d>tr.start?lph.d:tr.start;
+    out.push({kind:"control",icon:"📸",label:"Foto de control",due:addDays(base,tr.followup||5),sev:tr.sev,prio:tr.priority});
+  }else{
+    var li=plantLog(p.id).filter(function(l){return l.kind==="inspeccion"||l.kind==="foto"||l.kind==="salud";})[0];
+    out.push({kind:"inspeccion",icon:"🔍",label:"Inspección preventiva",due:addDays(li?li.d:(p.created||today()),7)});
+  }
+  out.forEach(function(t){t.p=p;t.days=diff(t.due,today());});
+  return out;
+}
+function prioOf(t){
+  if(t.kind==="trat"||t.kind==="control")return (t.prio==="alta"||t.sev==="grave")?1:2;
+  if((t.kind==="agua"||t.kind==="solucion")&&t.days<=-2)return 2;
+  if(t.kind==="inspeccion")return 4;
+  return 3;
+}
+function allTasks(){var a=[];S.plants.forEach(function(p){a=a.concat(tasksFor(p));});a.forEach(function(t){t.pr=prioOf(t);});return a.sort(function(x,y){return (x.days<=0&&y.days<=0)?(x.pr-y.pr||x.days-y.days):x.days-y.days;});}
+function readingAlert(p){
+  if(p.type!=="hidro")return null;
+  var m=lastOf(p.id,"medicion"); if(!m)return null;
+  var bad=[];
+  if(m.ph!=null&&m.ph!==""){ if(m.ph<p.phMin)bad.push("pH bajo ("+m.ph+")"); if(m.ph>p.phMax)bad.push("pH alto ("+m.ph+")"); }
+  if(m.ec!=null&&m.ec!==""){ if(m.ec<p.ecMin)bad.push("EC baja ("+m.ec+")"); if(m.ec>p.ecMax)bad.push("EC alta ("+m.ec+")"); }
+  if(m.temp!=null&&m.temp!==""&&m.temp>24)bad.push("agua caliente ("+m.temp+" °C)");
+  return bad.length?bad:null;
+}
+function lastHealth(p){
+  return plantLog(p.id).filter(function(l){return (l.kind==="salud"||l.kind==="foto")&&l.sev;})[0]||null;
+}
+function healthOf(p){
+  var h=lastHealth(p);
+  if(h&&diff(today(),h.d)<=30&&h.sev!=="sana")return h;
+  return null;
+}
+var SEVCOL={sana:"#4f9a5c",atencion:"#e0a526",grave:"#b5482e"};
+function timeline(p){
+  var t=plantLog(p.id).filter(function(l){return (l.kind==="foto"||l.kind==="salud"||(l.kind==="nota"&&l.thumb));});
+  var hasFirst=t.some(function(l){return l.first;});
+  if(p.thumb&&!hasFirst&&!t.some(function(l){return l.thumb===p.thumb;}))t.push({id:"_ini",d:p.created||today(),t:0,kind:"foto",thumb:p.thumb,title:"Foto inicial",first:true});
+  return t.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.t||0)-(b.t||0);});
+}
+function photosOf(p){return timeline(p).filter(function(l){return l.thumb;});}
+var ICON={agua:"💧",abono:"🧪",medicion:"📏",solucion:"🔄",salud:"🩺",nota:"📝",rem:"🔔",inspeccion:"🔍",foto:"📸"};
+var KINDNAME={agua:"Riego",abono:"Abono",medicion:"Medición",solucion:"Cambio de solución",salud:"Revisión de salud",nota:"Nota",rem:"Recordatorio",inspeccion:"Inspección preventiva",foto:"Foto de seguimiento"};
+
+/* ---------- guardar ---------- */
+function save(){
+  S.v=(S.v||0)+1;
+  if(!window.MJStore){showToast("⚠️ No se pudo guardar: falta el almacenamiento local.",null,8000);render();return;}
+  MJStore.save(S).catch(function(e){showToast("⚠️ No se pudo guardar este cambio ("+((e&&e.message)||"error")+"). Exporta un respaldo en Ajustes.",null,9000);render();});
+}
+function setSaving(on){var el=document.getElementById("saving");if(el)el.className="pill saving"+(on?" on":"");}
+function buildDoc(){
+  var head='\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>Mi Jardín</title>\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">\n';
+  var css=document.getElementById("app-css").textContent;
+  var js=document.getElementById("app-js").textContent;
+  var data=JSON.stringify(S).replace(/</g,"\\u003c");
+  var SC="script";
+  return "<!DOCTYPE html>\n<html lang=\"es\">\n<head>"+head+"<style id=\"app-css\">"+css+"</style>\n</head>\n<body>\n<div id=\"root\"></div>\n<"+SC+" id=\"state\" type=\"application/json\">"+data+"</"+SC+">\n<"+SC+" id=\"app-js\">"+js+"</"+SC+">\n</body>\n</html>";
+}
+function publish(){
+  if(!ART)return;
+  ART.publish(buildDoc()).catch(function(e){
+    setSaving(false);
+    if(e&&(e.code==="not_granted"||e.code==="not_writer")){ART=null;render();}
+  });
+}
+
+/* ---------- acciones ---------- */
+var toastTimer=null;
+function showToast(msg,undo,ms){
+  ms=ms||6000;ui.toast={msg:msg,undo:undo||null,until:Date.now()+ms};
+  try{sessionStorage.setItem("miJardin.toast",JSON.stringify(ui.toast));}catch(e){}
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){ui.toast=null;try{sessionStorage.removeItem("miJardin.toast");}catch(e){}render();},ms);
+}
+function addLog(entry){entry.id=uid();entry.t=Date.now();entry.d=entry.d||today();S.log.push(entry);}
+function doTask(pid,kind,remId){
+  if(kind==="medicion"){openSheet({k:"medir",pid:pid});return;}
+  if(kind==="trat"){
+    var pt=plant(pid),tr=pt&&pt.treatment;if(!tr)return;
+    var st=tr.steps.filter(function(x){return x.id===remId;})[0];if(!st)return;
+    st.done=!st.done;st.doneOn=st.done?today():null;
+    if(st.done)addLog({plantId:pid,kind:"nota",text:"Tratamiento: "+st.action});
+    var left=tr.steps.filter(function(x){return !x.done;}).length;
+    showToast(st.done?(left?"✅ Paso hecho. Quedan "+left+".":"🎉 Terminaste todos los pasos. Toma una foto de control para confirmar que mejoró."):"Paso marcado como pendiente.");
+    save();render();return;
+  }
+  var dup=S.log.filter(function(l){return l.plantId===pid&&l.kind===kind&&(l.remId||null)===(remId||null)&&l.d===today();})[0];
+  if(dup){var p0=plant(pid),n0=tasksFor(p0).filter(function(t){return t.kind===kind&&(t.remId||null)===(remId||null);})[0];showToast("👍 Ya estaba anotado hoy. Próximo: "+(n0?nice(n0.due):"—")+".");render();return;}
+  var e={plantId:pid,kind:kind}; if(remId)e.remId=remId;
+  addLog(e);
+  var p=plant(pid),nt=tasksFor(p).filter(function(t){return t.kind===kind&&(t.remId||null)===(remId||null);})[0];
+  var what={agua:"Riego",abono:"Abono",solucion:"Cambio de solución",inspeccion:"Inspección",rem:nt?nt.label:"Tarea"}[kind]||"Tarea";
+  showToast("✅ "+what+" de "+p.name+" anotado. Próximo: "+(nt?nice(nt.due):"—")+".",e.id);
+  save();render();
+}
+
+/* ---------- render ---------- */
+function render(){
+  var r=document.getElementById("root");
+  var h='<span id="saving" class="pill saving">Guardando…</span><div class="wrap">';
+  h+='<header class="top"><div><h1>Mi Jardín</h1><div class="date">'+new Date().toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"})+'</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill">🌿 '+S.plants.length+'</span><button data-a="ajustes" aria-label="Ajustes" style="font-size:22px;padding:4px">⚙️</button></div></header>';
+  if(false)h+='<div class="banner">Los cambios se guardan solo en este teléfono. Abre la app desde tu enlace de Claude para que se guarden en la nube.</div>';
+  if(ui.loading)h+='<div class="empty"><div class="big"><span class="spin">🌿</span></div><p>Cargando tu jardín…</p></div>';
+  else if(ui.tab==="hoy")h+=viewHoy();
+  else if(ui.tab==="plantas")h+=viewPlantas();
+  else if(ui.tab==="hidro")h+=viewHidro();
+  else if(ui.tab==="salud")h+=viewSalud();
+  h+='</div>';
+  if(ui.tab==="plantas"||ui.tab==="hoy")h+='<button class="fab" data-a="new" aria-label="Agregar planta">+</button>';
+  h+='<nav class="tabs">'+[["hoy","☀️","Hoy"],["plantas","🪴","Plantas"],["hidro","💧","Hidro"],["salud","🩺","Salud"]].map(function(t){return '<button data-a="tab" data-v="'+t[0]+'" class="'+(ui.tab===t[0]?"on":"")+'"><span class="e">'+t[1]+'</span>'+t[2]+'</button>';}).join("")+'</nav>';
+  if(ui.sheet)h+=viewSheet();
+  if(ui.toast)h+='<div class="toast" role="status"><span style="flex:1">'+esc(ui.toast.msg)+'</span>'+(ui.toast.undo?'<button data-a="toastundo">Deshacer</button>':'')+'</div>';
+  r.innerHTML=h;
+  [["photo",onPhoto],["idphoto",onIdPhoto],["nphoto",onNotePhoto],["impfile",onImportFile]].forEach(function(x){var el=document.getElementById(x[0]);if(el)el.addEventListener("change",x[1]);});
+  Array.prototype.forEach.call(document.querySelectorAll("input[data-fu]"),function(el){el.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)followUp(el.getAttribute("data-fu"),f);});});
+}
+
+function taskRow(t){
+  var late=t.days<0, when=t.days===0?"Hoy":late?("Atrasado "+(-t.days)+(t.days===-1?" día":" días")):("Faltan "+t.days+(t.days===1?" día":" días"));
+  var pr=t.days<=0?prioOf(t):3, chip=pr===1?'<span class="prio p1">🔴 URGENTE</span>':pr===2?'<span class="prio p2">🟠 IMPORTANTE</span>':'';
+  var right;
+  if(t.days>0)right='<span class="when">'+(t.days===1?"Mañana":short(t.due))+'</span>';
+  else if(t.kind==="control")right='<label class="btn sm" for="fu-t-'+t.p.id+'">📸 Tomar</label><input type="file" accept="image/*" capture="environment" id="fu-t-'+t.p.id+'" data-fu="'+t.p.id+'" style="display:none">';
+  else if(t.kind==="inspeccion")right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="done" data-p="'+t.p.id+'" data-k="inspeccion">Todo bien</button><button class="btn sm ghost" data-a="checkhealth" data-p="'+t.p.id+'">Veo algo</button></div>';
+  else right='<button class="btn sm" data-a="done" data-p="'+t.p.id+'" data-k="'+t.kind+'"'+(t.remId||t.stepId?' data-r="'+(t.remId||t.stepId)+'"':'')+'>'+(t.kind==="medicion"?"Medir":"Listo ✓")+'</button>';
+  if(ui.fuBusy===t.p.id&&t.kind==="control")right='<span class="spin">🌿</span>';
+  var title=t.kind==="trat"?esc(t.label):esc(t.label)+' · '+esc(t.p.name);
+  return '<div class="task'+(late||pr===1?" late":"")+'"><div class="ico i-'+t.kind+'">'+(t.icon||ICON[t.kind])+'</div><div class="t">'+chip+'<b>'+title+'</b><small>'+(t.kind==="trat"?t.p.emoji+' '+esc(t.p.name)+' · ':t.p.emoji+' ')+when+'</small></div>'+right+'</div>';
+}
+
+function seasonTips(){
+  var m=new Date().getMonth()+1,hid=S.plants.some(function(p){return p.type==="hidro";});
+  var r=(m>=5&&m<=11)?{t:"🌧️ Temporada lluviosa: más riesgo de hongos",tips:["No mojes las hojas al regar y riega solo si la tierra está seca al tacto.","Las plantas de exterior casi no necesitan riego extra en días de lluvia.","Vacía los platos con agua: evitas pudrición de raíz y zancudos."]}:{t:"☀️ Temporada seca: más sed y más plagas",tips:["Riega más seguido las de exterior y las macetas pequeñas.","Vigila la araña roja (telarañas finas): aparece con calor y aire seco.","Rocía las hojas de las plantas de interior en la mañana."]};
+  if(hid)r.tips.push("Hidroponía: el agua caliente favorece la pudrición de raíz; mantenla bajo 24 °C y oxigenada.");
+  return r;
+}
+function viewHoy(){
+  if(!S.plants.length)return '<div class="empty"><div class="big">🌱</div><h2 style="color:var(--ink);margin-bottom:6px">Agrega tu primera planta</h2><p>Te diré cuándo regar, abonar o revisar tu hidroponía, y te ayudo a revisar si tiene alguna enfermedad.</p><br><button class="btn" data-a="new">+ Agregar planta</button></div>';
+  var ts=allTasks(), now=ts.filter(function(t){return t.days<=0;}), soon=ts.filter(function(t){return t.days>0&&t.days<=7&&t.kind!=="inspeccion";});
+  var alerts=[];
+  S.plants.forEach(function(p){var a=readingAlert(p);if(a)alerts.push({p:p,msg:a.join(", ")});var hh=healthOf(p);if(hh||(p.treatment&&p.treatment.active))alerts.push({p:p,msg:hh?hh.title:p.treatment.title,sick:true,h:hh});});
+  alerts.sort(function(a,b){function sc(x){var sv=x.h?x.h.sev:(x.p.treatment&&x.p.treatment.sev);return sv==="grave"?0:x.sick?1:2;}return sc(a)-sc(b);});
+  var urg=now.filter(function(t){return t.pr<=2;}).length, care=now.filter(function(t){return t.pr===3;}).length;
+  var title=urg?(urg+(urg===1?" tarea prioritaria":" tareas prioritarias")):care?("Tienes "+care+(care===1?" tarea":" tareas")+" hoy"):alerts.length?"Riego y abono al día":"Todo al día ✨";
+  var sub=urg?"Empieza por las marcadas en rojo y naranja.":care?"Toca «Listo ✓» cuando termines cada una.":alerts.length?"Sigue el plan de las plantas en tratamiento.":"Tus plantas están atendidas. Vuelve mañana.";
+  var h='<div class="hero"><h2>'+title+'</h2><p>'+sub+'</p><div class="stats"><div class="stat"><b>'+urg+'</b><span>prioritarias</span></div><div class="stat"><b>'+care+'</b><span>de cuidado</span></div><div class="stat"><b>'+alerts.filter(function(a){return a.sick;}).length+'</b><span>en tratamiento</span></div></div></div>';
+  var st=seasonTips();
+  h+='<div class="season"><button data-a="season" style="display:flex;width:100%;text-align:left;color:inherit"><b style="flex:1">'+st.t+'</b><span>'+(ui.seasonOpen?"▲":"▼")+'</span></button>'+(ui.seasonOpen?'<ul>'+st.tips.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul>':'')+'</div>';
+  if(alerts.length){h+='<div class="sec">Plantas que necesitan atención</div>';alerts.forEach(function(a){h+=alertCard(a);});}
+  if(now.length){h+='<div class="sec">Para hoy, por prioridad</div>';now.forEach(function(t){h+=taskRow(t);});}
+  if(soon.length){h+='<div class="sec">Próximos 7 días</div>';soon.forEach(function(t){h+=taskRow(t);});}
+  return h;
+}
+
+function alertCard(a){
+  var p=a.p,busy=ui.fuBusy===p.id;
+  var h='<div class="alert"><button class="head" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img src="'+p.thumb+'" alt="">':'<span class="ico">'+p.emoji+'</span>')+'<span style="flex:1;min-width:0"><b style="display:block">'+(a.sick?"🩺 ":"⚠️ ")+esc(p.name)+'</b><small style="color:var(--muted)">'+esc(a.msg)+(a.h?' · '+nice(a.h.d):'')+'</small></span><span style="color:var(--muted);font-size:20px">›</span></button>';
+  if(busy)return h+'<div class="read" style="background:var(--leafbg);color:var(--leaf)"><span class="spin">🌿</span> Comparando con la foto anterior…</div></div>';
+  if(a.sick){
+    var tr=p.treatment&&p.treatment.active?p.treatment:null;
+    if(ui.planBusy===p.id)h+='<div class="read" style="background:var(--leafbg);color:var(--leaf)"><span class="spin">🌿</span> Armando el plan de tratamiento…</div>';
+    else if(tr){var dn=tr.steps.filter(function(x){return x.done;}).length,nx=tr.steps.filter(function(x){return !x.done;}).sort(function(x,y){return x.day-y.day;})[0];
+      h+='<div style="margin-top:8px;font-size:13px"><span class="prio '+(tr.priority==="alta"?"p1":"p2")+'">'+(tr.priority==="alta"?"🔴 PRIORIDAD ALTA":"🟠 PRIORIDAD MEDIA")+'</span> Plan: '+dn+' de '+tr.steps.length+' pasos<div class="bar"><i style="width:'+Math.round(100*dn/Math.max(1,tr.steps.length))+'%"></i></div>'+(nx?'👉 Siguiente: <b>'+esc(nx.action)+'</b> ('+nice(addDays(tr.start,nx.day))+')':'✅ Pasos completos: toma una foto de control.')+'</div>';}
+    h+='<div class="acts">'+(!tr&&ui.planBusy!==p.id?'<button class="btn sm" data-a="mkplan" data-p="'+p.id+'">📋 Qué hago</button>':'')+'<label class="btn sm '+(tr?'':'ghost')+'" for="fu-'+p.id+'">📸 Foto control</label><input type="file" accept="image/*" capture="environment" id="fu-'+p.id+'" data-fu="'+p.id+'" style="display:none"><button class="btn sm ghost" data-a="healed" data-p="'+p.id+'">✓ Está bien</button></div>';
+  }
+  else h+='<div class="acts"><button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="medicion">📏 Medir de nuevo</button><button class="btn sm ghost" data-a="open" data-p="'+p.id+'">Ver planta</button></div>';
+  return h+'</div>';
+}
+function plantCard(p){
+  var ts=tasksFor(p), late=ts.filter(function(t){return t.days<=0;}), hh=healthOf(p), al=readingAlert(p);
+  var badge=hh?'<span class="badge b-bad">Revisar salud</span>':al?'<span class="badge b-bad">Fuera de rango</span>':late.length?'<span class="badge b-warn">'+late.map(function(t){return t.label.split(" ")[0];}).join(" · ")+'</span>':'<span class="badge b-ok">Al día</span>';
+  var next=ts.slice().sort(function(a,b){return a.days-b.days;})[0];
+  return '<button class="pcard" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img class="thumb" src="'+p.thumb+'" alt="">':'<span class="em">'+p.emoji+'</span>')+'<b>'+(p.thumb?p.emoji+' ':'')+esc(p.name)+'</b><small>'+(p.type==="hidro"?"💧 Hidroponía":"Tierra")+(p.place?" · "+esc(p.place):"")+'</small>'+badge+'<small>'+next.label+': '+nice(next.due)+'</small>'+(function(){var lp=photosOf(p).slice(-1)[0];return lp?'<small>📸 Última foto: '+nice(lp.d)+'</small>':'';})()+'</button>';
+}
+function catOf(p){return p.category&&CATS.indexOf(p.category)>=0?p.category:"Otras";}
+function viewPlantas(){
+  if(!S.plants.length)return '<div class="empty"><div class="big">📷</div><p>Toma una foto de tu planta y la identifico por ti.</p><br><button class="btn" data-a="new">+ Agregar planta</button></div>';
+  var used=CATS.filter(function(c){return S.plants.some(function(p){return catOf(p)===c;});});
+  if(ui.cat&&used.indexOf(ui.cat)<0)ui.cat="";
+  var h='<div class="chips" style="margin-bottom:6px"><button class="chip'+(!ui.cat?" on":"")+'" data-a="cat" data-v="">Todas ('+S.plants.length+')</button>'+used.map(function(c){var n=S.plants.filter(function(p){return catOf(p)===c;}).length;return '<button class="chip'+(ui.cat===c?" on":"")+'" data-a="cat" data-v="'+esc(c)+'">'+esc(c)+' ('+n+')</button>';}).join("")+'</div>';
+  (ui.cat?[ui.cat]:used).forEach(function(c){
+    var list=S.plants.filter(function(p){return catOf(p)===c;});
+    h+='<div class="sec">'+esc(c)+'</div><div class="grid">'+list.map(plantCard).join("")+'</div>';
+  });
+  return h;
+}
+
+function spark(vals,min,max,color){
+  if(vals.length<2)return "";
+  var lo=Math.min.apply(null,vals.concat([min])),hi=Math.max.apply(null,vals.concat([max]));if(hi===lo)hi=lo+1;
+  var W=300,H=56,pd=6;
+  function y(v){return pd+(H-2*pd)*(1-(v-lo)/(hi-lo));}
+  var pts=vals.map(function(v,i){return (pd+i*(W-2*pd)/(vals.length-1)).toFixed(1)+","+y(v).toFixed(1);}).join(" ");
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><rect x="0" y="'+y(max)+'" width="'+W+'" height="'+Math.max(2,y(min)-y(max))+'" fill="#e4efe0"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
+}
+function viewHidro(){
+  var hid=S.plants.filter(function(p){return p.type==="hidro";});
+  var h='<div class="tip">💡 Para hidroponía, mide <b>pH</b> y <b>EC</b> cada 2–3 días y cambia toda la solución cada 1–2 semanas. Mantén el agua entre 18 y 24 °C.</div>';
+  if(!hid.length)return h+'<div class="empty"><div class="big">💧</div><p>Aún no tienes cultivos hidropónicos.</p><br><button class="btn" data-a="new" data-v="hidro">+ Agregar cultivo hidropónico</button></div>';
+  hid.forEach(function(p){
+    var ms=plantLog(p.id).filter(function(l){return l.kind==="medicion";}).reverse().slice(-12);
+    var m=ms[ms.length-1], al=readingAlert(p);
+    var ls=lastOf(p.id,"solucion"), solDue=addDays(ls?ls.d:(p.lastSol||p.created),p.sol||14);
+    h+='<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:30px">'+p.emoji+'</span><div style="flex:1"><b style="font-size:16px">'+esc(p.name)+'</b><br><small style="color:var(--muted)">Cambio de solución: '+nice(solDue)+'</small></div><button class="btn sm ghost" data-a="open" data-p="'+p.id+'">Ver</button></div>';
+    if(m){
+      h+='<div class="row" style="text-align:center"><div><small style="color:var(--muted)">pH</small><br><b style="font-size:22px;font-family:Fraunces">'+(m.ph!==""&&m.ph!=null?m.ph:"–")+'</b><br><small style="color:var(--muted)">meta '+p.phMin+'–'+p.phMax+'</small></div><div><small style="color:var(--muted)">EC</small><br><b style="font-size:22px;font-family:Fraunces">'+(m.ec!==""&&m.ec!=null?m.ec:"–")+'</b><br><small style="color:var(--muted)">meta '+p.ecMin+'–'+p.ecMax+'</small></div><div><small style="color:var(--muted)">Agua</small><br><b style="font-size:22px;font-family:Fraunces">'+(m.temp!==""&&m.temp!=null?m.temp+"°":"–")+'</b><br><small style="color:var(--muted)">'+nice(m.d)+'</small></div></div>';
+      var phv=ms.map(function(x){return +x.ph;}).filter(function(v){return !isNaN(v)&&v>0;});
+      if(phv.length>1)h+='<small style="color:var(--muted)">Tendencia de pH (zona verde = meta)</small>'+spark(phv,p.phMin,p.phMax,"#2c74a8");
+      h+=al?'<div class="read" style="background:var(--rustbg);color:var(--rust)">⚠️ '+esc(al.join(", "))+'. '+fixTip(al)+'</div>':'<div class="read" style="background:var(--leafbg);color:var(--leaf)">✅ Valores dentro del rango.</div>';
+    }else h+='<p style="color:var(--muted);font-size:14px">Sin mediciones todavía.</p>';
+    h+='<div class="actions"><button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="medicion">📏 Registrar medición</button><button class="btn sm line" data-a="done" data-p="'+p.id+'" data-k="solucion">🔄 Cambié la solución</button></div></div>';
+  });
+  return h+'<button class="btn ghost block" data-a="new" data-v="hidro">+ Agregar cultivo hidropónico</button>';
+}
+function fixTip(al){
+  var s=al.join(" ");
+  var t=[];
+  if(/pH alto/.test(s))t.push("Agrega unas gotas de pH Down y mide de nuevo en 15 min");
+  if(/pH bajo/.test(s))t.push("Agrega unas gotas de pH Up y mide de nuevo en 15 min");
+  if(/EC alta/.test(s))t.push("Agrega agua limpia para diluir");
+  if(/EC baja/.test(s))t.push("Agrega nutriente poco a poco");
+  if(/caliente/.test(s))t.push("Pon el depósito a la sombra u oxigena el agua");
+  return esc(t.join(". "))+".";
+}
+
+function viewSalud(){
+  var d=ui.diag;
+  var act=S.plants.filter(function(p){return p.treatment&&p.treatment.active;}).sort(function(a,b){return (a.treatment.priority==="alta"?0:1)-(b.treatment.priority==="alta"?0:1);});
+  var h='';
+  if(act.length){h+='<div class="sec" style="margin-top:0">Tratamientos activos</div>';act.forEach(function(p){var t=p.treatment,dn=t.steps.filter(function(x){return x.done;}).length;h+='<button class="task" style="width:100%;text-align:left" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img src="'+p.thumb+'" style="width:42px;height:42px;border-radius:12px;object-fit:cover" alt="">':'<div class="ico i-trat">'+p.emoji+'</div>')+'<div class="t"><span class="prio '+(t.priority==="alta"?"p1":"p2")+'">'+(t.priority==="alta"?"🔴 ALTA":"🟠 MEDIA")+'</span><b>'+esc(p.name)+'</b><small>'+esc(t.title)+' · '+dn+'/'+t.steps.length+' pasos</small></div><span style="color:var(--muted)">›</span></button>';});}
+  h+='<div class="card"><h2 style="font-size:20px;margin-bottom:4px">Revisar enfermedades y plagas</h2><p style="color:var(--muted);font-size:14px;margin-bottom:12px">Toma una foto de la hoja o la parte afectada y marca lo que ves.</p>';
+  h+='<label class="f"><span>Planta</span><select data-a="dplant"><option value="">— Elige una planta (opcional) —</option>'+S.plants.map(function(p){return '<option value="'+p.id+'"'+(d.plant===p.id?" selected":"")+'>'+p.emoji+' '+esc(p.name)+'</option>';}).join("")+'</select></label>';
+  h+='<label class="photo-drop" for="photo">'+(d.imgUrl?'<img src="'+d.imgUrl+'" alt="Foto de la planta">':'<div style="font-size:34px">📷</div><b style="color:var(--ink)">Tomar o elegir foto</b><br><small>De cerca, con buena luz</small>')+'</label><input id="photo" type="file" accept="image/*" capture="environment" style="display:none">';
+  h+='<div class="sec" style="margin-top:14px">¿Qué ves?</div><div class="chips">'+SYMPTOMS.map(function(s){return '<button class="chip'+(d.sym.indexOf(s[0])>=0?" on":"")+'" data-a="sym" data-v="'+s[0]+'">'+s[1]+'</button>';}).join("")+'</div>';
+  h+='<label class="f" style="margin-top:12px"><span>Notas (opcional)</span><textarea id="dnote" placeholder="Ej.: empezó hace una semana, está en el balcón…">'+esc(d.note||"")+'</textarea></label>';
+  h+='<button class="btn block" data-a="analyze"'+(d.busy?" disabled":"")+'>'+(d.busy?"Analizando… 🔍":"🩺 Revisar mi planta")+'</button>';
+  if(d.err)h+='<p class="note" style="color:var(--rust)">'+esc(d.err)+'</p>';
+  h+='</div>';
+  var hl=S.log.filter(function(l){return l.kind==="salud";}).sort(function(a,b){return (b.t||0)-(a.t||0);});
+  if(hl.length){h+='<div class="sec">Último diagnóstico</div>'+diagCard(hl[0]);
+    if(hl.length>1){h+='<div class="sec">Historial</div><div class="card">'+hl.slice(1,8).map(function(l){var p=plant(l.plantId);return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+(p?p.emoji+" "+esc(p.name)+": ":"")+esc(l.title)+'</span></div>';}).join("")+'</div>';}
+  }
+  return h;
+}
+function sevBadge(s){return s==="sana"?'<span class="badge b-ok">Sana</span>':s==="grave"?'<span class="badge b-bad">Grave</span>':'<span class="badge b-warn">Atención</span>';}
+function diagCard(l){
+  var p=plant(l.plantId);
+  var h='<div class="card diag">'+sevBadge(l.sev)+'<h3 style="margin-top:6px">'+esc(l.title)+'</h3><small style="color:var(--muted)">'+(p?p.emoji+" "+esc(p.name)+" · ":"")+nice(l.d)+(l.src==="ia"?" · Revisado con Claude":" · Guía rápida")+'</small>';
+  if(l.why)h+='<p style="margin-top:8px">'+esc(l.why)+'</p>';
+  if(l.steps&&l.steps.length)h+='<b style="display:block;margin-top:10px">Qué hacer</b><ul>'+l.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join("")+'</ul>';
+  if(l.other&&l.other.length)h+='<small style="color:var(--muted)">También podría ser: '+esc(l.other.join(", "))+'</small>';
+  return h+'<p class="note">Es una orientación, no un diagnóstico seguro. Si empeora en una semana, consulta en un vivero o agrónomo.</p></div>';
+}
+
+function viewSheet(){
+  var s=ui.sheet,h='<div class="sheet-bg" data-a="bgclose"><div class="sheet">';
+  if(s.k==="add")h+=viewAdd();
+  else if(s.k==="form")h+=viewForm();
+  else if(s.k==="match")h+=viewMatch();
+  else if(s.k==="ajustes")h+=viewAjustes();
+  else if(s.k==="plant")h+=viewPlant(plant(s.pid));
+  else if(s.k==="medir")h+=viewMedir(plant(s.pid));
+  return h+'</div></div>';
+}
+function viewAdd(){
+  var b=ui.idBusy;
+  var h='<button class="x" data-a="close">✕</button><h2>Agregar planta</h2>';
+  if(b)return h+'<div class="idbox">'+(b.thumb?'<img src="'+b.thumb+'" alt="">':'')+'<div><b><span class="spin">🌿</span> Identificando tu planta…</b><br>Esto tarda unos segundos.</div></div>';
+  h+='<label class="big-opt" for="idphoto"><span class="bi">📷</span><span><b>Identificar con una foto</b><small>Tomo la foto, reconozco la planta y la agrego con su nombre, categoría y cuidados.</small></span></label><input id="idphoto" type="file" accept="image/*" capture="environment" style="display:none">';
+  h+='<button class="big-opt" data-a="manual"><span class="bi" style="background:#ece8db">✍️</span><span><b>Agregar a mano</b><small>Escribe el nombre o usa una plantilla.</small></span></button>';
+  if(ui.idErr)h+='<p class="note" style="color:var(--rust)">'+esc(ui.idErr)+'</p>';
+  return h;
+}
+function viewForm(){
+  var f=ui.form,h='<button class="x" data-a="close">✕</button><h2>'+(f.id?"Editar planta":"Nueva planta")+'</h2>';
+  if(!f.id&&ui.idInfo)h+='<div class="idbox">'+(f.thumb?'<img src="'+f.thumb+'" alt="">':'')+'<div>'+ui.idInfo+'</div></div>';
+  if(!f.id&&!ui.idInfo){h+='<div class="sec" style="margin-top:0">Plantillas rápidas</div><div class="chips" style="margin-bottom:14px">'+PRESETS.filter(function(x){return x.type===f.type;}).map(function(x,i){return '<button class="chip" data-a="preset" data-v="'+PRESETS.indexOf(x)+'">'+x.e+' '+x.n+'</button>';}).join("")+'</div>';}
+  h+='<div class="seg"><button data-a="ftype" data-v="tierra" class="'+(f.type==="tierra"?"on":"")+'">🪴 En tierra</button><button data-a="ftype" data-v="hidro" class="'+(f.type==="hidro"?"on":"")+'">💧 Hidroponía</button></div>';
+  h+='<label class="f"><span>Nombre</span><input type="text" id="f-name" value="'+esc(f.name)+'" placeholder="Ej.: Albahaca de la cocina"></label>';
+  h+='<div class="emo">'+EMOJIS.map(function(e){return '<button data-a="femo" data-v="'+e+'" class="'+(f.emoji===e?"on":"")+'">'+e+'</button>';}).join("")+'</div>';
+  h+='<div class="row"><label class="f"><span>Categoría</span><select id="f-cat">'+CATS.map(function(c){return '<option'+((f.category||"Otras")===c?" selected":"")+'>'+c+'</option>';}).join("")+'</select></label><label class="f"><span>Nombre científico</span><input type="text" id="f-sci" value="'+esc(f.sci||"")+'" placeholder="Opcional"></label></div>';
+  h+='<label class="f"><span>Dónde está</span><input type="text" id="f-place" value="'+esc(f.place||"")+'" placeholder="Ej.: Balcón, cocina, patio"></label>';
+  if(f.type==="tierra"){
+    h+='<div class="row"><label class="f"><span>Regar cada (días)</span><input type="number" min="1" id="f-water" value="'+f.water+'"></label><label class="f"><span>Abonar cada (días)</span><input type="number" min="1" id="f-feed" value="'+f.feed+'"></label></div>';
+    if(!f.id)h+='<div class="row"><label class="f"><span>Último riego</span><input type="date" id="f-lw" value="'+f.lastWater+'"></label><label class="f"><span>Último abono</span><input type="date" id="f-lf" value="'+f.lastFeed+'"></label></div>';
+  }else{
+    h+='<div class="row"><label class="f"><span>Medir pH/EC cada (días)</span><input type="number" min="1" id="f-check" value="'+f.check+'"></label><label class="f"><span>Cambiar solución cada (días)</span><input type="number" min="1" id="f-sol" value="'+f.sol+'"></label></div>';
+    h+='<div class="row"><label class="f"><span>pH mínimo</span><input type="number" step="0.1" id="f-phmin" value="'+f.phMin+'"></label><label class="f"><span>pH máximo</span><input type="number" step="0.1" id="f-phmax" value="'+f.phMax+'"></label></div>';
+    h+='<div class="row"><label class="f"><span>EC mínima (mS/cm)</span><input type="number" step="0.1" id="f-ecmin" value="'+f.ecMin+'"></label><label class="f"><span>EC máxima (mS/cm)</span><input type="number" step="0.1" id="f-ecmax" value="'+f.ecMax+'"></label></div>';
+    if(!f.id)h+='<label class="f"><span>Último cambio de solución</span><input type="date" id="f-ls" value="'+f.lastSol+'"></label>';
+  }
+  h+='<label class="f"><span>Notas</span><textarea id="f-notes" placeholder="Variedad, maceta, tipo de abono…">'+esc(f.notes||"")+'</textarea></label>';
+  h+='<button class="btn block" data-a="fsave">'+(f.id?"Guardar cambios":"Agregar planta")+'</button>';
+  return h;
+}
+function viewPlant(p){
+  if(!p)return '<button class="x" data-a="close">✕</button><p>Planta no encontrada.</p>';
+  var h='<button class="x" data-a="close">✕</button>'+(p.thumb?'<img class="hero-img" src="'+p.thumb+'" alt="">':'<div style="font-size:44px">'+p.emoji+'</div>')+'<h2 style="margin-bottom:2px">'+(p.thumb?p.emoji+" ":"")+esc(p.name)+'</h2>'+(p.sci?'<i style="color:var(--muted);font-size:14px">'+esc(p.sci)+'</i><br>':'')+'<small style="color:var(--muted)">'+esc(catOf(p))+' · '+(p.type==="hidro"?"Hidroponía":"En tierra")+(p.place?" · "+esc(p.place):"")+'</small>'+famLine(p);
+  var hh=healthOf(p);
+  if(hh)h+='<div class="read" style="background:var(--rustbg);color:var(--rust)">🩺 '+esc(hh.title)+' ('+nice(hh.d)+')</div>';
+  var al=readingAlert(p);
+  if(al)h+='<div class="read" style="background:var(--rustbg);color:var(--rust)">⚠️ '+esc(al.join(", "))+'</div>';
+  h+='<div class="actions">';
+  if(p.type==="hidro")h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="medicion">📏 Medir</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="solucion">🔄 Cambié solución</button>';
+  else h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="agua">💧 Regué</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="abono">🧪 Aboné</button>';
+  h+='<label class="btn sm line" for="fu-d-'+p.id+'">📸 Foto de seguimiento</label><input type="file" accept="image/*" capture="environment" id="fu-d-'+p.id+'" data-fu="'+p.id+'" style="display:none"><button class="btn sm line" data-a="checkhealth" data-p="'+p.id+'">🩺 Revisar salud</button></div>';
+  if(ui.fuBusy===p.id)h+='<div class="read" style="background:var(--leafbg);color:var(--leaf)"><span class="spin">🌿</span> Comparando con la foto anterior…</div>';
+  if(hh)h+='<div class="actions" style="margin-top:0"><button class="btn sm ghost" data-a="healed" data-p="'+p.id+'">✓ Marcar como recuperada</button></div>';
+  h+='<div class="card">'+tasksFor(p).filter(function(t){return ["agua","abono","medicion","solucion","inspeccion"].indexOf(t.kind)>=0;}).map(function(t){return '<div class="kv"><span>'+ICON[t.kind]+' '+t.label+'</span><b>'+nice(t.due)+'</b></div>';}).join("");
+  if(p.type==="hidro")h+='<div class="kv"><span>pH meta</span><b>'+p.phMin+'–'+p.phMax+'</b></div><div class="kv"><span>EC meta</span><b>'+p.ecMin+'–'+p.ecMax+' mS/cm</b></div>';
+  else h+='<div class="kv"><span>Frecuencia</span><b>Riego c/'+p.water+' d · Abono c/'+p.feed+' d</b></div>';
+  h+='</div>';
+  if(p.notes)h+='<div class="card" style="font-size:14px">📝 '+esc(p.notes)+'</div>';
+  h+=treatCard(p)+evoCard(p)+careCard(p)+propCard(p)+remCard(p)+diaryCard(p);
+  var lg=plantLog(p.id).slice(0,15);
+  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
+  h+='<div class="actions"><button class="btn sm line" data-a="edit" data-p="'+p.id+'">✏️ Editar</button><button class="btn sm danger" data-a="del">🗑 Eliminar</button></div>';
+  if(ui.confirmDel)h+='<div class="confirm"><b>¿Eliminar «'+esc(p.name)+'» y su historial?</b><div class="actions"><button class="btn sm danger" data-a="delyes" data-p="'+p.id+'">Sí, eliminar</button><button class="btn sm line" data-a="delno">Cancelar</button></div></div>';
+  return h;
+}
+function evoCard(p){
+  var tl=timeline(p),ph=photosOf(p);
+  var h='<div class="sec">Evolución</div><div class="card">';
+  if(!tl.length)return h+'<p style="color:var(--muted);font-size:14px">Toma una «Foto de seguimiento» cada semana para ver cómo cambia tu planta.</p></div>';
+  if(ph.length>=2){var a=ph[0],b=ph[ph.length-1],dd=diff(b.d,a.d);
+    h+='<div class="cmp"><figure><img src="'+a.thumb+'" alt="Antes"><figcaption>Antes · '+short(a.d)+'</figcaption></figure><figure><img src="'+b.thumb+'" alt="Ahora"><figcaption>Ahora · '+short(b.d)+'</figcaption></figure></div><p style="text-align:center;font-size:13px;color:var(--muted);margin:6px 0 10px">'+(dd>0?dd+(dd===1?" día":" días")+" de diferencia":"mismo día")+'</p>';}
+  var sv=tl.filter(function(l){return l.sev;});
+  if(sv.length)h+='<small style="color:var(--muted)">Estado en el tiempo</small><div class="dots">'+sv.map(function(l){return '<i title="'+short(l.d)+'" style="background:'+SEVCOL[l.sev]+'"></i>';}).join("")+'</div><small style="color:var(--muted);font-size:11px">🟩 sana · 🟨 atención · 🟥 grave</small>';
+  h+='<div class="tl" style="margin-top:12px">'+tl.slice().reverse().slice(0,12).map(function(l){
+    var title=l.title||(l.kind==="nota"?l.text:"Foto"), tr=l.trend?'<span class="trend t-'+l.trend+'">'+({mejor:"↗ Mejoró",igual:"→ Igual",peor:"↘ Empeoró"})[l.trend]+'</span> ':'';
+    return '<div class="tl-i" style="--dot:'+(SEVCOL[l.sev]||"#9aa494")+'"><div class="rowx">'+(l.thumb?'<img src="'+l.thumb+'" alt="">':'')+'<div style="min-width:0"><small style="color:var(--muted)">'+short(l.d)+' · '+(l.kind==="salud"?"Revisión":l.kind==="nota"?"Diario":"Seguimiento")+'</small><br>'+tr+'<b style="font-size:14px">'+esc(title)+'</b>'+(l.why?'<br><small>'+esc(l.why)+'</small>':'')+(l.steps&&l.steps.length&&l.kind==="foto"?'<br><small style="color:var(--leaf)">👉 '+esc(l.steps[0])+'</small>':'')+'</div></div></div>';
+  }).join("")+'</div>';
+  return h+'</div>';
+}
+function famLine(p){
+  var h="",par=p.parent?plant(p.parent):null,kids=S.plants.filter(function(x){return x.parent===p.id;});
+  if(par)h+='<br><button style="color:var(--leaf);font-size:13px;font-weight:600;padding:2px 0" data-a="open" data-p="'+par.id+'">🌱 Hija de '+esc(par.name)+' · '+esc(p.propMethod||"")+' '+nice(p.created)+'</button>';
+  if(kids.length)h+='<br><span style="font-size:13px;color:var(--leaf)">🌱 Hijos: </span>'+kids.map(function(k){return '<button style="color:var(--leaf);font-size:13px;font-weight:600;text-decoration:underline;padding:2px 4px" data-a="open" data-p="'+k.id+'">'+esc(k.name)+'</button>';}).join(" ");
+  return h;
+}
+function propCard(p){
+  var h='<div class="sec">Sacar hijos e injertos</div><div class="card">';
+  if(ui.propBusy===p.id)return h+'<span class="spin">🌿</span> Preparando la guía…</div>';
+  var g=p.prop;
+  if(!g){h+='<p style="font-size:14px;color:var(--muted)">Aprende cómo reproducir esta planta (esquejes, hijuelos, división, acodo) y si se puede injertar.</p><div class="actions">'+(SAMPLE?'<button class="btn sm" data-a="mkprop" data-p="'+p.id+'">✨ Ver cómo hacerlo</button>':'')+'<button class="btn sm ghost" data-a="newkid" data-p="'+p.id+'">🌱 Registrar un hijo</button></div>';return h+'</div>';}
+  (g.methods||[]).forEach(function(m,i){
+    var open=ui.propOpen===p.id+":"+i;
+    h+='<div style="border-bottom:1px dashed var(--line);padding:8px 0"><button data-a="propopen" data-v="'+p.id+':'+i+'" style="display:flex;width:100%;text-align:left;gap:8px;align-items:center"><span style="flex:1"><b>'+esc(m.name)+'</b><br><small style="color:var(--muted)">'+esc(m.difficulty||"")+(m.when?" · "+esc(m.when):"")+(m.time?" · raíces en "+esc(m.time):"")+'</small></span><span style="color:var(--muted)">'+(open?"▲":"▼")+'</span></button>'+(open?'<ol style="padding-left:20px;font-size:14px;margin-top:8px">'+(m.steps||[]).map(function(x){return '<li style="margin-bottom:4px">'+esc(x)+'</li>';}).join("")+'</ol><button class="btn sm ghost" style="margin-top:6px" data-a="newkid" data-p="'+p.id+'" data-v="'+esc(m.name)+'">🌱 Lo hice: registrar el hijo</button>':'')+'</div>';
+  });
+  var gr=g.graft||{};
+  var go=ui.propOpen===p.id+":g";
+  h+='<div style="padding:8px 0"><button data-a="propopen" data-v="'+p.id+':g" style="display:flex;width:100%;text-align:left;gap:8px;align-items:center"><span style="flex:1"><b>🔗 Injerto</b><br><small style="color:var(--muted)">'+(gr.possible?"Sí se puede"+(gr.rootstock?" · patrón: "+esc(gr.rootstock):""):"No es común en esta planta")+'</small></span><span style="color:var(--muted)">'+(go?"▲":"▼")+'</span></button>'+(go?'<p style="font-size:14px;margin-top:6px">'+esc(gr.note||"")+'</p>'+(gr.steps&&gr.steps.length?'<ol style="padding-left:20px;font-size:14px;margin-top:6px">'+gr.steps.map(function(x){return '<li style="margin-bottom:4px">'+esc(x)+'</li>';}).join("")+'</ol>':''):'')+'</div>';
+  if(g.tip)h+='<p class="note">💡 '+esc(g.tip)+'</p>';
+  h+='<div class="actions"><button class="btn sm ghost" data-a="newkid" data-p="'+p.id+'">🌱 Registrar un hijo</button></div>';
+  return h+'</div>';
+}
+function mkProp(p){
+  if(!SAMPLE)return;
+  ui.propBusy=p.id;render();
+  var prompt="Eres viverista experto en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", cultivo "+(p.type==="hidro"?"hidropónico":"en tierra")+".\nExplica cómo reproducirla en casa (sacarle hijos): solo los métodos que de verdad funcionan para esta planta (esqueje en agua o tierra, hijuelos, división de mata, acodo, semilla) y si se puede injertar.\nResponde SOLO JSON válido en español sencillo: {\"methods\":[{\"name\":\"emoji + nombre del método\",\"difficulty\":\"Fácil\"|\"Media\"|\"Difícil\",\"when\":\"mejor época o momento\",\"time\":\"tiempo hasta tener raíces o brotes\",\"steps\":[\"4 a 7 pasos concretos, con materiales caseros\"]}] (1 a 3 métodos, el más fácil primero),\"graft\":{\"possible\":true|false,\"rootstock\":\"en qué patrón se injerta, si aplica\",\"note\":\"1-2 frases\",\"steps\":[\"pasos del injerto si es posible, si no lista vacía\"]},\"tip\":\"un consejo clave\"}";
+  SAMPLE.json(prompt,{modelTier:"default"}).then(function(r){
+    p.prop={methods:(r.methods||[]).slice(0,3).map(function(m){return {name:String(m.name||"Método"),difficulty:String(m.difficulty||""),when:String(m.when||""),time:String(m.time||""),steps:(m.steps||[]).map(String).slice(0,8)};}),graft:{possible:!!(r.graft&&r.graft.possible),rootstock:String((r.graft&&r.graft.rootstock)||""),note:String((r.graft&&r.graft.note)||""),steps:((r.graft&&r.graft.steps)||[]).map(String).slice(0,8)},tip:String(r.tip||"")};
+    ui.propBusy=null;ui.propOpen=p.id+":0";save();render();
+  }).catch(function(){ui.propBusy=null;render();});
+}
+function newKid(p,method){
+  var k=JSON.parse(JSON.stringify(p));
+  k.id=uid();k.created=today();k.parent=p.id;k.propMethod=method||"";k.thumb="";delete k.prop;
+  k.name=uniqueName(normName(p.name)===normName(p.name)?p.name.replace(/\s+\d+$/,"")+" (hijo)":p.name);
+  k.notes="Hijo de "+p.name+(method?" · "+method:"");
+  k.reminders=[{id:uid(),icon:"🔍",label:"Revisar raíces del hijo",every:7,start:today()}];
+  k.lastWater=today();k.lastFeed=today();k.lastSol=today();
+  S.plants.push(k);
+  addLog({plantId:k.id,kind:"nota",text:"Nació de "+p.name+(method?" por "+method:"")+"."});
+  addLog({plantId:p.id,kind:"nota",text:"Le saqué un hijo: "+k.name+(method?" ("+method+")":"")+"."});
+  showToast("🌱 "+k.name+" agregado. Tómale una foto para seguir su crecimiento.");
+  ui.sheet={k:"plant",pid:k.id};save();render();
+}
+function careCard(p){
+  var h='<div class="sec">Ficha de cuidado</div>';
+  if(ui.careBusy===p.id)return h+'<div class="card"><span class="spin">🌿</span> Preparando la ficha…</div>';
+  if(!p.care)return h+'<div class="card" style="font-size:14px;color:var(--muted)">Aún no tiene ficha.'+(SAMPLE?'<div class="actions"><button class="btn sm ghost" data-a="mkcare" data-p="'+p.id+'">✨ Crear ficha con Claude</button></div>':'')+'</div>';
+  var c=p.care;
+  h+='<div class="card">'+[["☀️ Luz",c.light],["💧 Riego",c.water],["💨 Humedad",c.humidity],["🌡️ Temperatura",c.temp]].filter(function(x){return x[1];}).map(function(x){return '<div class="kv" style="gap:12px"><span style="flex:none">'+x[0]+'</span><b style="text-align:right;font-weight:500">'+esc(x[1])+'</b></div>';}).join("");
+  if(c.tips&&c.tips.length)h+='<b style="display:block;margin-top:10px;font-size:14px">Consejos</b><ul style="padding-left:18px;font-size:14px;margin-top:4px">'+c.tips.map(function(t){return '<li style="margin-bottom:3px">'+esc(t)+'</li>';}).join("")+'</ul>';
+  return h+'</div>';
+}
+function remCard(p){
+  var rs=p.reminders||[], ts=tasksFor(p).filter(function(t){return t.kind==="rem";});
+  var h='<div class="sec">Recordatorios</div><div class="card">';
+  if(!rs.length)h+='<p style="color:var(--muted);font-size:14px;margin-bottom:8px">Agrega tareas extra como rotar la maceta, podar o revisar plagas.</p>';
+  ts.forEach(function(t){h+='<div class="kv" style="align-items:center;gap:8px"><span style="flex:1;color:var(--ink)">'+t.icon+' '+esc(t.label)+'<br><small style="color:var(--muted)">cada '+(rs.filter(function(r){return r.id===t.remId;})[0].every)+' días · '+(t.days<0?'<b style="color:var(--rust)">atrasado</b>':nice(t.due))+'</small></span>'+(t.days<=0?'<button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="rem" data-r="'+t.remId+'">Listo ✓</button>':'')+'<button style="color:var(--muted);padding:6px" data-a="remdel" data-p="'+p.id+'" data-v="'+t.remId+'" aria-label="Quitar">✕</button></div>';});
+  h+='<div class="chips" style="margin:10px 0">'+REM_SUG.filter(function(x){return !rs.some(function(r){return r.label===x[1];});}).map(function(x,i){return '<button class="chip" data-a="remsug" data-p="'+p.id+'" data-v="'+REM_SUG.indexOf(x)+'">+ '+x[0]+' '+x[1]+'</button>';}).join("")+'</div>';
+  h+='<div class="row" style="align-items:flex-end"><label class="f" style="flex:2;margin:0"><span>Otro recordatorio</span><input type="text" id="r-label" placeholder="Ej.: Cosechar hojas"></label><label class="f" style="margin:0"><span>Cada (días)</span><input type="number" min="1" id="r-every" value="7"></label></div><button class="btn sm block" style="margin-top:8px" data-a="remadd" data-p="'+p.id+'">+ Agregar recordatorio</button>';
+  return h+'</div>';
+}
+function diaryCard(p){
+  var ns=plantLog(p.id).filter(function(l){return l.kind==="nota";});
+  var h='<div class="sec">Diario de la planta</div><div class="card">';
+  h+='<textarea id="n-text" placeholder="Ej.: Le salió una flor nueva, la cambié de lugar…">'+esc(ui.noteText||"")+'</textarea>';
+  h+='<div class="actions" style="align-items:center">'+(ui.noteThumb?'<img src="'+ui.noteThumb+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px" alt="">':'')+'<label class="btn sm line" for="nphoto">📷 '+(ui.noteThumb?"Cambiar foto":"Agregar foto")+'</label><input id="nphoto" type="file" accept="image/*" capture="environment" style="display:none"><button class="btn sm" style="margin-left:auto" data-a="noteadd" data-p="'+p.id+'">Guardar nota</button></div>';
+  ns.slice(0,10).forEach(function(n){h+='<div class="diary">'+(n.thumb?'<img src="'+n.thumb+'" alt="">':'')+'<div><small style="color:var(--muted)">'+short(n.d)+'</small><br>'+esc(n.text||"")+'</div><button style="margin-left:auto;color:var(--muted);align-self:flex-start" data-a="undo" data-v="'+n.id+'" aria-label="Borrar nota">✕</button></div>';});
+  return h+'</div>';
+}
+function viewMedir(p){
+  var h='<button class="x" data-a="close">✕</button><h2>Medición · '+esc(p.name)+'</h2><p style="color:var(--muted);font-size:14px;margin-bottom:12px">Meta: pH '+p.phMin+'–'+p.phMax+' · EC '+p.ecMin+'–'+p.ecMax+' mS/cm</p>';
+  h+='<div class="row"><label class="f"><span>pH</span><input type="number" step="0.1" inputmode="decimal" id="m-ph" placeholder="6.0"></label><label class="f"><span>EC (mS/cm)</span><input type="number" step="0.1" inputmode="decimal" id="m-ec" placeholder="1.2"></label></div>';
+  h+='<label class="f"><span>Temperatura del agua (°C, opcional)</span><input type="number" step="0.5" inputmode="decimal" id="m-temp" placeholder="21"></label>';
+  h+='<p class="note" style="margin:-4px 0 12px">¿Tu medidor da PPM? Divide entre 500 para EC (o entre 700 si usa la escala 700).</p>';
+  h+='<button class="btn block" data-a="msave" data-p="'+p.id+'">Guardar medición</button>';
+  return h;
+}
+
+/* ---------- formulario ---------- */
+function newForm(type){
+  return {id:null,type:type||"tierra",name:"",emoji:type==="hidro"?"🥬":"🪴",place:"",water:3,feed:21,check:3,sol:14,phMin:5.5,phMax:6.5,ecMin:1.0,ecMax:1.6,lastWater:today(),lastFeed:today(),lastSol:today(),notes:"",category:"",sci:"",thumb:"",care:null,reminders:[]};
+}
+function readForm(){
+  var f=ui.form;
+  function v(id){var el=document.getElementById(id);return el?el.value:undefined;}
+  function n(id,def){var x=parseFloat(v(id));return isNaN(x)?def:x;}
+  if(v("f-name")!==undefined)f.name=v("f-name");
+  if(v("f-place")!==undefined)f.place=v("f-place");
+  if(v("f-notes")!==undefined)f.notes=v("f-notes");
+  if(v("f-cat")!==undefined)f.category=v("f-cat");
+  if(v("f-sci")!==undefined)f.sci=v("f-sci");
+  if(f.type==="tierra"){f.water=Math.max(1,Math.round(n("f-water",f.water)));f.feed=Math.max(1,Math.round(n("f-feed",f.feed)));if(v("f-lw"))f.lastWater=v("f-lw");if(v("f-lf"))f.lastFeed=v("f-lf");}
+  else{f.check=Math.max(1,Math.round(n("f-check",f.check)));f.sol=Math.max(1,Math.round(n("f-sol",f.sol)));f.phMin=n("f-phmin",f.phMin);f.phMax=n("f-phmax",f.phMax);f.ecMin=n("f-ecmin",f.ecMin);f.ecMax=n("f-ecmax",f.ecMax);if(v("f-ls"))f.lastSol=v("f-ls");}
+}
+function openSheet(s){ui.sheet=s;ui.confirmDel=false;render();}
+
+/* ---------- foto + diagnóstico ---------- */
+function onPhoto(e){
+  var file=e.target.files&&e.target.files[0]; if(!file)return;
+  keepNote();
+  var img=new Image(),url=URL.createObjectURL(file);
+  img.onload=function(){
+    var max=1024,w=img.width,h=img.height,sc=Math.min(1,max/Math.max(w,h));
+    var c=document.createElement("canvas");c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    var c2=document.createElement("canvas"),s2=Math.min(1,320/Math.max(w,h));c2.width=Math.round(w*s2);c2.height=Math.round(h*s2);c2.getContext("2d").drawImage(img,0,0,c2.width,c2.height);
+    c.toBlob(function(b){ui.diag.img=b;ui.diag.imgUrl=c.toDataURL("image/jpeg",.8);ui.diag.thumb=c2.toDataURL("image/jpeg",.72);URL.revokeObjectURL(url);render();},"image/jpeg",.85);
+  };
+  img.src=url;
+}
+function makeImages(file,cb){
+  var img=new Image(),url=URL.createObjectURL(file);
+  img.onload=function(){
+    function draw(max){var sc=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c;}
+    var big=draw(1024),small=draw(320),thumb=small.toDataURL("image/jpeg",.72);
+    big.toBlob(function(b){URL.revokeObjectURL(url);cb(b,thumb);},"image/jpeg",.85);
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);cb(null,"");};
+  img.src=url;
+}
+function onIdPhoto(e){
+  var file=e.target.files&&e.target.files[0]; if(!file)return;
+  ui.idErr="";
+  makeImages(file,function(blob,thumb){
+    if(!blob){ui.idErr="No pude leer esa foto. Intenta con otra.";render();return;}
+    ui.idBusy={thumb:thumb};render();identify(blob,thumb);
+  });
+}
+function dataUrlBlob(u){try{var p=u.split(","),bin=atob(p[1]),a=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:"image/jpeg"});}catch(e){return null;}}
+function followUp(pid,file){
+  ui.fuBusy=pid;render();
+  makeImages(file,function(blob,thumb){followUpImg(pid,blob,thumb);});
+}
+function followUpImg(pid,blob,thumb){
+  var p=plant(pid);if(!p)return;
+  var prev=photosOf(p).slice(-1)[0]||null, last=lastHealth(p);
+  ui.fuBusy=pid;render();
+  (function(){
+    if(!blob){ui.fuBusy=null;render();return;}
+    function done(r){
+      r.kind="foto";r.plantId=pid;r.thumb=thumb;
+      if(!prev&&!p.thumb)r.first=true;
+      addLog(r);p.thumb=thumb;autoPlan(p);ui.fuBusy=null;save();render();
+    }
+    if(!SAMPLE){done({title:"Foto de seguimiento",src:"manual"});return;}
+    var ctx="Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", "+(p.type==="hidro"?"hidroponía":"en tierra")+". ";
+    if(last)ctx+="Último estado registrado ("+last.d+"): "+(last.title||"")+(last.why?" — "+last.why:"")+". ";
+    var imgs=[blob],pb=prev?dataUrlBlob(prev.thumb):null;
+    if(pb)imgs=[pb,blob];
+    var prompt="Eres agrónomo experto en plantas en Costa Rica. "+ctx+(pb?"La PRIMERA imagen es la foto anterior ("+prev.d+") y la SEGUNDA es la foto de hoy ("+today()+"). Compara cómo estaba y cómo está.":"Esta es la foto de hoy.")+"\nResponde SOLO con JSON válido en español sencillo: {\"trend\":\"mejor\"|\"igual\"|\"peor\""+(pb?"":" (usa igual si no hay foto anterior)")+",\"sev\":\"sana\"|\"atencion\"|\"grave\",\"title\":\"estado actual en máx 6 palabras\",\"why\":\"1-2 frases: qué cambió entre fotos y qué ves hoy\",\"steps\":[\"1 a 3 acciones concretas para esta semana\"]"+PLAN_SCHEMA+"}";
+    SAMPLE.limits().then(function(l){if(!l||!l.images)throw {code:"noimg"};return SAMPLE.json(prompt,{images:imgs,modelTier:"default"});})
+    .then(function(r){var sv0=["sana","atencion","grave"].indexOf(r.sev)>=0?r.sev:"atencion";startPlan(p,r,String(r.title||"Tratamiento"),sv0);done({trend:pb&&["mejor","igual","peor"].indexOf(r.trend)>=0?r.trend:null,sev:["sana","atencion","grave"].indexOf(r.sev)>=0?r.sev:"atencion",title:String(r.title||"Foto de seguimiento").slice(0,60),why:String(r.why||""),steps:(r.steps||[]).map(String).slice(0,3),src:"ia"});})
+    .catch(function(){done({title:"Foto de seguimiento",src:"manual"});});
+  })();
+}
+function onNotePhoto(e){var file=e.target.files&&e.target.files[0];if(!file)return;var t=document.getElementById("n-text");if(t)ui.noteText=t.value;makeImages(file,function(b,th){ui.noteThumb=th;render();});}
+function onPlantPhoto(e){var file=e.target.files&&e.target.files[0];if(!file||!ui.sheet)return;var p=plant(ui.sheet.pid);makeImages(file,function(b,th){if(p&&th){p.thumb=th;save();render();}});}
+function clampN(x,lo,hi,def){x=parseFloat(x);return isNaN(x)?def:Math.min(hi,Math.max(lo,x));}
+function careFrom(r){
+  var c=r.care||{};
+  return {light:String(c.light||""),water:String(c.water||""),humidity:String(c.humidity||""),temp:String(c.temp||""),tips:(c.tips||[]).map(String).slice(0,5)};
+}
+function remsFrom(r){
+  return (r.reminders||[]).slice(0,4).map(function(x){return {id:uid(),label:String(x.label||"Recordatorio").slice(0,40),every:Math.round(clampN(x.every,1,365,14)),icon:String(x.icon||"🔔").slice(0,4),start:today()};}).filter(function(x){return !/regar|abonar|riego|abono/i.test(x.label);});
+}
+var CARE_SCHEMA='"care":{"light":"luz que necesita, frase corta","water":"cómo regarla, frase corta","humidity":"humedad ideal, frase corta","temp":"rango de temperatura","tips":["2 a 4 consejos prácticos para Costa Rica"]},"reminders":[{"label":"tarea extra de cuidado (NO riego ni abono), máx 4 palabras","every":días,"icon":"un emoji"}] (1 a 3)';
+function identify(blob,thumb){
+  function manual(msg){var f=newForm("tierra");f.thumb=thumb;ui.form=f;ui.idBusy=null;ui.idInfo=msg;openSheet({k:"form"});}
+  if(!SAMPLE){manual("No pude conectar con Claude para reconocerla. Completa el nombre a mano; la foto ya quedó guardada.");return;}
+  var prompt="Eres botánico y experto en huertos e hidroponía en Costa Rica. Identifica la planta de la foto.\nResponde SOLO con JSON válido en español:\n{\"found\":true|false,\"name\":\"nombre común usado en Costa Rica\",\"sci\":\"nombre científico\",\"confidence\":\"alta\"|\"media\"|\"baja\",\"emoji\":\"uno de: "+EMOJIS.join(" ")+"\",\"category\":\"una de: "+CATS.join(", ")+"\",\"type\":\"tierra\" o \"hidro\" (hidro solo si se ven raíces en agua, canastillas o tubos),\"water\":días entre riegos en clima tropical,\"feed\":días entre abonos,\"check\":días entre mediciones pH/EC si es hidro,\"sol\":días entre cambios de solución si es hidro,\"phMin\":n,\"phMax\":n,\"ecMin\":n,\"ecMax\":n,"+CARE_SCHEMA+",\"health\":\"sana\"|\"atencion\"|\"grave\",\"healthNote\":\"si se ve algún problema, nómbralo en máx 6 palabras; si no, vacío\"}\nSi no es una planta o no se distingue, found=false.";
+  SAMPLE.limits().then(function(l){if(!l||!l.images)throw {code:"noimg"};return SAMPLE.json(prompt,{images:[blob],modelTier:"default"});})
+  .then(function(r){
+    if(!r||r.found===false||!r.name){ui.idBusy=null;ui.idErr="No logré reconocer una planta en la foto. Prueba de más cerca, con buena luz y una hoja completa.";render();return;}
+    var f=newForm(r.type==="hidro"?"hidro":"tierra");
+    f.name=String(r.name).slice(0,40);f.sci=String(r.sci||"").slice(0,60);f.thumb=thumb;
+    f.emoji=EMOJIS.indexOf(r.emoji)>=0?r.emoji:"🪴";f.category=CATS.indexOf(r.category)>=0?r.category:"Otras";
+    f.water=Math.round(clampN(r.water,1,60,3));f.feed=Math.round(clampN(r.feed,3,120,21));f.check=Math.round(clampN(r.check,1,14,3));f.sol=Math.round(clampN(r.sol,3,45,14));
+    f.phMin=clampN(r.phMin,4,8,5.5);f.phMax=clampN(r.phMax,4,8.5,6.5);f.ecMin=clampN(r.ecMin,0.2,5,1.0);f.ecMax=clampN(r.ecMax,0.3,6,1.6);
+    f.care=careFrom(r);f.reminders=remsFrom(r);
+    if(r.health&&r.health!=="sana"&&r.healthNote)f._health={sev:r.health==="grave"?"grave":"atencion",title:String(r.healthNote).slice(0,60)};
+    ui.idBusy=null;
+    ui.idInfo='<b>Es '+esc(f.name)+'</b>'+(f.sci?' <i>('+esc(f.sci)+')</i>':'')+'<br>Confianza '+esc(r.confidence||"media")+' · '+esc(f.category)+'. Revisa los datos y toca «Agregar planta».'+(f._health?'<br>⚠️ Noté: '+esc(f._health.title)+'. Revísala en Salud.':'');
+    var cands=sameKind(f);
+    if(cands.length){ui.pending={f:f,blob:blob,thumb:thumb,cands:cands.map(function(c){return c.id;}),guess:null,why:"",busy:true};openSheet({k:"match"});guessMatch();return;}
+    ui.form=f;openSheet({k:"form"});
+  }).catch(function(e){
+    if(e&&e.code==="rate_limited"){ui.idBusy=null;ui.idErr="Muchas fotos seguidas. Espera un minuto e inténtalo de nuevo.";render();return;}
+    manual("No pude reconocerla esta vez. Escribe el nombre a mano; la foto ya quedó guardada.");
+  });
+}
+function normName(x){return String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\(.*?\)/g,"").replace(/\s+\d+$/,"").trim();}
+function sciKey(x){return String(x||"").toLowerCase().split(/\s+/).slice(0,2).join(" ");}
+function sameKind(f){
+  return S.plants.filter(function(p){
+    if(f.sci&&p.sci&&sciKey(f.sci)===sciKey(p.sci))return true;
+    var a=normName(p.name),b=normName(f.name);
+    return a&&b&&(a===b||a.indexOf(b)===0||b.indexOf(a)===0);
+  });
+}
+function uniqueName(n){
+  var base=String(n).replace(/\s+\d+$/,""),names=S.plants.map(function(p){return p.name;});
+  if(names.indexOf(base)<0)return base;
+  for(var k=2;k<99;k++)if(names.indexOf(base+" "+k)<0)return base+" "+k;
+  return base;
+}
+function guessMatch(){
+  var u=ui.pending;
+  var cs=u.cands.map(plant).filter(function(p){return p&&p.thumb;}).slice(0,4);
+  if(!SAMPLE||!cs.length){u.busy=false;render();return;}
+  var imgs=[u.blob].concat(cs.map(function(p){return dataUrlBlob(photosOf(p).slice(-1)[0].thumb);})).filter(Boolean);
+  var prompt="La PRIMERA imagen es una foto nueva de una planta. Las siguientes "+cs.length+" imágenes son las últimas fotos de plantas que el usuario ya tiene registradas, en este orden: "+cs.map(function(p,i){return (i+1)+") "+p.name+(p.place?" en "+p.place:"");}).join("; ")+".\nCompara la maceta, el soporte, el fondo, el tamaño y la forma de la planta. ¿La foto nueva es la MISMA planta que alguna de ellas, o es otra planta distinta?\nResponde SOLO JSON: {\"match\":número de 1 a "+cs.length+" o 0 si es otra planta,\"why\":\"razón corta en español, máx 12 palabras\"}";
+  SAMPLE.limits().then(function(l){if(!l||!l.images)throw 0;return SAMPLE.json(prompt,{images:imgs,modelTier:"default"});})
+  .then(function(r){var m=parseInt(r.match,10);u.guess=m>0&&m<=cs.length?cs[m-1].id:"new";u.why=String(r.why||"");u.busy=false;render();})
+  .catch(function(){u.busy=false;render();});
+}
+function viewAjustes(){
+  var imp=ui.importData;
+  var h='<button class="x" data-a="close">✕</button><h2>Ajustes</h2>';
+  h+='<div class="sec" style="margin-top:0">Respaldo</div><div class="card">';
+  h+='<p style="font-size:14px;color:var(--muted);margin-bottom:10px">Tus datos se guardan en este teléfono. Descarga un respaldo de vez en cuando y guárdalo en tu Drive u OneDrive.</p>';
+  h+='<div class="actions"><button class="btn sm" data-a="exportar">⬇️ Exportar respaldo</button><label class="btn sm ghost" for="impfile">⬆️ Importar respaldo</label><input id="impfile" type="file" accept=".json,.html,.htm,application/json,text/html" style="display:none"></div>';
+  if(imp&&imp.err)h+='<p class="note" style="color:var(--rust)">'+esc(imp.err)+'</p>';
+  if(imp&&imp.s){var fotos=imp.s.plants.filter(function(p){return p.thumb;}).length+imp.s.log.filter(function(l){return l.thumb;}).length;
+    h+='<div class="confirm" style="background:var(--sunbg)"><b>¿Reemplazar tus datos con «'+esc(imp.name)+'»?</b><p style="font-size:14px;margin-top:6px">Trae '+imp.s.plants.length+' plantas, '+imp.s.log.length+' registros y '+fotos+' fotos. Lo que hay ahora en este teléfono ('+S.plants.length+' plantas) se reemplaza.</p><div class="actions"><button class="btn sm" data-a="impok">Sí, importar</button><button class="btn sm line" data-a="impno">Cancelar</button></div></div>';}
+  h+='</div>';
+  h+='<div class="sec">Instalar en el teléfono</div><div class="card" style="font-size:14px"><b>iPhone:</b> abre esta página en Safari → botón Compartir → «Agregar a pantalla de inicio».<br><b>Android:</b> menú ⋮ de Chrome → «Instalar app».<br><span style="color:var(--muted)">'+(isStandalone()?"✅ Ya la estás usando como app instalada.":"Ahora la estás viendo en el navegador.")+'</span></div>';
+  h+='<div class="sec">Inteligencia artificial</div><div class="card" style="font-size:14px;color:var(--muted)">La identificación y el diagnóstico con IA se conectan en el Sprint 1. Mientras tanto funciona la guía de síntomas sin conexión.</div>';
+  h+='<p class="note" style="text-align:center">Mi Jardín · versión '+APP_VERSION+'</p>';
+  return h;
+}
+function isStandalone(){try{return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;}catch(e){return false;}}
+function exportar(){
+  var data=JSON.stringify(S,null,0),name="mi-jardin-respaldo-"+today()+".json";
+  try{
+    var blob=new Blob([data],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);a.remove();},1500);
+    showToast("⬇️ Respaldo descargado: "+name);
+  }catch(e){showToast("No se pudo descargar el respaldo en este navegador.");}
+  render();
+}
+function parseBackup(text){
+  var t=String(text||"").trim(),raw=null;
+  if(t.charAt(0)==="{")raw=t;
+  else{var m=t.match(/<script id="state" type="application\/json">([\s\S]*?)<\/script>/);if(m)raw=m[1];}
+  if(!raw)throw new Error("No encontré datos de Mi Jardín en ese archivo.");
+  var s=JSON.parse(raw);
+  if(!s||!Array.isArray(s.plants)||!Array.isArray(s.log))throw new Error("El archivo no tiene el formato de Mi Jardín.");
+  return normState(s);
+}
+function onImportFile(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){try{ui.importData={s:parseBackup(r.result),name:f.name};}catch(err){ui.importData={err:err.message||"Archivo no válido."};}render();};
+  r.onerror=function(){ui.importData={err:"No pude leer el archivo."};render();};
+  r.readAsText(f);
+}
+function viewMatch(){
+  var u=ui.pending,cs=u.cands.map(plant).filter(Boolean);
+  var h='<button class="x" data-a="close">✕</button><h2>¿Cuál es?</h2>';
+  h+='<div class="idbox"><img src="'+u.thumb+'" alt=""><div>Es <b>'+esc(u.f.name)+'</b>. Ya tienes '+(cs.length===1?"una":cs.length)+' de este tipo. Elige si es la misma planta (se guarda como foto de seguimiento) o una nueva.</div></div>';
+  if(u.busy)h+='<p style="font-size:14px;color:var(--leaf);margin-bottom:10px"><span class="spin">🌿</span> Comparando con tus fotos…</p>';
+  cs.forEach(function(p){
+    var lp=photosOf(p).slice(-1)[0],g=u.guess===p.id;
+    h+='<button class="big-opt" data-a="matchpick" data-p="'+p.id+'" style="'+(g?"border:2px solid var(--leaf);background:var(--leafbg)":"")+'">'+(lp?'<img src="'+lp.thumb+'" style="width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none" alt="">':'<span class="bi">'+p.emoji+'</span>')+'<span style="flex:1"><b>'+esc(p.name)+'</b><small>'+(p.place?esc(p.place)+" · ":"")+(lp?"última foto "+nice(lp.d):"sin fotos")+'</small>'+(g?'<small style="display:block;color:var(--leaf);font-weight:600">✓ Parece esta'+(u.why?": "+esc(u.why):"")+'</small>':'')+'</span></button>';
+  });
+  h+='<button class="big-opt" data-a="matchnew" style="'+(u.guess==="new"?"border:2px solid var(--leaf);background:var(--leafbg)":"")+'"><span class="bi" style="background:#ece8db">➕</span><span><b>Es otra planta nueva</b><small>Se agrega como «'+esc(uniqueName(u.f.name))+'»</small>'+(u.guess==="new"?'<small style="display:block;color:var(--leaf);font-weight:600">✓ Parece una planta distinta'+(u.why?": "+esc(u.why):"")+'</small>':'')+'</span></button>';
+  return h;
+}
+var PLAN_SCHEMA=',"priority":"alta"|"media"|"baja" (alta si se puede morir o contagiar a otras),"plan":[{"day":días desde hoy (0 = hoy),"action":"acción concreta y casera, máx 15 palabras","icon":"un emoji"}] (3 a 7 pasos en orden; incluye aislarla si contagia y las repeticiones del tratamiento; máx día 28; si está sana, lista vacía),"followup":días entre fotos de control (3 a 7),"prevent":["2 o 3 hábitos para que no vuelva a pasar"]';
+function startPlan(p,r,title,sev){
+  if(!p||!r)return;
+  if(r.prevent&&r.prevent.length)p.prevent=r.prevent.map(String).slice(0,4);
+  if(sev==="sana"){if(p.treatment&&p.treatment.active){p.treatment.active=false;p.treatment.end=today();p.treatment.outcome="Recuperada";}return;}
+  var plan=(r.plan||[]).filter(function(x){return x&&x.action;}).slice(0,8);
+  if(!plan.length)return;
+  var t=p.treatment&&p.treatment.active?p.treatment:{id:uid(),start:today(),steps:[],active:true};
+  t.steps=t.steps.filter(function(x){return x.done;});
+  var base=diff(today(),t.start);
+  plan.forEach(function(x){t.steps.push({id:uid(),day:base+Math.round(clampN(x.day,0,28,0)),action:String(x.action).slice(0,140),icon:String(x.icon||"💊").slice(0,4),done:false});});
+  t.title=String(title||"Tratamiento").slice(0,60);t.sev=sev==="grave"?"grave":"atencion";
+  t.priority=["alta","media","baja"].indexOf(r.priority)>=0?r.priority:(sev==="grave"?"alta":"media");
+  t.followup=Math.round(clampN(r.followup,3,10,5));
+  p.treatment=t;
+}
+function localPlan(sym){
+  var plan=[],pre=[];
+  sym.forEach(function(s,i){plan.push({day:0,action:RULES[s][1].split(". ")[0],icon:"🩺"});});
+  plan.push({day:5,action:"Repite el tratamiento y revisa si hay hojas nuevas afectadas",icon:"🔁"});
+  plan.push({day:10,action:"Revisa de nuevo y retira hojas dañadas",icon:"🔍"});
+  return {priority:sym.some(function(s){return /raiz_cafe|tallo_blando|marchita/.test(s);})?"alta":"media",plan:plan,followup:5,prevent:pre};
+}
+function stepIcon(t){t=t.toLowerCase();return /pod|cort|retir|quita/.test(t)?"✂️":/riega|riego|agua|tierra|drenaj/.test(t)?"💧":/abon|fertiliz|nutri/.test(t)?"🧪":/aísla|aisla|separ/.test(t)?"🚧":/rocía|rocia|aplica|jabón|jabon|neem|fungicida/.test(t)?"🧴":/revisa|busca|observa/.test(t)?"🔍":"🩺";}
+function planFromSteps(h){
+  var days=[0,0,1,3,7,14,21];
+  return {priority:h&&h.sev==="grave"?"alta":"media",followup:5,plan:((h&&h.steps)||[]).slice(0,6).map(function(x,i){var a=String(x).split(/\.\s|:\s/)[0].replace(/\.$/,"");if(a.length>110)a=a.slice(0,107)+"…";return {day:days[i],action:a,icon:stepIcon(a)};})};
+}
+function autoPlan(p){
+  if(!p||(p.treatment&&p.treatment.active))return;
+  var hh=healthOf(p);if(!hh||!hh.steps||!hh.steps.length)return;
+  startPlan(p,planFromSteps(hh),hh.title,hh.sev);
+}
+function mkPlan(p){
+  if(!p)return;
+  var hh=lastHealth(p);
+  if(!SAMPLE){if(hh&&hh.steps&&hh.steps.length){startPlan(p,planFromSteps(hh),hh.title,hh.sev);save();render();showToast("📋 Plan listo. Los pasos de hoy están en «Para hoy».");}else{ui.tab="salud";ui.sheet=null;ui.diag.plant=p.id;render();}return;}
+  ui.planBusy=p.id;render();
+  var prompt="Eres agrónomo experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", "+(p.type==="hidro"?"hidroponía":"en tierra")+(p.place?", en "+p.place:"")+". Problema detectado: "+(hh?hh.title+(hh.why?" — "+hh.why:""):"no especificado")+".\nArma un plan de tratamiento por días. Responde SOLO JSON válido en español sencillo: {"+PLAN_SCHEMA.slice(1)+"}";
+  SAMPLE.json(prompt,{modelTier:"default"}).then(function(r){startPlan(p,r,hh?hh.title:"Tratamiento",hh?hh.sev:"atencion");ui.planBusy=null;save();render();showToast("📋 Plan listo. Los pasos de hoy están en «Para hoy».");})
+  .catch(function(){ui.planBusy=null;if(hh&&hh.steps&&hh.steps.length){startPlan(p,planFromSteps(hh),hh.title,hh.sev);save();showToast("📋 Plan armado con el diagnóstico.");}else showToast("No pude armar el plan ahora. Intenta en un momento.");render();});
+}
+function treatCard(p){
+  var t=p.treatment,h="";
+  if(t&&t.active){
+    var dn=t.steps.filter(function(x){return x.done;}).length;
+    h+='<div class="sec">Plan de tratamiento</div><div class="card"><span class="prio '+(t.priority==="alta"?"p1":"p2")+'">'+(t.priority==="alta"?"🔴 PRIORIDAD ALTA":"🟠 PRIORIDAD MEDIA")+'</span><b style="display:block;margin-top:6px">'+esc(t.title)+'</b><small style="color:var(--muted)">Empezó '+nice(t.start)+' · '+dn+' de '+t.steps.length+' pasos · foto de control cada '+t.followup+' días</small><div class="bar"><i style="width:'+Math.round(100*dn/Math.max(1,t.steps.length))+'%"></i></div>';
+    t.steps.slice().sort(function(a,b){return a.day-b.day;}).forEach(function(st){var due=addDays(t.start,st.day),dd=diff(due,today());
+      h+='<div class="step'+(st.done?" done":"")+'"><button class="ck" data-a="done" data-p="'+p.id+'" data-k="trat" data-r="'+st.id+'" aria-label="Marcar paso">'+(st.done?"✓":"")+'</button><div style="flex:1">'+st.icon+' '+esc(st.action)+'<br><small style="color:'+(!st.done&&dd<0?"var(--rust)":"var(--muted)")+';text-decoration:none">'+(st.done?"Hecho "+nice(st.doneOn||due):(dd<0?"Atrasado · ":"")+nice(due))+'</small></div></div>';});
+    h+='<div class="actions"><button class="btn sm ghost" data-a="healed" data-p="'+p.id+'">✓ Ya se recuperó</button>'+(SAMPLE?'<button class="btn sm line" data-a="mkplan" data-p="'+p.id+'">🔄 Rehacer plan</button>':'')+'</div></div>';
+  }else if(healthOf(p)){
+    h+='<div class="sec">Plan de tratamiento</div><div class="card" style="font-size:14px">Esta planta tiene un problema sin plan.'+(ui.planBusy===p.id?'<p style="margin-top:8px"><span class="spin">🌿</span> Armando el plan…</p>':'<div class="actions"><button class="btn sm" data-a="mkplan" data-p="'+p.id+'">📋 Crear plan de tratamiento</button></div>')+'</div>';
+  }
+  if(p.prevent&&p.prevent.length)h+='<div class="sec">Prevención</div><div class="card" style="font-size:14px"><b>🛡️ Para que no vuelva a pasar</b><ul style="padding-left:18px;margin-top:6px">'+p.prevent.map(function(x){return '<li style="margin-bottom:3px">'+esc(x)+'</li>';}).join("")+'</ul></div>';
+  return h;
+}
+function mkCare(p){
+  if(!SAMPLE)return;
+  ui.careBusy=p.id;render();
+  var prompt="Eres experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", cultivo "+(p.type==="hidro"?"hidropónico":"en tierra")+(p.place?", ubicada en "+p.place:"")+".\nResponde SOLO con JSON válido en español: {"+CARE_SCHEMA+",\"category\":\"una de: "+CATS.join(", ")+"\",\"sci\":\"nombre científico\"}";
+  SAMPLE.json(prompt,{modelTier:"quick"}).then(function(r){
+    p.care=careFrom(r);
+    var add=remsFrom(r);p.reminders=p.reminders||[];
+    add.forEach(function(x){if(!p.reminders.some(function(y){return y.label===x.label;}))p.reminders.push(x);});
+    if(!p.category&&CATS.indexOf(r.category)>=0)p.category=r.category;
+    if(!p.sci&&r.sci)p.sci=String(r.sci).slice(0,60);
+    ui.careBusy=null;save();render();
+  }).catch(function(){ui.careBusy=null;render();});
+}
+function keepNote(){var t=document.getElementById("dnote");if(t)ui.diag.note=t.value;}
+function localDiag(sym){
+  if(!sym.length)return null;
+  var lp=plant(ui.diag.plant);if(lp)startPlan(lp,localPlan(sym),RULES[sym[0]][0],sym.some(function(s){return /raiz_cafe|tallo_blando|marchita/.test(s);})?"grave":"atencion");
+  var first=RULES[sym[0]];
+  var steps=sym.map(function(s){return RULES[s][1];});
+  return {sev:sym.some(function(s){return /raiz_cafe|tallo_blando|marchita/.test(s);})?"grave":"atencion",title:first[0],why:"Según lo que marcaste: "+sym.map(function(s){return RULES[s][0].toLowerCase();}).join("; ")+".",steps:steps,other:[],src:"guia"};
+}
+function analyze(){
+  keepNote();
+  var d=ui.diag,p=plant(d.plant);
+  if(!d.img&&!d.sym.length&&!(d.note||"").trim()){d.err="Agrega una foto o marca al menos un síntoma.";render();return;}
+  d.err="";
+  if(!SAMPLE){
+    var r=localDiag(d.sym);
+    if(!r){d.err="Sin conexión con Claude: marca los síntomas para usar la guía rápida.";render();return;}
+    finishDiag(r);return;
+  }
+  d.busy=true;render();
+  var ctx="Planta: "+(p?p.name+" ("+(p.type==="hidro"?"hidroponía":"en tierra")+(p.place?", "+p.place:"")+")":"no especificada")+".\n";
+  if(p&&p.type==="hidro"){var m=lastOf(p.id,"medicion");if(m)ctx+="Última medición: pH "+m.ph+", EC "+m.ec+" mS/cm, agua "+(m.temp||"?")+" °C (metas pH "+p.phMin+"-"+p.phMax+", EC "+p.ecMin+"-"+p.ecMax+").\n";}
+  if(p&&p.type!=="hidro"){var la=lastOf(p.id,"agua");ctx+="Riega cada "+p.water+" días; abona cada "+p.feed+" días."+(la?" Último riego: "+la.d+".":"")+"\n";}
+  ctx+="Síntomas marcados: "+(d.sym.length?d.sym.map(function(s){return SYMPTOMS.filter(function(x){return x[0]===s;})[0][1];}).join(", "):"ninguno")+".\nNotas del dueño: "+((d.note||"").trim()||"ninguna")+".\n";
+  var prompt="Eres un agrónomo experto en plantas de casa, huerto e hidroponía, en Costa Rica (clima tropical). "+(d.img?"Mira la foto adjunta y ":"")+"usa estos datos para identificar la causa más probable del problema (enfermedad por hongo/bacteria/virus, plaga, deficiencia de nutrientes, pH/EC, riego o luz).\n\n"+ctx+"\nResponde SOLO con JSON válido, en español sencillo, con esta forma exacta:\n{\"sev\":\"sana\"|\"atencion\"|\"grave\",\"title\":\"nombre corto del problema (máx 6 palabras)\",\"why\":\"1-2 frases: qué ves y por qué crees que es eso\",\"steps\":[\"3 a 5 pasos concretos y caseros para tratarla\"],\"other\":[\"0 a 2 otras causas posibles\"]"+PLAN_SCHEMA+"}\nSi la foto no muestra una planta o no se ve bien, usa sev \"atencion\", title \"Foto poco clara\" y en steps pide otra foto más cerca con buena luz.";
+  var opts={modelTier:"default"};
+  var go=function(useImg){ if(useImg)opts.images=[d.img]; return SAMPLE.json(prompt,opts); };
+  (d.img?SAMPLE.limits().then(function(l){return go(!!(l&&l.images));}).catch(function(){return go(false);}):go(false))
+  .then(function(r){
+    if(!r||!r.title)throw {message:"respuesta vacía"};
+    if(p)startPlan(p,r,String(r.title),r.sev||"atencion");
+    finishDiag({sev:r.sev||"atencion",title:String(r.title),why:String(r.why||""),steps:(r.steps||[]).map(String).slice(0,6),other:(r.other||[]).map(String).slice(0,3),src:"ia"});
+  }).catch(function(e){
+    d.busy=false;
+    var r=localDiag(d.sym);
+    if(e&&e.code==="not_granted"){SAMPLE=null;}
+    if(r){finishDiag(r);return;}
+    d.err=(e&&e.code==="rate_limited")?"Muchas revisiones seguidas. Intenta en un minuto.":"No pude analizar la foto. Marca los síntomas para usar la guía rápida.";
+    render();
+  });
+}
+function finishDiag(r){
+  var d=ui.diag;
+  r.kind="salud";r.plantId=d.plant||null;if(d.thumb)r.thumb=d.thumb;
+  addLog(r);autoPlan(plant(d.plant));
+  ui.diag={plant:d.plant,sym:[],img:null,imgUrl:"",busy:false,err:"",note:""};
+  save();render();
+  setTimeout(function(){var el=document.querySelector(".diag");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},50);
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-a]"); if(!el)return;
+  var a=el.getAttribute("data-a"),v=el.getAttribute("data-v"),pid=el.getAttribute("data-p");
+  if(a==="bgclose"){if(e.target===el){ui.sheet=null;render();}return;}
+  if(a==="tab"){ui.tab=v;ui.cat="";ui.sheet=null;try{history.replaceState(null,"","#"+v);}catch(x){location.hash=v;}render();window.scrollTo(0,0);}
+  else if(a==="close"){ui.sheet=null;render();}
+  else if(a==="new"){ui.addType=v||(ui.tab==="hidro"?"hidro":"tierra");ui.idErr="";ui.idBusy=null;openSheet({k:"add"});}
+  else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
+  else if(a==="cat"){ui.cat=v;render();}
+  else if(a==="ajustes"){ui.importData=null;openSheet({k:"ajustes"});}
+  else if(a==="exportar"){exportar();}
+  else if(a==="impno"){ui.importData=null;render();}
+  else if(a==="impok"){var ns=ui.importData&&ui.importData.s;if(ns){ns.v=Math.max(ns.v||0,S.v||0);S=ns;ui.importData=null;ui.sheet=null;save();showToast("✅ Respaldo importado: "+S.plants.length+" plantas.");render();}}
+  else if(a==="mkplan"){mkPlan(plant(pid));}
+  else if(a==="season"){ui.seasonOpen=!ui.seasonOpen;render();}
+  else if(a==="mkprop"){mkProp(plant(pid));}
+  else if(a==="propopen"){ui.propOpen=ui.propOpen===v?null:v;render();}
+  else if(a==="newkid"){newKid(plant(pid),v);}
+  else if(a==="matchpick"){var u=ui.pending;ui.pending=null;ui.sheet={k:"plant",pid:pid};followUpImg(pid,u.blob,u.thumb);}
+  else if(a==="matchnew"){var u2=ui.pending;ui.pending=null;u2.f.name=uniqueName(u2.f.name);ui.idInfo=(ui.idInfo||"")+'<br>📍 Ponle dónde está (o un apodo) para distinguirla de la otra.';ui.form=u2.f;openSheet({k:"form"});}
+  else if(a==="toastundo"){var u=ui.toast&&ui.toast.undo;S.log=S.log.filter(function(l){return l.id!==u;});showToast("Deshecho.",null,2500);save();render();}
+  else if(a==="healed"){var ph0=plant(pid);if(ph0&&ph0.treatment&&ph0.treatment.active){ph0.treatment.active=false;ph0.treatment.end=today();ph0.treatment.outcome="Recuperada";}showToast("🎉 ¡Qué bien! Queda anotado que se recuperó.");addLog({plantId:pid,kind:"salud",sev:"sana",title:"Recuperada ✅",why:"Marcada como recuperada.",steps:[],other:[],src:"manual"});save();render();}
+  else if(a==="mkcare"){mkCare(plant(pid));}
+  else if(a==="remsug"){var pp=plant(pid),sg=REM_SUG[+v];pp.reminders=pp.reminders||[];pp.reminders.push({id:uid(),icon:sg[0],label:sg[1],every:sg[2],start:today()});save();render();}
+  else if(a==="remadd"){var pp2=plant(pid),lb=(document.getElementById("r-label").value||"").trim(),ev=parseInt(document.getElementById("r-every").value,10);if(!lb){document.getElementById("r-label").focus();return;}pp2.reminders=pp2.reminders||[];pp2.reminders.push({id:uid(),icon:"🔔",label:lb.slice(0,40),every:Math.max(1,ev||7),start:today()});save();render();}
+  else if(a==="remdel"){var pp3=plant(pid);pp3.reminders=(pp3.reminders||[]).filter(function(r){return r.id!==v;});save();render();}
+  else if(a==="noteadd"){var tx=(document.getElementById("n-text").value||"").trim();if(!tx&&!ui.noteThumb){document.getElementById("n-text").focus();return;}var ne={plantId:pid,kind:"nota",text:tx.slice(0,500)};if(ui.noteThumb)ne.thumb=ui.noteThumb;addLog(ne);ui.noteText="";ui.noteThumb="";save();render();}
+  else if(a==="edit"){var p=plant(pid);ui.form=JSON.parse(JSON.stringify(p));openSheet({k:"form"});}
+  else if(a==="ftype"){readForm();ui.form.type=v;if(v==="hidro"&&ui.form.emoji==="🪴")ui.form.emoji="🥬";render();}
+  else if(a==="femo"){readForm();ui.form.emoji=v;render();}
+  else if(a==="preset"){readForm();var pr=PRESETS[+v],f=ui.form;f.type=pr.type;f.emoji=pr.e;if(!f.name)f.name=pr.n.replace(" (hidro)","");f.category=pr.c;["water","feed","check","sol","phMin","phMax","ecMin","ecMax"].forEach(function(k){if(pr[k]!=null)f[k]=pr[k];});render();}
+  else if(a==="fsave"){
+    readForm();var f=ui.form;
+    if(!f.name.trim()){var ni=document.getElementById("f-name");if(ni){ni.focus();ni.style.borderColor="var(--rust)";}return;}
+    if(f.id){var i=S.plants.findIndex(function(x){return x.id===f.id;});S.plants[i]=f;}
+    else{f.name=uniqueName(f.name.trim());f.id=uid();f.created=today();var hl=f._health;delete f._health;S.plants.push(f);if(f.thumb)addLog({plantId:f.id,kind:"foto",thumb:f.thumb,first:true,title:hl?hl.title:"Foto inicial",why:hl?"Detectado al identificar la planta.":"",sev:hl?hl.sev:"sana",src:"ia"});}
+    ui.idInfo=null;
+    ui.sheet={k:"plant",pid:f.id};save();render();
+  }
+  else if(a==="open"){openSheet({k:"plant",pid:pid});}
+  else if(a==="done"){doTask(pid,el.getAttribute("data-k"),el.getAttribute("data-r"));}
+  else if(a==="msave"){
+    function num(id){var x=parseFloat(document.getElementById(id).value);return isNaN(x)?"":x;}
+    var ph=num("m-ph"),ec=num("m-ec"),tp=num("m-temp");
+    if(ph===""&&ec===""){document.getElementById("m-ph").focus();return;}
+    addLog({plantId:pid,kind:"medicion",ph:ph,ec:ec,temp:tp});showToast("📏 Medición guardada.");ui.sheet={k:"plant",pid:pid};save();render();
+  }
+  else if(a==="undo"){S.log=S.log.filter(function(l){return l.id!==v;});save();render();}
+  else if(a==="del"){ui.confirmDel=true;render();}
+  else if(a==="delno"){ui.confirmDel=false;render();}
+  else if(a==="delyes"){S.plants=S.plants.filter(function(p){return p.id!==pid;});S.log=S.log.filter(function(l){return l.plantId!==pid;});ui.sheet=null;ui.confirmDel=false;save();render();}
+  else if(a==="checkhealth"){ui.tab="salud";ui.sheet=null;keepNote();ui.diag.plant=pid;render();window.scrollTo(0,0);}
+  else if(a==="sym"){keepNote();var i2=ui.diag.sym.indexOf(v);if(i2>=0)ui.diag.sym.splice(i2,1);else ui.diag.sym.push(v);render();}
+  else if(a==="analyze"){analyze();}
+});
+document.addEventListener("change",function(e){
+  if(e.target.getAttribute&&e.target.getAttribute("data-a")==="dplant"){keepNote();ui.diag.plant=e.target.value;}
+});
+
+/* ---------- inicio ---------- */
+var h0=(location.hash||"").replace("#","");
+if(["hoy","plantas","hidro","salud"].indexOf(h0)>=0)ui.tab=h0;
+ui.loading=true;
+try{var tt=JSON.parse(sessionStorage.getItem("miJardin.toast")||"null");if(tt&&tt.until>Date.now()){if(tt.undo&&!S.log.some(function(l){return l.id===tt.undo;}))tt.undo=null;showToast(tt.msg,tt.undo,tt.until-Date.now());}}catch(e){}
+render();
+function boot(){
+  function legacy(){
+    var s=null;
+    try{var l=localStorage.getItem(LS_KEY);if(l)s=JSON.parse(l);}catch(e){}
+    try{var el=document.getElementById("state");if(el){var e2=JSON.parse(el.textContent);if(!s||(e2.v||0)>(s.v||0))s=e2;}}catch(e){}
+    return s&&s.plants&&s.plants.length?s:null;
+  }
+  if(!window.MJStore){ui.loading=false;render();showToast("⚠️ Este navegador no permite guardar datos.",null,9000);return;}
+  MJStore.load().then(function(st){
+    ui.loading=false;
+    if(st){S=normState(st);}
+    else{var lg=legacy();if(lg){S=normState(lg);MJStore.save(S).catch(function(){});}}
+    render();
+  }).catch(function(e){ui.loading=false;render();showToast("⚠️ No pude abrir los datos guardados ("+((e&&e.message)||"error")+").",null,9000);});
+  if("serviceWorker" in navigator&&location.protocol!=="file:"){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
+}
+boot();
+})();
+</script>
+</body>
+</html>
