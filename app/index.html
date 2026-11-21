@@ -173,7 +173,7 @@ textarea{min-height:70px;resize:vertical}
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.2.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.3.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -315,7 +315,8 @@ function save(){
   if(window.MJSync)MJSync.changed();
 }
 var softT=null;
-function softRender(){var ae=document.activeElement;if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA")&&ae.type!=="file"){clearTimeout(softT);softT=setTimeout(softRender,1500);return;}render();}
+function aiHook(){if(!window.MJSync||!MJSync.makeSample)return;var g=MJSync.info().gid;if(g&&!SAMPLE)SAMPLE=MJSync.makeSample();if(!g)SAMPLE=null;}
+function softRender(){aiHook();var ae=document.activeElement;if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA")&&ae.type!=="file"){clearTimeout(softT);softT=setTimeout(softRender,1500);return;}render();}
 function syncInfo(){return window.MJSync?MJSync.info():{status:"off"};}
 function cloudPill(){
   var i=syncInfo();
@@ -836,7 +837,7 @@ function viewAjustes(){
     h+='<div class="confirm" style="background:var(--sunbg)"><b>¿Reemplazar tus datos con «'+esc(imp.name)+'»?</b><p style="font-size:14px;margin-top:6px">Trae '+imp.s.plants.length+' plantas, '+imp.s.log.length+' registros y '+fotos+' fotos. Lo que hay ahora en este teléfono ('+S.plants.length+' plantas) se reemplaza.</p><div class="actions"><button class="btn sm" data-a="impok">Sí, importar</button><button class="btn sm line" data-a="impno">Cancelar</button></div></div>';}
   h+='</div>';
   h+='<div class="sec">Instalar en el teléfono</div><div class="card" style="font-size:14px"><b>iPhone:</b> abre esta página en Safari → botón Compartir → «Agregar a pantalla de inicio».<br><b>Android:</b> menú ⋮ de Chrome → «Instalar app».<br><span style="color:var(--muted)">'+(isStandalone()?"✅ Ya la estás usando como app instalada.":"Ahora la estás viendo en el navegador.")+'</span></div>';
-  h+='<div class="sec">Inteligencia artificial</div><div class="card" style="font-size:14px;color:var(--muted)">La identificación y el diagnóstico con IA se conectan en el Sprint 1. Mientras tanto funciona la guía de síntomas sin conexión.</div>';
+  h+='<div class="sec">Inteligencia artificial</div><div class="card" style="font-size:14px">'+(SAMPLE?'✅ Activa con Google Gemini (gratis). Identifica plantas por foto, diagnostica y arma planes.':'<span style="color:var(--muted)">Se activa cuando entras con tu correo. Sin conexión funciona la guía de síntomas.</span>')+'</div>';
   h+='<p class="note" style="text-align:center">Mi Jardín · versión '+APP_VERSION+'</p>';
   return h;
 }

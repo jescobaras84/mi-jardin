@@ -4,3 +4,4 @@
 | 16 nov 2026 | Usar varios teléfonos y familia | Entra al MVP como F4 | +1 sprint (Sprint 2) |
 | 16 nov 2026 | IA económica en vez de Anthropic | Entra como F3 con Gemini + DeepSeek | Sin cambio de fecha |
 | 21 nov 2026 | Los datos deben seguir al usuario, no al teléfono | Se adelanta F4 (Supabase) al Sprint 1; la IA pasa al Sprint 2 | Sin cambio de fecha final |
+| 21 nov 2026 | IA gratuita | Gemini (nivel gratis) vía función de Supabase «ia» en vez de Cloudflare Worker: una cuenta menos. DeepSeek queda como opción v2 | Sin cambio de fecha |

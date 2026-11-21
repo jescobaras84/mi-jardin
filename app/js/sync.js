@@ -23,6 +23,7 @@
     sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "mj-auth" }
     });
+    window.__mjSb = sb;
     sb.auth.getSession().then(function(r){
       var ses = r && r.data && r.data.session;
       if (ses) start(ses.user.email); else set("status", "out");
@@ -143,4 +144,28 @@
   }
   window.MJSync = { init: init, changed: changed, run: run, info: function(){ return st; }, enabled: enabled,
     sendCode: sendCode, verify: verify, logout: logout, members: members, invite: invite };
+})();
+/* IA: llama a la función "ia" de Supabase (Gemini gratis). Devuelve el JSON de la respuesta. */
+(function(){
+  function b64(blob){ return new Promise(function(res, rej){ var r = new FileReader(); r.onload = function(){ res(String(r.result).split(",")[1] || ""); }; r.onerror = rej; r.readAsDataURL(blob); }); }
+  function ai(prompt, blobs){
+    var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
+    return Promise.all((blobs || []).map(b64)).then(function(imgs){
+      return sbc.functions.invoke("ia", { body: { prompt: prompt, images: imgs } });
+    }).then(function(r){
+      if (r.error) {
+        var st = r.error.context && r.error.context.status;
+        throw { code: st === 429 ? "rate_limited" : st === 401 ? "not_granted" : "unavailable", message: r.error.message };
+      }
+      if (!r.data || r.data.json == null) throw { code: (r.data && r.data.code) || "unavailable", message: (r.data && r.data.message) || "Sin respuesta" };
+      return r.data.json;
+    });
+  }
+  function makeSample(){
+    var f = function(prompt, opts){ return f.json(prompt, opts).then(function(j){ return { text: JSON.stringify(j) }; }); };
+    f.limits = function(){ return Promise.resolve({ images: true }); };
+    f.json = function(prompt, opts){ return ai(prompt, (opts && opts.images) || []); };
+    return f;
+  }
+  if (window.MJSync) { window.MJSync.ai = ai; window.MJSync.makeSample = makeSample; }
 })();

@@ -29,9 +29,9 @@ app/ (index.html, js/, css/, icons/, manifest.webmanifest, sw.js) · worker/ · 
 - Conservar: tareas calculadas a partir de eventos (no guardadas), validación del JSON de la IA, guía local de síntomas sin conexión.
 - Al terminar cada historia: explicar cómo probarla en el iPhone y listar archivos cambiados; actualizar "Estado" abajo.
 
-## Estado
-- Sprint actual: Sprint 0 (20–27 nov 2026)
-- Hecho (20 nov): MJ-02 estructura · MJ-03 respaldo JSON · MJ-04 IndexedDB (app/js/store.js) · MJ-05 importar/exportar en ⚙️ Ajustes · MJ-06 PWA (manifest, íconos, sw.js, fuentes locales) · arreglo iOS < 16.4 (sin lookbehind).
-- Falta del Sprint 0: MJ-01 crear repo + Pages con «GitHub Actions» (Jonathan) · MJ-07 publicar y probar en iPhone.
-- Siguiente sprint: MJ-08 … MJ-13 (IA con Cloudflare Worker).
-- Nota: la IA está desactivada fuera de Claude (SAMPLE = null); funcionan los flujos manuales y la guía local de síntomas.
+## Estado (21 nov 2026)
+- Hecho: Sprint 0 completo (PWA en https://jescobaras84.github.io/mi-jardin/, IndexedDB, importar/exportar).
+- Hecho: cuenta por correo con código (Supabase Auth + Gmail SMTP), sincronización por registro (supabase/migrations/001), invitar familia.
+- Hecho: IA Gemini gratis vía Supabase Edge Function supabase/functions/ia (secreto GEMINI_API_KEY; opcional GEMINI_MODEL, por defecto gemini-flash-latest). La app la usa solo con sesión iniciada.
+- Cambio de arquitectura: ya no se usa Cloudflare Worker; IA y (luego) avisos van en Supabase. Ver CAMBIOS.md.
+- Siguiente: probar IA con fotos reales (MJ-13) · fotos a Supabase Storage (MJ-18) · avisos diarios 7:00 a. m. con Web Push desde Supabase (MJ-20/21).
