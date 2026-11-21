@@ -177,7 +177,9 @@
   function b64(blob){ return new Promise(function(res, rej){ var r = new FileReader(); r.onload = function(){ res(String(r.result).split(",")[1] || ""); }; r.onerror = rej; r.readAsDataURL(blob); }); }
   function ai(prompt, blobs){
     var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
-    return Promise.all((blobs || []).map(b64)).then(function(imgs){
+    var t0 = Date.now();
+    var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej({ code: "unavailable", message: "La IA no respondió en 60 s (la solicitud no volvió de Supabase)" }); }, 60000); });
+    return Promise.race([timeout, Promise.all((blobs || []).map(b64)).then(function(imgs){
       return sbc.functions.invoke((window.MJ_CONFIG && MJ_CONFIG.IA_FUNCTION) || "ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
     }).then(function(r){
       if (r.error) {
@@ -187,8 +189,9 @@
         throw base;
       }
       if (!r.data || r.data.json == null) throw { code: (r.data && r.data.code) || "unavailable", message: (r.data && r.data.message) || "Sin respuesta" };
+      window.__mjLastAiMs = Date.now() - t0;
       return r.data.json;
-    });
+    })]);
   }
   function makeSample(){
     var f = function(prompt, opts){ return f.json(prompt, opts).then(function(j){ return { text: JSON.stringify(j) }; }); };
