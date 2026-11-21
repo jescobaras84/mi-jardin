@@ -7,241 +7,294 @@
 <meta name="description" content="App gratis para cuidar tus plantas: recordatorios de riego y abono, identificación con foto, planes cuando se enferman, clima de cada lugar e hidroponía. Para toda la familia.">
 <meta property="og:title" content="Mi Jardín — tus plantas, cuidadas a tiempo">
 <meta property="og:description" content="Recordatorios, identificación con foto y planes de tratamiento. Gratis, para toda la familia.">
-<meta property="og:image" content="img/hoy.webp">
-<meta name="theme-color" content="#0f3b2e">
+<meta name="theme-color" content="#f6f7f3">
 <link rel="icon" href="img/icono.png">
+<link rel="apple-touch-icon" href="img/icono.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --selva:#0f3b2e; --hoja:#2f6b3a; --brote:#b8e07a; --papel:#fafbf7; --lluvia:#dce9f2; --tinta:#15241c;
-  --gris:#5b6b61; --linea:#dfe5dc; --alerta:#b5482e;
+  --fondo:#f6f7f3; --superficie:#ffffff; --tinta:#17201a; --suave:#5f6b63; --tenue:#8a958d;
+  --linea:#e4e8e1; --hoja:#2e6a3e; --lluvia:#e8f0f6; --lluvia-tinta:#24485f;
+  --alerta:#b4492f; --alerta-claro:#f8e6df; --ambar-claro:#f8efd9;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --r-md:16px; --r-lg:24px;
+  --sombra:0 1px 2px rgba(23,32,26,.04),0 8px 24px -8px rgba(23,32,26,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-body{background:var(--papel);color:var(--tinta);font:18px/1.6 "Atkinson Hyperlegible",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.05;letter-spacing:-.02em}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--fondo);color:var(--tinta);font:400 17px/1.6 Geist,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-weight:600;letter-spacing:-0.025em;line-height:1.1}
+p{text-wrap:pretty}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--brote);outline-offset:3px;border-radius:6px}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-.btn{display:inline-flex;align-items:center;gap:10px;font:700 18px/1 "Atkinson Hyperlegible",sans-serif;text-decoration:none;padding:17px 26px;border-radius:999px;transition:transform .15s}
-.btn:hover{transform:translateY(-1px)}
-.btn-brote{background:var(--brote);color:var(--selva)}
-.btn-linea{border:2px solid rgba(255,255,255,.35);color:#fff}
-.btn-hoja{background:var(--hoja);color:#fff}
+:focus-visible{outline:2px solid var(--hoja);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:1080px;margin-inline:auto;padding-inline:24px}
+.num{font-variant-numeric:tabular-nums}
 
-/* Barra */
-.top{position:absolute;inset:0 0 auto;z-index:5}
-.top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
-.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:800 22px "Bricolage Grotesque",sans-serif}
-.logo img{width:36px;height:36px;border-radius:10px}
-.top nav a{color:rgba(255,255,255,.85);text-decoration:none;margin-left:26px;font-size:16px}
-.top nav a:hover{color:#fff}
-@media (max-width:720px){.top nav{display:none}}
-
-/* Portada */
-.hero{background:var(--selva);color:#fff;padding:140px 0 0;overflow:hidden;position:relative}
-.hero::before{content:"";position:absolute;right:-180px;top:-120px;width:620px;height:620px;border-radius:50%;background:radial-gradient(closest-side,rgba(184,224,122,.22),transparent)}
-.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:end;position:relative}
-.hero h1{font-size:clamp(54px,8.4vw,112px);font-weight:800;margin-bottom:26px;max-width:9ch}
-.hero p.lead{font-size:21px;color:rgba(255,255,255,.86);max-width:34ch;margin-bottom:34px}
-.hero .ctas{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:28px}
-.hero .facts{display:flex;flex-wrap:wrap;gap:10px 22px;color:rgba(255,255,255,.75);font-size:16px;padding-bottom:72px}
-.hero .facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brote);margin-right:9px;vertical-align:2px}
-.phone{width:310px;max-width:100%;border-radius:44px;padding:11px;background:#08241b;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.08)}
-.phone img{display:block;width:100%;border-radius:34px}
-.hero .phone{justify-self:center;margin-bottom:-120px;transform:rotate(2.5deg);animation:asoma .9s cubic-bezier(.2,.8,.2,1) both}
-@keyframes asoma{from{transform:translateY(60px) rotate(2.5deg);opacity:0}to{transform:rotate(2.5deg);opacity:1}}
-@media (max-width:860px){
-  .hero{padding-top:110px}
-  .hero .wrap{grid-template-columns:1fr}
-  .hero .facts{padding-bottom:36px}
-  .hero .phone{margin-bottom:-160px;width:270px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;font:600 16px/1 Geist,sans-serif;text-decoration:none;border:0;cursor:pointer;transition:transform 160ms var(--ease-out),background-color 200ms ease}
+.btn:active{transform:scale(0.97)}
+.btn-primario{background:var(--tinta);color:#fff}
+.btn-secundario{background:transparent;color:var(--tinta);box-shadow:inset 0 0 0 1px var(--linea)}
+@media (hover:hover) and (pointer:fine){
+  .btn-primario:hover{background:#2a362e}
+  .btn-secundario:hover{background:#fff}
 }
 
-/* Funciones */
-.funciones{padding:150px 0 40px}
-.fila{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:56px 0}
-.fila + .fila{border-top:1px solid var(--linea)}
-.fila.inv .texto{order:2}
-.fila h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:18px;max-width:14ch}
-.fila p{color:var(--gris);max-width:44ch;margin-bottom:14px}
-.fila ul{list-style:none;margin-top:18px}
-.fila li{padding:8px 0 8px 32px;position:relative}
-.fila li::before{content:"";position:absolute;left:0;top:15px;width:18px;height:10px;border-left:3px solid var(--hoja);border-bottom:3px solid var(--hoja);transform:rotate(-45deg)}
-.fila .phone{margin:0 auto;width:260px;background:#e9eee6;box-shadow:0 18px 50px rgba(15,59,46,.16)}
-@media (max-width:860px){.fila,.fila.inv{grid-template-columns:1fr;gap:32px}.fila.inv .texto{order:0}}
+.barra{position:sticky;top:0;z-index:20;background:rgba(246,247,243,.78);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color 200ms ease}
+.barra.con-borde{border-bottom-color:var(--linea)}
+.barra .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.marca{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;text-decoration:none;letter-spacing:-0.01em}
+.marca img{width:28px;height:28px;border-radius:8px;flex-shrink:0}
+.barra nav{display:flex;align-items:center;gap:28px;font-size:15px}
+.barra nav a:not(.btn){text-decoration:none;color:var(--suave)}
+.barra nav a:not(.btn):hover{color:var(--tinta)}
+.barra .btn{height:38px;padding:0 16px;font-size:14px}
+@media (max-width:760px){.barra nav a:not(.btn){display:none}}
 
-/* Clima */
-.clima{background:var(--lluvia);padding:96px 0}
-.clima .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
-.clima h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:18px;color:#13324a}
-.clima p{color:#2c4c63;max-width:42ch}
-.pronos{display:grid;gap:14px}
-.lugar{background:#fff;border-radius:22px;padding:20px 22px;display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center}
-.lugar .ic{font-size:38px;line-height:1}
-.lugar b{display:block;font-size:19px}
-.lugar small{color:#466377;font-size:16px}
-.lugar .dice{grid-column:2;font-size:16px;color:#13324a;background:#eef4f9;border-radius:12px;padding:8px 12px;margin-top:2px}
-@media (max-width:860px){.clima .wrap{grid-template-columns:1fr}}
+.portada{padding:72px 0 96px}
+.portada .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:64px;align-items:center}
+.portada h1{font-size:clamp(40px,5.6vw,64px);max-width:12ch;margin-bottom:20px}
+.portada .bajada{font-size:19px;color:var(--suave);max-width:40ch;margin-bottom:32px}
+.acciones{display:flex;flex-wrap:wrap;gap:12px}
+.detalle{margin-top:28px;font-size:14px;color:var(--tenue)}
+@media (max-width:900px){.portada{padding-top:40px}.portada .wrap{grid-template-columns:1fr;gap:48px}}
 
-/* Recetario */
-.recetario{padding:96px 0}
-.recetario .cab{max-width:640px;margin-bottom:40px}
-.recetario h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:16px}
-.recetario .cab p{color:var(--gris)}
-.columnas{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.col h3{font-size:22px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.col h3 i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px}
-.ok h3 i{background:#e4efe0;color:var(--hoja)} .medio h3 i{background:#fbf0d4;color:#8a6110} .mito h3 i{background:#f8e3dc;color:var(--alerta)}
-.col ul{list-style:none;border-top:2px solid var(--tinta)}
-.col li{padding:12px 0;border-bottom:1px solid var(--linea)}
-.col li small{display:block;color:var(--gris);font-size:15px}
-.mito li s{text-decoration-color:rgba(181,72,46,.55);text-decoration-thickness:2px}
-.fuente{margin-top:26px;font-size:15px;color:var(--gris)}
-@media (max-width:860px){.columnas{grid-template-columns:1fr}}
+.demo{background:var(--superficie);border-radius:var(--r-lg);box-shadow:var(--sombra),0 0 0 1px var(--linea);padding:22px;position:relative}
+.demo-cab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.demo-cab b{font-size:20px;letter-spacing:-0.02em}
+.demo-cab span{font-size:14px;color:var(--tenue)}
+.resumen{font-size:14px;color:var(--suave);margin-bottom:14px}
+.tarea{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-md);background:var(--fondo);margin-bottom:8px;transition:opacity 300ms ease,filter 300ms ease}
+.tarea.hecha{opacity:.5;filter:saturate(0)}
+.tarea .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex-shrink:0;background:#fff}
+.tarea .txt{flex:1;min-width:0}
+.tarea .txt b{display:block;font-weight:600;font-size:15px}
+.tarea .txt small{color:var(--tenue);font-size:13px}
+.prio{display:inline-block;font-size:11px;font-weight:600;color:var(--alerta);background:var(--alerta-claro);border-radius:999px;padding:1px 8px;margin-right:6px;vertical-align:1px}
+.check{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--linea);background:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:transform 160ms var(--ease-out),background-color 200ms ease,border-color 200ms ease}
+.check:active{transform:scale(0.92)}
+.check svg{width:16px;height:16px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset 260ms var(--ease-out)}
+.tarea.hecha .check{background:var(--hoja);border-color:var(--hoja)}
+.tarea.hecha .check svg{stroke-dashoffset:0}
+.clima-mini{display:flex;gap:10px;align-items:center;background:var(--lluvia);color:var(--lluvia-tinta);border-radius:var(--r-md);padding:12px 14px;font-size:14px;margin-top:12px}
+.clima-mini b{font-weight:600}
+.pista{position:absolute;top:-14px;right:18px;background:var(--tinta);color:#fff;font-size:13px;padding:6px 12px;border-radius:999px;transition:opacity 200ms ease}
+.pista.oculta{opacity:0}
 
-/* Comparación */
-.compara{background:#fff;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:88px 0}
-.compara h2{font-size:clamp(32px,4vw,46px);font-weight:700;margin-bottom:28px;max-width:20ch}
-table{width:100%;border-collapse:collapse;font-size:17px}
-th,td{text-align:left;padding:15px 12px;border-bottom:1px solid var(--linea);vertical-align:top}
-thead th{font-family:"Bricolage Grotesque",sans-serif;font-size:19px}
-thead th:nth-child(2){color:var(--hoja)}
-td:nth-child(2){font-weight:700}
-td:nth-child(3){color:var(--gris)}
-.nota{font-size:14px;color:var(--gris);margin-top:14px}
+.avisos{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40;width:min(360px,calc(100% - 32px));pointer-events:none}
+.aviso{background:var(--tinta);color:#fff;border-radius:14px;padding:13px 16px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);margin-top:8px;opacity:1;transform:translateY(0);transition:opacity 400ms ease,transform 400ms ease}
+.aviso.entra{opacity:0;transform:translateY(100%)}
+.aviso.sale{opacity:0;transform:translateY(8px) scale(.98)}
 
-/* Instalar */
-.instalar{background:var(--selva);color:#fff;padding:96px 0}
-.instalar h2{font-size:clamp(36px,4.6vw,56px);font-weight:800;margin-bottom:40px;max-width:16ch}
-.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;list-style:none;counter-reset:p}
-.pasos li{counter-increment:p;border-top:2px solid rgba(255,255,255,.2);padding-top:20px}
-.pasos li::before{content:counter(p);display:block;font:800 52px/1 "Bricolage Grotesque",sans-serif;color:var(--brote);margin-bottom:12px}
-.pasos b{display:block;font-size:20px;margin-bottom:6px}
-.pasos p{color:rgba(255,255,255,.78);font-size:17px}
-.instalar .ctas{margin-top:44px;display:flex;gap:14px;flex-wrap:wrap}
-@media (max-width:860px){.pasos{grid-template-columns:1fr}}
+.entra-pagina{opacity:0;transform:translateY(8px);filter:blur(4px);animation:aparece 600ms var(--ease-out) forwards}
+.entra-pagina.d1{animation-delay:60ms}.entra-pagina.d2{animation-delay:120ms}.entra-pagina.d3{animation-delay:220ms}
+@keyframes aparece{to{opacity:1;transform:none;filter:none}}
 
-/* Preguntas */
-.preguntas{padding:96px 0}
-.preguntas h2{font-size:clamp(32px,4vw,46px);font-weight:700;margin-bottom:24px}
-details{border-bottom:1px solid var(--linea);max-width:760px}
-summary{cursor:pointer;list-style:none;padding:20px 40px 20px 0;font:700 20px "Atkinson Hyperlegible",sans-serif;position:relative}
+section{padding:96px 0}
+.titulo-sec{font-size:clamp(30px,3.6vw,42px);max-width:20ch;margin-bottom:14px}
+.intro-sec{color:var(--suave);max-width:56ch;margin-bottom:48px;font-size:18px}
+.borde-arriba{border-top:1px solid var(--linea)}
+
+.funciones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.funcion{background:var(--superficie);border-radius:var(--r-lg);box-shadow:0 0 0 1px var(--linea);padding:28px;display:flex;flex-direction:column;gap:24px}
+.funcion h3{font-size:21px;margin-bottom:6px}
+.funcion p{color:var(--suave);font-size:16px;max-width:42ch}
+.funcion .muestra{margin-top:auto}
+@media (max-width:820px){.funciones{grid-template-columns:1fr}}
+
+.visor{padding-bottom:46px;border-radius:var(--r-md);background:linear-gradient(160deg,#dfe9d8,#c4d9ba);aspect-ratio:16/9;position:relative;display:grid;place-items:center;overflow:hidden}
+.visor .hoja{font-size:84px;line-height:1;filter:drop-shadow(0 10px 18px rgba(30,60,30,.25))}
+.visor .esquina{position:absolute;width:26px;height:26px;border:2.5px solid rgba(255,255,255,.95)}
+.visor .e1{top:14px;left:14px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}.visor .e2{top:14px;right:14px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+.visor .e3{bottom:14px;left:14px;border-right:0;border-top:0;border-radius:0 0 0 8px}.visor .e4{bottom:14px;right:14px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.visor .resultado{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:8px 14px;font-size:14px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.visor .resultado i{font-style:normal;color:var(--tenue)}
+.pasos-plan{list-style:none}
+.pasos-plan li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--linea);font-size:15px}
+.pasos-plan li:first-child{border-top:0}
+.pasos-plan .c{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--linea);flex-shrink:0;margin-top:1px;display:grid;place-items:center}
+.pasos-plan .c.ok{background:var(--hoja);border-color:var(--hoja)}
+.pasos-plan .c.ok::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.pasos-plan .cuando{margin-left:auto;color:var(--tenue);font-size:13px;white-space:nowrap}
+.pasos-plan .tach{color:var(--tenue);text-decoration:line-through}
+.lugar{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--r-md);background:var(--lluvia);color:var(--lluvia-tinta);font-size:14px}
+.lugar + .lugar{margin-top:8px}
+.lugar.sol{background:var(--ambar-claro);color:#5c4510}
+.lugar .ic{font-size:22px;flex-shrink:0}
+.lugar b{font-weight:600}
+.historial{list-style:none;font-size:15px}
+.historial li{display:flex;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--linea)}
+.historial li:first-child{border-top:0}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.historial small{margin-left:auto;color:var(--tenue);font-size:13px;white-space:nowrap}
+
+.columnas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.col{background:var(--superficie);border-radius:var(--r-lg);box-shadow:0 0 0 1px var(--linea);padding:24px}
+.col h3{font-size:17px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.col h3 .punto{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.col ul{list-style:none}
+.col li{padding:11px 0;border-top:1px solid var(--linea);font-size:15px;font-weight:500}
+.col li:first-child{border-top:0}
+.col li small{display:block;font-weight:400;color:var(--tenue);font-size:13px}
+.col.mito li s{text-decoration-color:rgba(180,73,47,.5);text-decoration-thickness:1.5px}
+.fuentes{margin-top:20px;font-size:13px;color:var(--tenue);max-width:70ch}
+@media (max-width:820px){.columnas{grid-template-columns:1fr}}
+
+.tabla{background:var(--superficie);border-radius:var(--r-lg);box-shadow:0 0 0 1px var(--linea);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:16px 20px;border-top:1px solid var(--linea)}
+thead th{border-top:0;font-size:13px;font-weight:500;color:var(--tenue)}
+tbody th{font-weight:500}
+td.si{font-weight:600;color:var(--hoja)}
+td.no{color:var(--suave)}
+.nota{font-size:13px;color:var(--tenue);margin-top:14px}
+@media (max-width:620px){th,td{padding:12px;font-size:14px}}
+
+.pasos{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;counter-reset:paso}
+.pasos li{counter-increment:paso;padding-top:20px;border-top:1px solid var(--tinta)}
+.pasos li::before{content:counter(paso);display:block;font-size:14px;font-weight:600;color:var(--tenue);margin-bottom:28px;font-variant-numeric:tabular-nums}
+.pasos b{display:block;font-size:19px;font-weight:600;letter-spacing:-0.01em;margin-bottom:6px}
+.pasos p{color:var(--suave);font-size:15px;max-width:32ch}
+@media (max-width:820px){.pasos{grid-template-columns:1fr}}
+
+.preguntas{max-width:720px;margin-top:32px}
+details{border-top:1px solid var(--linea)}
+details:last-child{border-bottom:1px solid var(--linea)}
+summary{cursor:pointer;list-style:none;padding:20px 36px 20px 0;font-weight:500;font-size:17px;position:relative}
 summary::-webkit-details-marker{display:none}
-summary::after{content:"+";position:absolute;right:6px;top:14px;font:500 30px "Bricolage Grotesque",sans-serif;color:var(--hoja);transition:transform .2s}
-details[open] summary::after{transform:rotate(45deg)}
-details p{padding:0 0 22px;color:var(--gris);max-width:62ch}
+summary::after{content:"";position:absolute;right:6px;top:50%;width:9px;height:9px;border-right:1.5px solid var(--suave);border-bottom:1.5px solid var(--suave);transform:translateY(-70%) rotate(45deg);transition:transform 200ms var(--ease-out)}
+details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details p{padding:0 0 22px;color:var(--suave);max-width:60ch;font-size:16px}
 
-footer{border-top:1px solid var(--linea);padding:36px 0 48px;color:var(--gris);font-size:15px}
-footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.cierre{text-align:center}
+.cierre h2{font-size:clamp(30px,3.6vw,42px);margin:0 auto 14px;max-width:18ch}
+.cierre p{color:var(--suave);margin:0 auto 28px;max-width:44ch}
+.cierre .acciones{justify-content:center}
+footer{border-top:1px solid var(--linea);padding:28px 0 40px;font-size:14px;color:var(--tenue)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .entra-pagina{animation:fade 300ms ease forwards;transform:none;filter:none}
+  @keyframes fade{to{opacity:1}}
+  .aviso,.aviso.entra,.aviso.sale{transform:none}
+}
 </style>
 </head>
 <body>
 
-<header class="top">
+<header class="barra" id="barra">
   <div class="wrap">
-    <a class="logo" href="#"><img src="img/icono.png" alt="">Mi Jardín</a>
+    <a class="marca" href="#"><img src="img/icono.png" alt="" width="28" height="28">Mi Jardín</a>
     <nav aria-label="Secciones">
       <a href="#funciones">Qué hace</a>
       <a href="#recetario">Recetario</a>
       <a href="#instalar">Instalar</a>
-      <a href="#preguntas">Preguntas</a>
+      <a class="btn btn-primario" href="https://jescobaras84.github.io/mi-jardin/">Abrir la app</a>
     </nav>
   </div>
 </header>
 
 <main>
-<section class="hero">
+<section class="portada" aria-labelledby="t-portada">
   <div class="wrap">
     <div>
-      <h1>Tus plantas, cuidadas a tiempo.</h1>
-      <p class="lead">Mi Jardín te recuerda cuándo regar y abonar, reconoce tus plantas con una foto y te dice qué hacer si se enferman. Gratis y para toda la familia.</p>
-      <div class="ctas">
-        <a class="btn btn-brote" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a>
-        <a class="btn btn-linea" href="#instalar">Cómo instalarla</a>
+      <h1 id="t-portada" class="entra-pagina">Tus plantas, cuidadas a tiempo.</h1>
+      <p class="bajada entra-pagina d1">Mi Jardín te recuerda cuándo regar y abonar, reconoce tus plantas con una foto y te dice qué hacer si se enferman. Gratis y para toda la familia.</p>
+      <div class="acciones entra-pagina d2">
+        <a class="btn btn-primario" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a>
+        <a class="btn btn-secundario" href="#instalar">Cómo instalarla</a>
       </div>
-      <div class="facts"><span>Sin suscripción</span><span>iPhone y Android</span><span>Funciona sin internet</span></div>
-    </div>
-    <div class="phone"><img src="img/hoy.webp" alt="Pantalla Hoy de Mi Jardín: una tarea prioritaria, el clima de la casa y la finca, y un limón en tratamiento" width="390" height="844"></div>
-  </div>
-</section>
-
-<section class="funciones" id="funciones">
-  <div class="wrap">
-    <div class="fila">
-      <div class="texto">
-        <h2>Una foto y ya sabe cuál es</h2>
-        <p>Tómale una foto a tu planta: la app la reconoce y la agrega con su nombre, su categoría y una ficha de cuidados para el clima de Costa Rica.</p>
-        <ul>
-          <li>Si ya tienes una igual, te pregunta cuál de las dos es.</li>
-          <li>Ordena tus plantas por lugar, interior, exterior o tipo.</li>
-          <li>Árboles y frutales con su época de flor y cosecha.</li>
-        </ul>
-      </div>
-      <div class="phone"><img src="img/plantas.webp" alt="Lista de plantas filtrada por lugar y categoría" loading="lazy" width="390" height="844"></div>
+      <p class="detalle entra-pagina d2">Sin suscripción. Funciona en iPhone y Android, también sin internet.</p>
     </div>
 
-    <div class="fila inv">
-      <div class="texto">
-        <h2>Si se enferma, un plan día por día</h2>
-        <p>Cuenta qué ves o sube una foto: recibes un diagnóstico y un plan con prioridad. Cada paso aparece el día que toca y lo marcas al terminar.</p>
-        <ul>
-          <li>Foto de control para ver si mejoró o empeoró.</li>
-          <li>Consejos para que no vuelva a pasar.</li>
-          <li>Solo remedios que los especialistas confirman que funcionan.</li>
-        </ul>
+    <div class="demo entra-pagina d3" aria-label="Demostración de la pantalla Hoy">
+      <span class="pista" id="pista">Pruébalo: marca una tarea</span>
+      <div class="demo-cab"><b>Hoy</b><span>sábado 21 de noviembre</span></div>
+      <p class="resumen num" id="resumen">3 tareas para hoy</p>
+      <div class="tarea" data-msg="Riego de la albahaca anotado. Próximo: lunes 23.">
+        <div class="ico" aria-hidden="true">💧</div>
+        <div class="txt"><b>Regar la albahaca</b><small>Casa · le toca a Ana</small></div>
+        <button class="check" aria-label="Marcar como hecho: regar la albahaca"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></button>
       </div>
-      <div class="phone"><img src="img/plan.webp" alt="Plan de tratamiento de un limón con pulgones, con pasos marcados y botones de receta" loading="lazy" width="390" height="650"></div>
-    </div>
-
-    <div class="fila">
-      <div class="texto">
-        <h2>La familia cuida junta</h2>
-        <p>Invita a quien te ayuda con las plantas usando su correo. Todos ven el mismo jardín, desde cualquier teléfono, y nada se pierde si cambias de celular.</p>
-        <ul>
-          <li>Cada planta puede tener su responsable.</li>
-          <li>El historial dice quién regó, abonó o cosechó.</li>
-          <li>Nadie riega dos veces ni se olvida de hacerlo.</li>
-        </ul>
+      <div class="tarea" data-msg="Paso hecho. Quedan 2 pasos del plan del limón.">
+        <div class="ico" aria-hidden="true">🧴</div>
+        <div class="txt"><b><span class="prio">Prioridad alta</span>Jabón insecticida al limón</b><small>Finca · plan contra pulgones</small></div>
+        <button class="check" aria-label="Marcar como hecho: jabón insecticida al limón"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></button>
       </div>
-      <div class="phone"><img src="img/planta.webp" alt="Ficha de un limón mandarina con su lugar, responsable y estado de salud" loading="lazy" width="390" height="844"></div>
-    </div>
-
-    <div class="fila inv">
-      <div class="texto">
-        <h2>Hidroponía bajo control</h2>
-        <p>Anota el pH, la conductividad (EC) y la temperatura del agua. La app te avisa cuando algo se sale del rango y cómo corregirlo, y te recuerda cuándo cambiar la solución.</p>
+      <div class="tarea" data-msg="Medición guardada: pH 6,1. Todo en rango.">
+        <div class="ico" aria-hidden="true">📏</div>
+        <div class="txt"><b>Medir pH de la lechuga</b><small>Hidroponía · cada 3 días</small></div>
+        <button class="check" aria-label="Marcar como hecho: medir pH de la lechuga"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></button>
       </div>
-      <div class="phone"><img src="img/hidro.webp" alt="Pantalla de hidroponía con medición de pH fuera de rango" loading="lazy" width="390" height="844"></div>
+      <div class="clima-mini"><span aria-hidden="true">🌧️</span><span><b>Finca, Zarcero:</b> lloverá 14 mm. Las plantas de afuera no necesitan riego hoy.</span></div>
     </div>
   </div>
 </section>
 
-<section class="clima" aria-labelledby="t-clima">
+<section class="borde-arriba" id="funciones" aria-labelledby="t-funciones">
   <div class="wrap">
-    <div>
-      <h2 id="t-clima">Sabe si va a llover donde están tus plantas</h2>
-      <p>Guarda tus lugares con su ubicación: la casa, la finca, la oficina. Cada mañana revisa el pronóstico de cada zona y te dice si puedes saltarte el riego de las plantas de afuera.</p>
-    </div>
-    <div class="pronos" aria-label="Ejemplo del clima por lugar">
-      <div class="lugar"><span class="ic" aria-hidden="true">🌧️</span><div><b>Finca · Zarcero</b><small>Hoy 14–22 °C, 14 mm de lluvia</small></div><p class="dice">Lloverá: las 3 plantas de afuera no necesitan riego hoy.</p></div>
-      <div class="lugar"><span class="ic" aria-hidden="true">☀️</span><div><b>Casa · La Fortuna</b><small>Hoy 22–31 °C, sin lluvia</small></div><p class="dice">Mucho calor: revisa la tierra en la tarde.</p></div>
+    <h2 class="titulo-sec" id="t-funciones">Todo lo que necesitan tus plantas, en un solo lugar</h2>
+    <p class="intro-sec">Pensada para Costa Rica: el clima de tu zona, la temporada de lluvias y remedios que sí funcionan.</p>
+    <div class="funciones">
+      <article class="funcion">
+        <div>
+          <h3>Una foto y ya sabe cuál es</h3>
+          <p>La reconoce y la agrega con su nombre, su categoría y una ficha de cuidados. Si ya tienes una igual, te pregunta cuál de las dos es.</p>
+        </div>
+        <div class="muestra visor" aria-hidden="true">
+          <span class="esquina e1"></span><span class="esquina e2"></span><span class="esquina e3"></span><span class="esquina e4"></span>
+          <span class="hoja">🌿</span>
+          <span class="resultado"><b>Albahaca</b> <i>Ocimum basilicum</i></span>
+        </div>
+      </article>
+
+      <article class="funcion">
+        <div>
+          <h3>Si se enferma, un plan día por día</h3>
+          <p>Recibes un diagnóstico y los pasos con prioridad. Cada paso aparece el día que toca, y una foto de control muestra si mejoró.</p>
+        </div>
+        <ol class="muestra pasos-plan" aria-label="Ejemplo de plan contra pulgones">
+          <li><span class="c ok" aria-hidden="true"></span><span class="tach">Lavar los brotes con chorro de agua</span><span class="cuando">ayer</span></li>
+          <li><span class="c" aria-hidden="true"></span><span>Jabón insecticida al atardecer</span><span class="cuando">hoy</span></li>
+          <li><span class="c" aria-hidden="true"></span><span>Repetir y revisar el envés</span><span class="cuando num">en 5 días</span></li>
+        </ol>
+      </article>
+
+      <article class="funcion">
+        <div>
+          <h3>El clima de cada lugar</h3>
+          <p>Guarda la casa, la finca o la oficina con su ubicación. Cada mañana revisa el pronóstico y te dice cuándo saltarte el riego.</p>
+        </div>
+        <div class="muestra" aria-label="Ejemplo de clima por lugar">
+          <div class="lugar"><span class="ic" aria-hidden="true">🌧️</span><span><b>Finca, Zarcero</b><br><span class="num">14–22 °C, 14 mm.</span> No riegues las de afuera.</span></div>
+          <div class="lugar sol"><span class="ic" aria-hidden="true">☀️</span><span><b>Casa, La Fortuna</b><br><span class="num">22–31 °C</span>, sin lluvia. Revisa la tierra en la tarde.</span></div>
+        </div>
+      </article>
+
+      <article class="funcion">
+        <div>
+          <h3>La familia cuida junta</h3>
+          <p>Invita a quien te ayuda usando su correo. Cada planta puede tener responsable y el historial dice quién hizo qué.</p>
+        </div>
+        <ul class="muestra historial" aria-label="Ejemplo de historial">
+          <li><span class="avatar" style="background:#2e6a3e" aria-hidden="true">A</span><span>Ana regó la albahaca</span><small class="num">7:42</small></li>
+          <li><span class="avatar" style="background:#24485f" aria-hidden="true">J</span><span>Jonathan cosechó 24 limones</span><small>ayer</small></li>
+          <li><span class="avatar" style="background:#8a6110" aria-hidden="true">M</span><span>Mamá midió el pH: 6,1</span><small>jueves</small></li>
+        </ul>
+      </article>
     </div>
   </div>
 </section>
 
-<section class="recetario" id="recetario">
+<section class="borde-arriba" id="recetario" aria-labelledby="t-recetario">
   <div class="wrap">
-    <div class="cab">
-      <h2>Remedios caseros que sí funcionan</h2>
-      <p>Internet está lleno de trucos que no sirven o que dañan la planta. El recetario de Mi Jardín solo incluye lo que confirman los servicios de extensión agrícola de universidades, con cantidades y cuidados.</p>
-    </div>
+    <h2 class="titulo-sec" id="t-recetario">Remedios caseros que sí funcionan</h2>
+    <p class="intro-sec">Internet está lleno de trucos que no sirven o que dañan la planta. El recetario solo incluye lo que confirman los servicios de extensión agrícola de universidades, con cantidades y cuidados.</p>
     <div class="columnas">
-      <div class="col ok">
-        <h3><i aria-hidden="true">✓</i>Funcionan</h3>
+      <div class="col">
+        <h3><span class="punto" style="background:var(--hoja)"></span>Funcionan</h3>
         <ul>
           <li>Chorro de agua<small>Ácaros y pulgones</small></li>
           <li>Jabón insecticida de vivero<small>Insectos de cuerpo blando</small></li>
@@ -249,70 +302,120 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
           <li>Poda con tijera desinfectada<small>Hojas con hongos</small></li>
         </ul>
       </div>
-      <div class="col medio">
-        <h3><i aria-hidden="true">~</i>A medias</h3>
+      <div class="col">
+        <h3><span class="punto" style="background:#d4a32a"></span>A medias</h3>
         <ul>
           <li>Leche diluida<small>Solo para prevenir el oídio</small></li>
           <li>Canela en esquejes<small>Efecto pequeño</small></li>
         </ul>
       </div>
       <div class="col mito">
-        <h3><i aria-hidden="true">✕</i>Mitos</h3>
+        <h3><span class="punto" style="background:var(--alerta)"></span>Mitos</h3>
         <ul>
           <li><s>Vinagre</s><small>Quema la planta</small></li>
           <li><s>Jabón de lavar platos</s><small>Daña hojas y tierra</small></li>
-          <li><s>Borra de café directa</s><small>No acidifica y compacta</small></li>
+          <li><s>Borra de café directa</s><small>No acidifica y compacta la tierra</small></li>
           <li><s>Sal</s><small>Se queda en la tierra</small></li>
         </ul>
       </div>
     </div>
-    <p class="fuente">Fuentes: University of Florida IFAS, UC Master Gardeners, Colorado State University Extension, NC State Extension y Wisconsin Horticulture.</p>
+    <p class="fuentes">Fuentes: University of Florida IFAS, UC Master Gardeners, Colorado State University Extension, NC State Extension y Wisconsin Horticulture.</p>
   </div>
 </section>
 
-<section class="compara" aria-labelledby="t-compara">
+<section class="borde-arriba" aria-labelledby="t-compara">
   <div class="wrap">
-    <h2 id="t-compara">Lo que en otras apps se paga</h2>
-    <table>
-      <thead><tr><th scope="col"></th><th scope="col">Mi Jardín</th><th scope="col">Apps comunes</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Identificar con foto</th><td>Gratis</td><td>Casi siempre con suscripción</td></tr>
-        <tr><th scope="row">Diagnóstico y plan de tratamiento</th><td>Gratis</td><td>Casi siempre con suscripción</td></tr>
-        <tr><th scope="row">Compartir con la familia</th><td>Gratis</td><td>Versión de pago o no existe</td></tr>
-        <tr><th scope="row">Riego que se ajusta a la lluvia</th><td>Sí, por zona</td><td>Calendario fijo</td></tr>
-        <tr><th scope="row">Remedios con fuente</th><td>Sí</td><td>Pocas veces</td></tr>
-      </tbody>
-    </table>
-    <p class="nota">Comparación general según reseñas públicas de apps de cuidado de plantas; cada app tiene sus propias condiciones.</p>
+    <h2 class="titulo-sec" id="t-compara">Lo que en otras apps se paga</h2>
+    <p class="intro-sec">Las apps de plantas más conocidas cobran suscripción por identificar, diagnosticar o compartir.</p>
+    <div class="tabla">
+      <table>
+        <thead><tr><th scope="col">Función</th><th scope="col">Mi Jardín</th><th scope="col">Apps comunes</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Identificar con foto</th><td class="si">Gratis</td><td class="no">Con suscripción</td></tr>
+          <tr><th scope="row">Diagnóstico y plan</th><td class="si">Gratis</td><td class="no">Con suscripción</td></tr>
+          <tr><th scope="row">Compartir con la familia</th><td class="si">Gratis</td><td class="no">De pago o no existe</td></tr>
+          <tr><th scope="row">Riego según la lluvia de tu zona</th><td class="si">Sí</td><td class="no">Calendario fijo</td></tr>
+          <tr><th scope="row">Remedios con fuente</th><td class="si">Sí</td><td class="no">Pocas veces</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota">Comparación general según reseñas públicas; cada app tiene sus propias condiciones.</p>
   </div>
 </section>
 
-<section class="instalar" id="instalar">
+<section class="borde-arriba" id="instalar" aria-labelledby="t-instalar">
   <div class="wrap">
-    <h2>Lista en dos minutos, sin tienda de apps</h2>
+    <h2 class="titulo-sec" id="t-instalar">Lista en dos minutos, sin tienda de apps</h2>
+    <p class="intro-sec">Se instala desde el navegador y se actualiza sola.</p>
     <ol class="pasos">
-      <li><b>Abre la app</b><p>En el iPhone usa Safari; en Android, Chrome. Entra a la dirección de Mi Jardín.</p></li>
-      <li><b>Agrégala al inicio</b><p>iPhone: botón Compartir y «Agregar a pantalla de inicio». Android: menú ⋮ e «Instalar app».</p></li>
-      <li><b>Entra con tu correo</b><p>Te llega un código. Desde ahí tu jardín queda guardado en la nube y puedes invitar a tu familia.</p></li>
+      <li><b>Abre la app</b><p>En el iPhone con Safari; en Android con Chrome.</p></li>
+      <li><b>Agrégala al inicio</b><p>iPhone: Compartir y «Agregar a pantalla de inicio». Android: menú ⋮ e «Instalar app».</p></li>
+      <li><b>Entra con tu correo</b><p>Te llega un código. Tu jardín queda guardado y puedes invitar a tu familia.</p></li>
     </ol>
-    <div class="ctas"><a class="btn btn-brote" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a></div>
   </div>
 </section>
 
-<section class="preguntas" id="preguntas">
+<section class="borde-arriba" id="preguntas" aria-labelledby="t-preguntas">
   <div class="wrap">
-    <h2>Preguntas frecuentes</h2>
-    <details><summary>¿Cuesta algo?</summary><p>No. La identificación y los diagnósticos usan el nivel gratuito de Google Gemini. Si mucha gente la usa al mismo tiempo, puede tardar unos segundos más o pedirte que intentes un rato después.</p></details>
-    <details><summary>¿Dónde quedan mis datos y mis fotos?</summary><p>En tu teléfono y en tu cuenta. Solo los ven las personas que invites a tu jardín. Puedes descargar un respaldo completo cuando quieras desde Ajustes.</p></details>
-    <details><summary>¿Funciona sin internet?</summary><p>Sí: tus tareas, el historial, el recetario y la guía de síntomas funcionan sin señal. La identificación con foto, el diagnóstico con IA y el clima necesitan internet, y todo se sincroniza al volver la señal.</p></details>
-    <details><summary>¿Sirve para árboles, frutales e hidroponía?</summary><p>Sí. Puedes registrar cosechas, ver la época de flor y fruto, y llevar el pH y la conductividad de tus cultivos hidropónicos.</p></details>
-    <details><summary>¿Cómo invito a mi familia?</summary><p>En Ajustes escribe su correo y toca Invitar. Esa persona instala la app, entra con ese mismo correo y ve tu jardín.</p></details>
+    <h2 class="titulo-sec" id="t-preguntas">Preguntas frecuentes</h2>
+    <div class="preguntas">
+      <details><summary>¿Cuesta algo?</summary><p>No. La identificación y los diagnósticos usan el nivel gratuito de Google Gemini. Si mucha gente lo usa al mismo tiempo, puede tardar unos segundos más o pedirte que intentes un rato después.</p></details>
+      <details><summary>¿Dónde quedan mis datos y mis fotos?</summary><p>En tu teléfono y en tu cuenta. Solo los ven las personas que invites a tu jardín. Puedes descargar un respaldo completo cuando quieras desde Ajustes.</p></details>
+      <details><summary>¿Funciona sin internet?</summary><p>Sí: tus tareas, el historial, el recetario y la guía de síntomas funcionan sin señal. La identificación con foto, el diagnóstico y el clima necesitan internet, y todo se sincroniza al volver la señal.</p></details>
+      <details><summary>¿Sirve para árboles, frutales e hidroponía?</summary><p>Sí. Registras cosechas, ves la época de flor y fruto, y llevas el pH y la conductividad de tus cultivos hidropónicos.</p></details>
+      <details><summary>¿Cómo invito a mi familia?</summary><p>En Ajustes escribe su correo y toca Invitar. Esa persona instala la app, entra con ese mismo correo y ve tu jardín.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="borde-arriba cierre" aria-labelledby="t-cierre">
+  <div class="wrap">
+    <h2 id="t-cierre">Que no se te olvide ni una.</h2>
+    <p>Abre Mi Jardín, agrega tu primera planta con una foto y deja que la app se acuerde por ti.</p>
+    <div class="acciones"><a class="btn btn-primario" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a></div>
   </div>
 </section>
 </main>
 
 <footer>
-  <div class="wrap"><span>Mi Jardín · Hecho en Costa Rica</span><span>Las imágenes muestran datos de ejemplo.</span></div>
+  <div class="wrap"><span>Mi Jardín, hecho en Costa Rica</span><span>Los ejemplos de esta página usan datos inventados.</span></div>
 </footer>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var barra=document.getElementById("barra");
+  var onScroll=function(){barra.classList.toggle("con-borde",window.scrollY>8);};
+  window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+  // Demo: marcar tareas y mostrar avisos. Transiciones (no keyframes) para poder interrumpir.
+  var avisos=document.getElementById("avisos"),resumen=document.getElementById("resumen"),pista=document.getElementById("pista");
+  var plural=new Intl.PluralRules("es");
+  function aviso(texto){
+    var el=document.createElement("div");el.className="aviso entra";el.textContent=texto;
+    avisos.appendChild(el);
+    while(avisos.children.length>3)avisos.removeChild(avisos.firstChild);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.remove("entra");});});
+    setTimeout(function(){el.classList.add("sale");setTimeout(function(){el.remove();},400);},3200);
+  }
+  function actualizar(){
+    var n=document.querySelectorAll(".tarea:not(.hecha)").length;
+    resumen.textContent=n?n+(plural.select(n)==="one"?" tarea para hoy":" tareas para hoy"):"Todo al día. Vuelve mañana.";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".tarea"),function(t){
+    var b=t.querySelector(".check");
+    b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",function(){
+      var hecha=t.classList.toggle("hecha");
+      b.setAttribute("aria-pressed",hecha?"true":"false");
+      pista.classList.add("oculta");
+      aviso(hecha?t.getAttribute("data-msg"):"Tarea marcada como pendiente.");
+      actualizar();
+    });
+  });
+})();
+</script>
 </body>
 </html>
