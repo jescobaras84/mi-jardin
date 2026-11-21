@@ -178,7 +178,7 @@
   function ai(prompt, blobs){
     var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
     return Promise.all((blobs || []).map(b64)).then(function(imgs){
-      return sbc.functions.invoke("ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
+      return sbc.functions.invoke((window.MJ_CONFIG && MJ_CONFIG.IA_FUNCTION) || "ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
     }).then(function(r){
       if (r.error) {
         var ctx = r.error.context, st = ctx && ctx.status;

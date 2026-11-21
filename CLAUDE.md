@@ -32,7 +32,7 @@ app/ (index.html, js/, css/, icons/, manifest.webmanifest, sw.js) · worker/ · 
 ## Estado (21 nov 2026)
 - Hecho: Sprint 0 completo (PWA en https://jescobaras84.github.io/mi-jardin/, IndexedDB, importar/exportar).
 - Hecho: cuenta por correo con código (Supabase Auth + Gmail SMTP), sincronización por registro (supabase/migrations/001), invitar familia.
-- Hecho: IA Gemini gratis vía Supabase Edge Function supabase/functions/ia (secreto GEMINI_API_KEY; opcional GEMINI_MODEL, por defecto gemini-flash-latest). La app la usa solo con sesión iniciada.
+- Hecho: IA Gemini gratis vía Supabase Edge Function supabase/functions/ia (desplegada en Supabase con el nombre "bright-handler", ver app/js/config.js IA_FUNCTION; secreto GEMINI_API_KEY; opcional GEMINI_MODEL, por defecto gemini-flash-latest). La app la usa solo con sesión iniciada.
 - Cambio de arquitectura: ya no se usa Cloudflare Worker; IA y (luego) avisos van en Supabase. Ver CAMBIOS.md.
 - Hecho: recetario con respaldo (app/js/recetas.js) · lugares (registros log kind "lugar": nombre, zona, lat/lon, aire libre) con clima Open-Meteo y geolocalización/BigDataCloud · responsable por planta (plant.resp) · «hecho por» (log.by) · botón «Llovió» · interior/exterior por planta (plant.exp) · resumen por lugar · cosechas (log kind "cosecha") · temporada de floración/cosecha en la ficha · recordatorios sugeridos para árboles.
 - Siguiente: botón «tierra húmeda, posponer» · avisos por persona · probar IA con fotos reales (MJ-13) · fotos a Supabase Storage (MJ-18) · avisos diarios 7:00 a. m. con Web Push desde Supabase (MJ-20/21).
