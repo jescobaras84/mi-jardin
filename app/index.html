@@ -158,6 +158,12 @@ textarea{min-height:70px;resize:vertical}
 .step.done .ck{background:var(--leaf);border-color:var(--leaf);color:#fff}
 .season{background:#eef3fa;border-radius:14px;padding:12px 14px;margin:12px 0 0;font-size:14px;color:#244a68}
 .season ul{padding-left:18px;margin-top:6px}
+.rec{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border:0}
+.rec .re{font-size:24px;width:40px;text-align:center;flex:none}
+.lvl{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;display:inline-block}
+.l-ok{background:var(--leafbg);color:var(--leaf)} .l-parcial{background:var(--sunbg);color:#8a6110} .l-mito{background:var(--rustbg);color:var(--rust)}
+.recbtn{font-size:12px;font-weight:600;color:var(--leaf);background:var(--leafbg);border-radius:99px;padding:3px 9px;margin-top:4px;display:inline-block}
 .spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
 .banner{background:var(--sunbg);color:#7a560e;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
 .tip{background:var(--leafbg);border-radius:14px;padding:12px 14px;font-size:14px;color:#24502c}
@@ -167,13 +173,14 @@ textarea{min-height:70px;resize:vertical}
 <div id="root"></div>
 <script id="state" type="application/json">{"v":0,"plants":[],"log":[]}</script>
 <script src="js/store.js"></script>
+<script src="js/recetas.js"></script>
 <script src="js/vendor/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/sync.js"></script>
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.3.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.4.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -216,8 +223,8 @@ var RULES={
  amarillas_abajo:["Exceso de riego o falta de nitrógeno","Deja secar los primeros 2–3 cm de tierra antes de regar. Si el riego está bien, aplica abono balanceado."],
  amarillas_nuevas:["Falta de hierro, a menudo por pH alto","En hidroponía, baja el pH a 5.5–6.2. En tierra, usa un abono con micronutrientes (quelato de hierro)."],
  manchas_cafe:["Posible hongo o bacteria (mancha foliar)","Corta las hojas afectadas con tijera limpia, no mojes las hojas al regar y mejora la ventilación. Aísla la planta."],
- polvo_blanco:["Oídio (hongo)","Retira hojas muy afectadas. Rocía una mezcla de 1 parte de leche por 9 de agua o bicarbonato (1 cucharadita por litro) cada 5–7 días."],
- telaranas:["Araña roja (ácaro)","Lava las hojas por debajo con agua, sube la humedad y aplica jabón potásico o aceite de neem cada 5 días."],
+ polvo_blanco:["Oídio (hongo)","Retira hojas muy afectadas y rocía bicarbonato con aceite cada 7 días (ver Recetario). Mejora la ventilación."],
+ telaranas:["Araña roja (ácaro)","Lava el envés de las hojas con chorro de agua cada 3–4 días; si sigue, jabón insecticida o neem de vivero (ver Recetario)."],
  insectos:["Pulgón u otro insecto chupador","Quítalos con agua a presión y aplica jabón potásico o neem. Revisa el envés de las hojas."],
  algodon:["Cochinilla algodonosa","Límpialas con un algodón con alcohol y luego aplica jabón potásico. Aísla la planta."],
  puntas_quemadas:["Exceso de sales o abono (EC alta), o aire seco","Riega abundante para lavar sales. En hidro, baja la EC con agua limpia. No abones por 2 semanas."],
@@ -517,8 +524,32 @@ function viewSalud(){
   if(hl.length){h+='<div class="sec">Último diagnóstico</div>'+diagCard(hl[0]);
     if(hl.length>1){h+='<div class="sec">Historial</div><div class="card">'+hl.slice(1,8).map(function(l){var p=plant(l.plantId);return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+(p?p.emoji+" "+esc(p.name)+": ":"")+esc(l.title)+'</span></div>';}).join("")+'</div>';}
   }
+  h+=recetario();
   return h;
 }
+var LVL={ok:["✅ Funciona","l-ok"],parcial:["⚠️ A medias","l-parcial"],mito:["❌ Mito: no usar","l-mito"]};
+function recetario(){
+  var R=window.MJ_RECETAS||[];if(!R.length)return "";
+  var c=ui.recCat||"";
+  var h='<div class="sec">📖 Recetario casero con respaldo</div><div class="card"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Solo remedios que los especialistas agrícolas confirman que funcionan, y los mitos que conviene evitar.</p>';
+  h+='<div class="chips" style="margin-bottom:6px">'+[["","Todos"],["plagas","🐛 Plagas"],["hongos","🍄 Hongos"],["esquejes","🌱 Esquejes"],["mitos","🚫 Mitos"]].map(function(x){return '<button class="chip'+(c===x[0]?" on":"")+'" data-a="reccat" data-v="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>';
+  R.filter(function(r){return !c||r.cat===c;}).forEach(function(r){h+='<button class="rec" data-a="receta" data-v="'+r.id+'"><span class="re">'+r.emoji+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(r.nombre)+'</b><small style="color:var(--muted)">'+esc(r.para.join(" · "))+'</small><br><span class="lvl '+LVL[r.nivel][1]+'">'+LVL[r.nivel][0]+'</span></span><span style="color:var(--muted)">›</span></button>';});
+  return h+'</div>';
+}
+function viewReceta(id){
+  var r=(window.MJ_RECETAS||[]).filter(function(x){return x.id===id;})[0];
+  if(!r)return '<button class="x" data-a="close">✕</button><p>Receta no encontrada.</p>';
+  var h='<button class="x" data-a="close">✕</button><div style="font-size:40px">'+r.emoji+'</div><h2 style="margin-bottom:4px">'+esc(r.nombre)+'</h2><span class="lvl '+LVL[r.nivel][1]+'">'+LVL[r.nivel][0]+'</span>';
+  h+='<p style="margin:10px 0;font-size:14px"><b>'+(r.nivel==="mito"?"Se recomienda para: ":"Sirve para: ")+'</b>'+esc(r.para.join(", "))+'</p>';
+  if(r.ingredientes.length)h+='<div class="card"><b>Necesitas</b><ul style="padding-left:18px;margin-top:6px;font-size:14px">'+r.ingredientes.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>';
+  if(r.pasos.length)h+='<div class="card"><b>Cómo se hace</b><ol style="padding-left:20px;margin-top:6px;font-size:14px">'+r.pasos.map(function(x){return '<li style="margin-bottom:4px">'+esc(x)+'</li>';}).join("")+'</ol>'+(r.frecuencia?'<p style="font-size:14px;margin-top:6px">🔁 <b>Frecuencia:</b> '+esc(r.frecuencia)+'</p>':'')+'</div>';
+  h+='<div class="card" style="background:'+(r.nivel==="mito"?"var(--rustbg)":"var(--sunbg)")+';border:0"><b>'+(r.nivel==="mito"?"Por qué no":"⚠️ Cuidado")+'</b><ul style="padding-left:18px;margin-top:6px;font-size:14px">'+r.cuidado.map(function(x){return '<li style="margin-bottom:3px">'+esc(x)+'</li>';}).join("")+'</ul></div>';
+  if(r.fuente)h+='<p class="note">Fuente: <a href="'+esc(r.fuente.u)+'" target="_blank" rel="noopener" style="color:var(--leaf)">'+esc(r.fuente.t)+'</a></p>';
+  h+='<p class="note">Es orientación general. Si usas un producto comprado, manda lo que diga su etiqueta.</p>';
+  return h;
+}
+var REC_KEYS=[[/jab[oó]n/i,"jabon"],[/neem/i,"neem"],[/bicarbonato/i,"bicarbonato"],[/leche/i,"leche"],[/chorro|a presi[oó]n/i,"agua"],[/tijera|poda/i,"poda"],[/trampa/i,"trampas"],[/canela/i,"canela"]];
+function recFor(text){for(var i=0;i<REC_KEYS.length;i++)if(REC_KEYS[i][0].test(text||""))return REC_KEYS[i][1];return null;}
 function sevBadge(s){return s==="sana"?'<span class="badge b-ok">Sana</span>':s==="grave"?'<span class="badge b-bad">Grave</span>':'<span class="badge b-warn">Atención</span>';}
 function diagCard(l){
   var p=plant(l.plantId);
@@ -535,6 +566,7 @@ function viewSheet(){
   else if(s.k==="form")h+=viewForm();
   else if(s.k==="match")h+=viewMatch();
   else if(s.k==="ajustes")h+=viewAjustes();
+  else if(s.k==="receta")h+=viewReceta(s.id);
   else if(s.k==="plant")h+=viewPlant(plant(s.pid));
   else if(s.k==="medir")h+=viewMedir(plant(s.pid));
   return h+'</div></div>';
@@ -952,7 +984,7 @@ function treatCard(p){
     var dn=t.steps.filter(function(x){return x.done;}).length;
     h+='<div class="sec">Plan de tratamiento</div><div class="card"><span class="prio '+(t.priority==="alta"?"p1":"p2")+'">'+(t.priority==="alta"?"🔴 PRIORIDAD ALTA":"🟠 PRIORIDAD MEDIA")+'</span><b style="display:block;margin-top:6px">'+esc(t.title)+'</b><small style="color:var(--muted)">Empezó '+nice(t.start)+' · '+dn+' de '+t.steps.length+' pasos · foto de control cada '+t.followup+' días</small><div class="bar"><i style="width:'+Math.round(100*dn/Math.max(1,t.steps.length))+'%"></i></div>';
     t.steps.slice().sort(function(a,b){return a.day-b.day;}).forEach(function(st){var due=addDays(t.start,st.day),dd=diff(due,today());
-      h+='<div class="step'+(st.done?" done":"")+'"><button class="ck" data-a="done" data-p="'+p.id+'" data-k="trat" data-r="'+st.id+'" aria-label="Marcar paso">'+(st.done?"✓":"")+'</button><div style="flex:1">'+st.icon+' '+esc(st.action)+'<br><small style="color:'+(!st.done&&dd<0?"var(--rust)":"var(--muted)")+';text-decoration:none">'+(st.done?"Hecho "+nice(st.doneOn||due):(dd<0?"Atrasado · ":"")+nice(due))+'</small></div></div>';});
+      h+='<div class="step'+(st.done?" done":"")+'"><button class="ck" data-a="done" data-p="'+p.id+'" data-k="trat" data-r="'+st.id+'" aria-label="Marcar paso">'+(st.done?"✓":"")+'</button><div style="flex:1">'+st.icon+' '+esc(st.action)+(recFor(st.action)?' <button class="recbtn" data-a="receta" data-v="'+recFor(st.action)+'">📖 Receta</button>':'')+'<br><small style="color:'+(!st.done&&dd<0?"var(--rust)":"var(--muted)")+';text-decoration:none">'+(st.done?"Hecho "+nice(st.doneOn||due):(dd<0?"Atrasado · ":"")+nice(due))+'</small></div></div>';});
     h+='<div class="actions"><button class="btn sm ghost" data-a="healed" data-p="'+p.id+'">✓ Ya se recuperó</button>'+(SAMPLE?'<button class="btn sm line" data-a="mkplan" data-p="'+p.id+'">🔄 Rehacer plan</button>':'')+'</div></div>';
   }else if(healthOf(p)){
     h+='<div class="sec">Plan de tratamiento</div><div class="card" style="font-size:14px">Esta planta tiene un problema sin plan.'+(ui.planBusy===p.id?'<p style="margin-top:8px"><span class="spin">🌿</span> Armando el plan…</p>':'<div class="actions"><button class="btn sm" data-a="mkplan" data-p="'+p.id+'">📋 Crear plan de tratamiento</button></div>')+'</div>';
@@ -1028,10 +1060,12 @@ document.addEventListener("click",function(e){
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v"),pid=el.getAttribute("data-p");
   if(a==="bgclose"){if(e.target===el){ui.sheet=null;render();}return;}
   if(a==="tab"){ui.tab=v;ui.cat="";ui.sheet=null;try{history.replaceState(null,"","#"+v);}catch(x){location.hash=v;}render();window.scrollTo(0,0);}
-  else if(a==="close"){ui.sheet=null;render();}
+  else if(a==="close"){if(ui.sheet&&ui.sheet.k==="receta"&&ui.prevSheet){ui.sheet=ui.prevSheet;ui.prevSheet=null;}else ui.sheet=null;render();}
   else if(a==="new"){ui.addType=v||(ui.tab==="hidro"?"hidro":"tierra");ui.idErr="";ui.idBusy=null;openSheet({k:"add"});}
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
+  else if(a==="reccat"){ui.recCat=v;render();}
+  else if(a==="receta"){ui.prevSheet=ui.sheet&&ui.sheet.k!=="receta"?ui.sheet:null;openSheet({k:"receta",id:v});}
   else if(a==="ajustes"){ui.importData=null;ui.members=null;ui.confirmLogout=false;openSheet({k:"ajustes"});loadMembers();}
   else if(a==="au-send"){var em=(document.getElementById("au-email").value||"").trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ui.auth.err="Escribe un correo válido.";render();return;}ui.auth={step:"email",email:em,busy:true,err:""};render();MJSync.sendCode(em).then(function(){ui.auth={step:"code",email:em,busy:false,err:""};render();}).catch(function(e){var msg=(e&&e.message)||"error";ui.auth={step:"email",email:em,busy:false,err:/rate|limit|seconds/i.test(msg)?"Se pidieron muchos códigos seguidos. Espera unos minutos y vuelve a intentar.":/sending|smtp|email/i.test(msg)?"El servidor de correo no pudo enviar el código ("+msg+"). Revisa la configuración SMTP en Supabase.":"No se pudo enviar el código: "+msg};render();});}
   else if(a==="au-verify"){var cd=(document.getElementById("au-code").value||"").replace(/\D/g,"");if(cd.length<6){ui.auth.err="Escribe el código completo que llegó al correo.";render();return;}ui.auth.busy=true;ui.auth.err="";render();MJSync.verify(ui.auth.email,cd).then(function(){ui.auth={step:"email",email:"",busy:false,err:""};showToast("☁️ ¡Listo! Tu jardín se está guardando en la nube.");setTimeout(loadMembers,2500);render();}).catch(function(e){ui.auth.busy=false;ui.auth.err="Código incorrecto o vencido. Pide uno nuevo.";render();});}

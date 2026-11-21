@@ -147,11 +147,12 @@
 })();
 /* IA: llama a la función "ia" de Supabase (Gemini gratis). Devuelve el JSON de la respuesta. */
 (function(){
+  var REGLA_REMEDIOS = "\n\nREGLA DE REMEDIOS: si recomiendas tratamientos caseros, usa SOLO estos, que tienen respaldo de servicios de extensión agrícola: chorro de agua en el envés, jabón insecticida o potásico de vivero (no jabón de platos), aceite de neem comercial según etiqueta, bicarbonato con aceite (solo oídio al inicio), poda sanitaria con tijera desinfectada, trampas amarillas y dejar secar la tierra. NUNCA recomiendes vinagre, jabón de lavar platos, borra de café directa, sal, ajo, agua oxigenada ni té de compost. Indica siempre probar en pocas hojas 24 h y no aplicar con sol fuerte.";
   function b64(blob){ return new Promise(function(res, rej){ var r = new FileReader(); r.onload = function(){ res(String(r.result).split(",")[1] || ""); }; r.onerror = rej; r.readAsDataURL(blob); }); }
   function ai(prompt, blobs){
     var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
     return Promise.all((blobs || []).map(b64)).then(function(imgs){
-      return sbc.functions.invoke("ia", { body: { prompt: prompt, images: imgs } });
+      return sbc.functions.invoke("ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
     }).then(function(r){
       if (r.error) {
         var st = r.error.context && r.error.context.status;
