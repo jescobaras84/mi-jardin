@@ -183,7 +183,7 @@ textarea{min-height:70px;resize:vertical}
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.7.3";
+var LS_KEY="miJardin.v1", APP_VERSION="0.7.4";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -1189,7 +1189,7 @@ document.addEventListener("click",function(e){
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
   else if(a==="pcat"){ui.pcat=v;render();}
-  else if(a==="ai-test"){ui.aiTest={busy:true};render();SAMPLE.json('Responde SOLO este JSON: {"ok":true,"planta":"nombre de una planta común en Costa Rica"}').then(function(r){ui.aiTest={ok:true,msg:"✅ La IA responde bien ("+(r&&r.planta||"ok")+", "+Math.round((window.__mjLastAiMs||0)/100)/10+" s). Ya puedes identificar con foto."};render();}).catch(function(e){var m=(e&&e.message)||"error";ui.aiTest={ok:false,msg:"❌ "+m+(/404|not found|Failed to send|non-2xx/i.test(m)?" → Revisa que la función «ia» esté creada en Supabase (Edge Functions).":/GEMINI_API_KEY/.test(m)?" → Falta el secreto GEMINI_API_KEY en Supabase.":/401|Entra/.test(m)?" → Cierra sesión y vuelve a entrar.":/403|400/.test(m)?" → Revisa que la clave de Gemini sea correcta.":"")};render();});}
+  else if(a==="ai-test"){ui.aiTest={busy:true};render();SAMPLE.json('Responde SOLO este JSON: {"ok":true,"planta":"nombre de una planta común en Costa Rica"}').then(function(r){ui.aiTest={ok:true,msg:"✅ La IA responde bien ("+(r&&r.planta||"ok")+", "+Math.round((window.__mjLastAiMs||0)/100)/10+" s, función «"+(window.__mjAiFn||"?")+"»). Ya puedes identificar con foto."};render();}).catch(function(e){var m=(e&&e.message)||"error";ui.aiTest={ok:false,msg:"❌ "+m+(/404|not found|Failed to send|non-2xx/i.test(m)?" → La función de IA no respondió. En Supabase → Edge Functions revisa que exista (bright-handler o ia) y mira sus Logs: si dice «boot error», el código quedó mal pegado.":/GEMINI_API_KEY/.test(m)?" → Falta el secreto GEMINI_API_KEY en Supabase.":/401|Entra/.test(m)?" → Cierra sesión y vuelve a entrar.":/403|400/.test(m)?" → Revisa que la clave de Gemini sea correcta.":"")};render();});}
   else if(a==="pexp"){ui.pexp=v;render();}
   else if(a==="fexp"){readForm();ui.form.exp=v;render();}
   else if(a==="cosecha"){openSheet({k:"cosecha",pid:pid});}

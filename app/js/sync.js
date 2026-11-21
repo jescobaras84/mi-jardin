@@ -180,7 +180,19 @@
     var t0 = Date.now();
     var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej({ code: "unavailable", message: "La IA no respondió en 60 s (la solicitud no volvió de Supabase)" }); }, 60000); });
     return Promise.race([timeout, Promise.all((blobs || []).map(b64)).then(function(imgs){
-      return sbc.functions.invoke((window.MJ_CONFIG && MJ_CONFIG.IA_FUNCTION) || "ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
+      // Prueba el nombre configurado y, si no existe o no responde, los otros nombres posibles de la función.
+      var names = [(window.MJ_CONFIG && MJ_CONFIG.IA_FUNCTION) || "ia", "ia", "bright-handler"].filter(function(n, i, a){ return a.indexOf(n) === i; });
+      var body = { prompt: prompt + REGLA_REMEDIOS, images: imgs };
+      function tryName(i){
+        return sbc.functions.invoke(names[i], { body: body }).then(function(r){
+          var e = r.error, st = e && e.context && e.context.status;
+          var notThere = e && (e.name === "FunctionsFetchError" || /Failed to send|not found/i.test(e.message || "") || st === 404);
+          if (notThere && i < names.length - 1) return tryName(i + 1);
+          if (!e) window.__mjAiFn = names[i];
+          return r;
+        });
+      }
+      return tryName(0);
     }).then(function(r){
       if (r.error) {
         var ctx = r.error.context, st = ctx && ctx.status;
