@@ -167,10 +167,13 @@ textarea{min-height:70px;resize:vertical}
 <div id="root"></div>
 <script id="state" type="application/json">{"v":0,"plants":[],"log":[]}</script>
 <script src="js/store.js"></script>
+<script src="js/vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/sync.js"></script>
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.1.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.2.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -309,6 +312,16 @@ function save(){
   S.v=(S.v||0)+1;
   if(!window.MJStore){showToast("⚠️ No se pudo guardar: falta el almacenamiento local.",null,8000);render();return;}
   MJStore.save(S).catch(function(e){showToast("⚠️ No se pudo guardar este cambio ("+((e&&e.message)||"error")+"). Exporta un respaldo en Ajustes.",null,9000);render();});
+  if(window.MJSync)MJSync.changed();
+}
+var softT=null;
+function softRender(){var ae=document.activeElement;if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA")&&ae.type!=="file"){clearTimeout(softT);softT=setTimeout(softRender,1500);return;}render();}
+function syncInfo(){return window.MJSync?MJSync.info():{status:"off"};}
+function cloudPill(){
+  var i=syncInfo();
+  if(i.status==="off")return "";
+  var m={out:["☁️","Sin cuenta"],syncing:["⏳","Sincronizando"],ok:["☁️✓","En la nube"],error:["⚠️","Error al sincronizar"],offline:["📴","Sin conexión"]}[i.status]||["☁️",""];
+  return '<button data-a="ajustes" class="pill" style="background:'+(i.status==="error"?"var(--rustbg);color:var(--rust)":i.status==="out"?"var(--sunbg);color:#8a6110":"var(--leafbg)")+'" aria-label="'+m[1]+'">'+m[0]+'</button>';
 }
 function setSaving(on){var el=document.getElementById("saving");if(el)el.className="pill saving"+(on?" on":"");}
 function buildDoc(){
@@ -360,8 +373,9 @@ function doTask(pid,kind,remId){
 function render(){
   var r=document.getElementById("root");
   var h='<span id="saving" class="pill saving">Guardando…</span><div class="wrap">';
-  h+='<header class="top"><div><h1>Mi Jardín</h1><div class="date">'+new Date().toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"})+'</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill">🌿 '+S.plants.length+'</span><button data-a="ajustes" aria-label="Ajustes" style="font-size:22px;padding:4px">⚙️</button></div></header>';
+  h+='<header class="top"><div><h1>Mi Jardín</h1><div class="date">'+new Date().toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"})+'</div></div><div style="display:flex;gap:8px;align-items:center">'+cloudPill()+'<span class="pill">🌿 '+S.plants.length+'</span><button data-a="ajustes" aria-label="Ajustes" style="font-size:22px;padding:4px">⚙️</button></div></header>';
   if(false)h+='<div class="banner">Los cambios se guardan solo en este teléfono. Abre la app desde tu enlace de Claude para que se guarden en la nube.</div>';
+  if(!ui.loading&&syncInfo().status==="out")h+='<button class="banner" data-a="ajustes" style="display:block;width:100%;text-align:left;border:0">☁️ <b>Guarda tu jardín en la nube.</b> Entra con tu correo para no perder nada si cambias de teléfono y compartirlo con tu familia. <u>Entrar</u></button>';
   if(ui.loading)h+='<div class="empty"><div class="big"><span class="spin">🌿</span></div><p>Cargando tu jardín…</p></div>';
   else if(ui.tab==="hoy")h+=viewHoy();
   else if(ui.tab==="plantas")h+=viewPlantas();
@@ -813,7 +827,8 @@ function guessMatch(){
 function viewAjustes(){
   var imp=ui.importData;
   var h='<button class="x" data-a="close">✕</button><h2>Ajustes</h2>';
-  h+='<div class="sec" style="margin-top:0">Respaldo</div><div class="card">';
+  h+=accountCard();
+  h+='<div class="sec">Respaldo</div><div class="card">';
   h+='<p style="font-size:14px;color:var(--muted);margin-bottom:10px">Tus datos se guardan en este teléfono. Descarga un respaldo de vez en cuando y guárdalo en tu Drive u OneDrive.</p>';
   h+='<div class="actions"><button class="btn sm" data-a="exportar">⬇️ Exportar respaldo</button><label class="btn sm ghost" for="impfile">⬆️ Importar respaldo</label><input id="impfile" type="file" accept=".json,.html,.htm,application/json,text/html" style="display:none"></div>';
   if(imp&&imp.err)h+='<p class="note" style="color:var(--rust)">'+esc(imp.err)+'</p>';
@@ -825,6 +840,30 @@ function viewAjustes(){
   h+='<p class="note" style="text-align:center">Mi Jardín · versión '+APP_VERSION+'</p>';
   return h;
 }
+function accountCard(){
+  var i=syncInfo(),a=ui.auth||(ui.auth={step:"email",email:"",busy:false,err:""});
+  var h='<div class="sec" style="margin-top:0">Tu cuenta</div><div class="card" style="font-size:14px">';
+  if(i.status==="off")return h+'<span style="color:var(--muted)">La nube aún no está configurada.</span></div>';
+  if(i.status==="out"||!i.email){
+    h+='<p style="margin-bottom:10px">Entra con tu correo: tus plantas se guardan en la nube y aparecen en cualquier teléfono donde entres.</p>';
+    if(a.step==="email")h+='<label class="f"><span>Correo</span><input type="text" id="au-email" inputmode="email" autocomplete="email" value="'+esc(a.email)+'" placeholder="tu@correo.com"></label><button class="btn block" data-a="au-send"'+(a.busy?" disabled":"")+'>'+(a.busy?"Enviando…":"Enviarme el código")+'</button>';
+    else h+='<p>Te enviamos un código a <b>'+esc(a.email)+'</b>. Revisa también la carpeta de spam.</p><label class="f" style="margin-top:8px"><span>Código de 6 dígitos</span><input type="text" id="au-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"></label><button class="btn block" data-a="au-verify"'+(a.busy?" disabled":"")+'>'+(a.busy?"Verificando…":"Entrar")+'</button><button class="btn sm line" style="margin-top:8px" data-a="au-back">Usar otro correo</button>';
+    if(a.err)h+='<p class="note" style="color:var(--rust)">'+esc(a.err)+'</p>';
+    return h+'</div>';
+  }
+  var lab={syncing:"⏳ Sincronizando…",ok:"☁️ Todo guardado en la nube",error:"⚠️ No se pudo sincronizar: "+(i.err||""),offline:"📴 Sin conexión: se sincroniza al volver la señal"}[i.status]||"";
+  h+='<p>Conectado como <b>'+esc(i.email)+'</b></p><p style="color:var(--muted);margin:4px 0 10px">'+esc(lab)+'</p>';
+  var mm=ui.members;
+  h+='<b>Personas en este jardín</b>';
+  if(!mm)h+='<p style="color:var(--muted)">Cargando…</p>';
+  else{h+='<ul style="padding-left:18px;margin:6px 0">'+mm.m.map(function(x){return '<li>'+esc(x.email||"")+(x.role==="dueno"?" (dueño)":"")+'</li>';}).join("")+mm.i.map(function(x){return '<li style="color:var(--muted)">'+esc(x.email)+' (invitado, aún no entra)</li>';}).join("")+'</ul>';}
+  h+='<div class="row" style="align-items:flex-end;margin-top:6px"><label class="f" style="flex:2;margin:0"><span>Invitar por correo</span><input type="text" id="inv-email" inputmode="email" placeholder="familiar@correo.com"></label><button class="btn sm" style="flex:none" data-a="invite">Invitar</button></div>';
+  h+='<p class="note">La persona invitada instala la app y entra con ese correo: verá este jardín.</p>';
+  h+='<div class="actions"><button class="btn sm line" data-a="sync-now">🔄 Sincronizar ahora</button><button class="btn sm danger" data-a="logout">Cerrar sesión</button></div>';
+  if(ui.confirmLogout)h+='<div class="confirm"><b>¿Cerrar sesión?</b><p style="margin-top:4px">Se borran los datos de este teléfono. Siguen guardados en la nube y vuelven al entrar de nuevo.</p><div class="actions"><button class="btn sm danger" data-a="logout-yes">Sí, cerrar</button><button class="btn sm line" data-a="logout-no">Cancelar</button></div></div>';
+  return h+'</div>';
+}
+function loadMembers(){if(!window.MJSync||!syncInfo().gid)return;MJSync.members().then(function(r){ui.members=r;render();}).catch(function(){});}
 function isStandalone(){try{return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;}catch(e){return false;}}
 function exportar(){
   var data=JSON.stringify(S,null,0),name="mi-jardin-respaldo-"+today()+".json";
@@ -992,7 +1031,15 @@ document.addEventListener("click",function(e){
   else if(a==="new"){ui.addType=v||(ui.tab==="hidro"?"hidro":"tierra");ui.idErr="";ui.idBusy=null;openSheet({k:"add"});}
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
-  else if(a==="ajustes"){ui.importData=null;openSheet({k:"ajustes"});}
+  else if(a==="ajustes"){ui.importData=null;ui.members=null;ui.confirmLogout=false;openSheet({k:"ajustes"});loadMembers();}
+  else if(a==="au-send"){var em=(document.getElementById("au-email").value||"").trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ui.auth.err="Escribe un correo válido.";render();return;}ui.auth={step:"email",email:em,busy:true,err:""};render();MJSync.sendCode(em).then(function(){ui.auth={step:"code",email:em,busy:false,err:""};render();}).catch(function(e){ui.auth={step:"email",email:em,busy:false,err:"No se pudo enviar el código: "+((e&&e.message)||"error")+". Si dice límite de correos, espera unos minutos."};render();});}
+  else if(a==="au-verify"){var cd=(document.getElementById("au-code").value||"").replace(/\D/g,"");if(cd.length<6){ui.auth.err="El código tiene 6 dígitos.";render();return;}ui.auth.busy=true;ui.auth.err="";render();MJSync.verify(ui.auth.email,cd).then(function(){ui.auth={step:"email",email:"",busy:false,err:""};showToast("☁️ ¡Listo! Tu jardín se está guardando en la nube.");setTimeout(loadMembers,2500);render();}).catch(function(e){ui.auth.busy=false;ui.auth.err="Código incorrecto o vencido. Pide uno nuevo.";render();});}
+  else if(a==="au-back"){ui.auth={step:"email",email:ui.auth.email,busy:false,err:""};render();}
+  else if(a==="invite"){var ie=(document.getElementById("inv-email").value||"").trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ie)){showToast("Escribe un correo válido.");render();return;}MJSync.invite(ie).then(function(){showToast("✉️ Listo: "+ie+" verá este jardín al entrar con ese correo.");loadMembers();}).catch(function(e){showToast("No se pudo invitar: "+((e&&e.message)||"error"));render();});}
+  else if(a==="sync-now"){MJSync.run();}
+  else if(a==="logout"){ui.confirmLogout=true;render();}
+  else if(a==="logout-no"){ui.confirmLogout=false;render();}
+  else if(a==="logout-yes"){ui.confirmLogout=false;MJSync.logout().then(function(){S={v:0,plants:[],log:[]};MJStore.save(S).catch(function(){});ui.sheet=null;render();showToast("Sesión cerrada. Tus datos siguen en la nube.");});}
   else if(a==="exportar"){exportar();}
   else if(a==="impno"){ui.importData=null;render();}
   else if(a==="impok"){var ns=ui.importData&&ui.importData.s;if(ns){ns.v=Math.max(ns.v||0,S.v||0);S=ns;ui.importData=null;ui.sheet=null;save();showToast("✅ Respaldo importado: "+S.plants.length+" plantas.");render();}}
@@ -1061,6 +1108,7 @@ function boot(){
     if(st){S=normState(st);}
     else{var lg=legacy();if(lg){S=normState(lg);MJStore.save(S).catch(function(){});}}
     render();
+    if(window.MJSync)MJSync.init(function(){return S;},function(ns){S=normState(ns);MJStore.save(S).catch(function(){});softRender();},softRender);
   }).catch(function(e){ui.loading=false;render();showToast("⚠️ No pude abrir los datos guardados ("+((e&&e.message)||"error")+").",null,9000);});
   if("serviceWorker" in navigator&&location.protocol!=="file:"){
     navigator.serviceWorker.register("sw.js").catch(function(){});

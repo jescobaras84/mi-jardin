@@ -1,8 +1,8 @@
 /* Mi Jardín — service worker: la app abre sin internet.
    Al publicar una versión nueva, sube VERSION para que los teléfonos la descarguen. */
-const VERSION = "mj-0.1.0";
+const VERSION = "mj-0.2.0";
 const ASSETS = [
-  "./", "./index.html", "./js/store.js", "./manifest.webmanifest",
+  "./", "./index.html", "./js/store.js", "./js/config.js", "./js/sync.js", "./js/vendor/supabase.js", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png",
   "./fonts/fraunces-latin-600-normal.woff2", "./fonts/fraunces-latin-700-normal.woff2",
   "./fonts/inter-latin-400-normal.woff2", "./fonts/inter-latin-500-normal.woff2", "./fonts/inter-latin-600-normal.woff2"
