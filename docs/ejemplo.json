@@ -1,0 +1,282 @@
+{
+ "v": 5,
+ "plants": [
+  {
+   "id": "p1",
+   "name": "Albahaca",
+   "emoji": "🌿",
+   "type": "tierra",
+   "category": "Aromáticas",
+   "sci": "Ocimum basilicum",
+   "placeId": "l1",
+   "exp": "out",
+   "place": "jardinera",
+   "water": 2,
+   "feed": 15,
+   "created": "2026-10-22",
+   "resp": "ana@ejemplo.com",
+   "care": {
+    "light": "Sol directo 4–6 h",
+    "water": "Tierra húmeda, sin encharcar",
+    "humidity": "Media",
+    "temp": "18–30 °C",
+    "season": "Florece todo el año; corta las flores para más hojas",
+    "tips": [
+     "Cosecha desde arriba",
+     "Pellizca las puntas cada 10 días"
+    ]
+   },
+   "reminders": []
+  },
+  {
+   "id": "p2",
+   "name": "Monstera",
+   "emoji": "🪴",
+   "type": "tierra",
+   "category": "Interior y follaje",
+   "sci": "Monstera deliciosa",
+   "placeId": "l1",
+   "exp": "in",
+   "place": "sala",
+   "water": 7,
+   "feed": 30,
+   "created": "2026-09-22",
+   "reminders": [
+    {
+     "id": "r1",
+     "icon": "🧽",
+     "label": "Limpiar hojas",
+     "every": 30,
+     "start": "2026-09-22"
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "name": "Limón mandarina",
+   "emoji": "🍋",
+   "type": "tierra",
+   "category": "Frutales",
+   "sci": "Citrus × limonia",
+   "placeId": "l2",
+   "exp": "out",
+   "water": 4,
+   "feed": 30,
+   "created": "2026-08-23",
+   "resp": "jonathan@ejemplo.com",
+   "treatment": {
+    "id": "t1",
+    "start": "2026-11-20",
+    "active": true,
+    "title": "Pulgones en brotes nuevos",
+    "sev": "atencion",
+    "priority": "alta",
+    "followup": 5,
+    "steps": [
+     {
+      "id": "s1",
+      "day": 0,
+      "icon": "💦",
+      "action": "Lava los brotes con chorro de agua suave",
+      "done": true,
+      "doneOn": "2026-11-20"
+     },
+     {
+      "id": "s2",
+      "day": 1,
+      "icon": "🧴",
+      "action": "Rocía jabón insecticida de vivero al atardecer",
+      "done": false
+     },
+     {
+      "id": "s3",
+      "day": 6,
+      "icon": "🔁",
+      "action": "Repite el jabón y revisa el envés",
+      "done": false
+     },
+     {
+      "id": "s4",
+      "day": 12,
+      "icon": "🔍",
+      "action": "Revisa si aparecen hormigas en el tronco",
+      "done": false
+     }
+    ]
+   },
+   "prevent": [
+    "Revisa los brotes nuevos cada semana",
+    "No abones de más: el exceso de nitrógeno atrae pulgones"
+   ],
+   "care": {
+    "light": "Sol pleno",
+    "water": "Profundo cada 4 días en seca",
+    "humidity": "Media",
+    "temp": "20–32 °C",
+    "season": "Florece en marzo–abril; cosecha de junio a setiembre",
+    "tips": [
+     "Abona al inicio de las lluvias"
+    ]
+   },
+   "reminders": []
+  },
+  {
+   "id": "p4",
+   "name": "Lechuga",
+   "emoji": "🥬",
+   "type": "hidro",
+   "category": "Hortalizas",
+   "placeId": "l1",
+   "exp": "in",
+   "check": 3,
+   "sol": 14,
+   "phMin": 5.5,
+   "phMax": 6.5,
+   "ecMin": 0.8,
+   "ecMax": 1.2,
+   "created": "2026-11-01",
+   "reminders": []
+  },
+  {
+   "id": "p5",
+   "name": "Orquídea",
+   "emoji": "🌸",
+   "type": "tierra",
+   "category": "Flores",
+   "placeId": "l1",
+   "exp": "in",
+   "place": "ventana",
+   "water": 7,
+   "feed": 21,
+   "created": "2026-10-12",
+   "reminders": []
+  }
+ ],
+ "log": [
+  {
+   "id": "l1",
+   "kind": "lugar",
+   "name": "Casa",
+   "area": "La Fortuna, Alajuela",
+   "lat": 10.47,
+   "lon": -84.64,
+   "out": false,
+   "t": 1,
+   "d": "2026-08-23"
+  },
+  {
+   "id": "l2",
+   "kind": "lugar",
+   "name": "Finca",
+   "area": "Zarcero, Alajuela",
+   "lat": 10.18,
+   "lon": -84.39,
+   "out": true,
+   "t": 2,
+   "d": "2026-08-23"
+  },
+  {
+   "id": "e1",
+   "plantId": "p1",
+   "kind": "agua",
+   "d": "2026-11-19",
+   "t": 10,
+   "by": "ana@ejemplo.com"
+  },
+  {
+   "id": "e2",
+   "plantId": "p2",
+   "kind": "agua",
+   "d": "2026-11-15",
+   "t": 11,
+   "by": "jonathan@ejemplo.com"
+  },
+  {
+   "id": "e3",
+   "plantId": "p3",
+   "kind": "agua",
+   "d": "2026-11-17",
+   "t": 12,
+   "by": "jonathan@ejemplo.com"
+  },
+  {
+   "id": "e4",
+   "plantId": "p3",
+   "kind": "salud",
+   "d": "2026-11-20",
+   "t": 13,
+   "sev": "atencion",
+   "title": "Pulgones en brotes nuevos",
+   "why": "Hay colonias verdes en las hojas tiernas.",
+   "steps": [
+    "Lava con chorro de agua",
+    "Jabón insecticida al atardecer"
+   ],
+   "src": "ia",
+   "by": "jonathan@ejemplo.com"
+  },
+  {
+   "id": "e5",
+   "plantId": "p4",
+   "kind": "medicion",
+   "d": "2026-11-18",
+   "t": 14,
+   "ph": 6.9,
+   "ec": 1.0,
+   "temp": 22,
+   "by": "ana@ejemplo.com"
+  },
+  {
+   "id": "e6",
+   "plantId": "p3",
+   "kind": "cosecha",
+   "d": "2026-11-01",
+   "t": 15,
+   "qty": 24,
+   "unit": "limones",
+   "by": "ana@ejemplo.com"
+  },
+  {
+   "id": "e7",
+   "plantId": "p5",
+   "kind": "agua",
+   "d": "2026-11-14",
+   "t": 16
+  },
+  {
+   "id": "e8",
+   "plantId": "p1",
+   "kind": "abono",
+   "d": "2026-11-11",
+   "t": 17
+  },
+  {
+   "id": "e9",
+   "plantId": "p2",
+   "kind": "abono",
+   "d": "2026-10-27",
+   "t": 18
+  },
+  {
+   "id": "e10",
+   "plantId": "p3",
+   "kind": "abono",
+   "d": "2026-11-01",
+   "t": 19
+  },
+  {
+   "id": "e11",
+   "plantId": "p5",
+   "kind": "abono",
+   "d": "2026-11-06",
+   "t": 20
+  },
+  {
+   "id": "e12",
+   "plantId": "p4",
+   "kind": "solucion",
+   "d": "2026-11-11",
+   "t": 21
+  }
+ ]
+}

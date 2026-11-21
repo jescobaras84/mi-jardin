@@ -1,0 +1,9 @@
+# Netlify publica la página de presentación (carpeta web/). La app sigue en GitHub Pages.
+[build]
+  publish = "web"
+  command = ""
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Jardín — tus plantas, cuidadas a tiempo</title>
+<meta name="description" content="App gratis para cuidar tus plantas: recordatorios de riego y abono, identificación con foto, planes cuando se enferman, clima de cada lugar e hidroponía. Para toda la familia.">
+<meta property="og:title" content="Mi Jardín — tus plantas, cuidadas a tiempo">
+<meta property="og:description" content="Recordatorios, identificación con foto y planes de tratamiento. Gratis, para toda la familia.">
+<meta property="og:image" content="img/hoy.webp">
+<meta name="theme-color" content="#0f3b2e">
+<link rel="icon" href="img/icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --selva:#0f3b2e; --hoja:#2f6b3a; --brote:#b8e07a; --papel:#fafbf7; --lluvia:#dce9f2; --tinta:#15241c;
+  --gris:#5b6b61; --linea:#dfe5dc; --alerta:#b5482e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--papel);color:var(--tinta);font:18px/1.6 "Atkinson Hyperlegible",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.05;letter-spacing:-.02em}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brote);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.btn{display:inline-flex;align-items:center;gap:10px;font:700 18px/1 "Atkinson Hyperlegible",sans-serif;text-decoration:none;padding:17px 26px;border-radius:999px;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-brote{background:var(--brote);color:var(--selva)}
+.btn-linea{border:2px solid rgba(255,255,255,.35);color:#fff}
+.btn-hoja{background:var(--hoja);color:#fff}
+
+/* Barra */
+.top{position:absolute;inset:0 0 auto;z-index:5}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:800 22px "Bricolage Grotesque",sans-serif}
+.logo img{width:36px;height:36px;border-radius:10px}
+.top nav a{color:rgba(255,255,255,.85);text-decoration:none;margin-left:26px;font-size:16px}
+.top nav a:hover{color:#fff}
+@media (max-width:720px){.top nav{display:none}}
+
+/* Portada */
+.hero{background:var(--selva);color:#fff;padding:140px 0 0;overflow:hidden;position:relative}
+.hero::before{content:"";position:absolute;right:-180px;top:-120px;width:620px;height:620px;border-radius:50%;background:radial-gradient(closest-side,rgba(184,224,122,.22),transparent)}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:end;position:relative}
+.hero h1{font-size:clamp(54px,8.4vw,112px);font-weight:800;margin-bottom:26px;max-width:9ch}
+.hero p.lead{font-size:21px;color:rgba(255,255,255,.86);max-width:34ch;margin-bottom:34px}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:28px}
+.hero .facts{display:flex;flex-wrap:wrap;gap:10px 22px;color:rgba(255,255,255,.75);font-size:16px;padding-bottom:72px}
+.hero .facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brote);margin-right:9px;vertical-align:2px}
+.phone{width:310px;max-width:100%;border-radius:44px;padding:11px;background:#08241b;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.08)}
+.phone img{display:block;width:100%;border-radius:34px}
+.hero .phone{justify-self:center;margin-bottom:-120px;transform:rotate(2.5deg);animation:asoma .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes asoma{from{transform:translateY(60px) rotate(2.5deg);opacity:0}to{transform:rotate(2.5deg);opacity:1}}
+@media (max-width:860px){
+  .hero{padding-top:110px}
+  .hero .wrap{grid-template-columns:1fr}
+  .hero .facts{padding-bottom:36px}
+  .hero .phone{margin-bottom:-160px;width:270px}
+}
+
+/* Funciones */
+.funciones{padding:150px 0 40px}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:56px 0}
+.fila + .fila{border-top:1px solid var(--linea)}
+.fila.inv .texto{order:2}
+.fila h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:18px;max-width:14ch}
+.fila p{color:var(--gris);max-width:44ch;margin-bottom:14px}
+.fila ul{list-style:none;margin-top:18px}
+.fila li{padding:8px 0 8px 32px;position:relative}
+.fila li::before{content:"";position:absolute;left:0;top:15px;width:18px;height:10px;border-left:3px solid var(--hoja);border-bottom:3px solid var(--hoja);transform:rotate(-45deg)}
+.fila .phone{margin:0 auto;width:260px;background:#e9eee6;box-shadow:0 18px 50px rgba(15,59,46,.16)}
+@media (max-width:860px){.fila,.fila.inv{grid-template-columns:1fr;gap:32px}.fila.inv .texto{order:0}}
+
+/* Clima */
+.clima{background:var(--lluvia);padding:96px 0}
+.clima .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.clima h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:18px;color:#13324a}
+.clima p{color:#2c4c63;max-width:42ch}
+.pronos{display:grid;gap:14px}
+.lugar{background:#fff;border-radius:22px;padding:20px 22px;display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center}
+.lugar .ic{font-size:38px;line-height:1}
+.lugar b{display:block;font-size:19px}
+.lugar small{color:#466377;font-size:16px}
+.lugar .dice{grid-column:2;font-size:16px;color:#13324a;background:#eef4f9;border-radius:12px;padding:8px 12px;margin-top:2px}
+@media (max-width:860px){.clima .wrap{grid-template-columns:1fr}}
+
+/* Recetario */
+.recetario{padding:96px 0}
+.recetario .cab{max-width:640px;margin-bottom:40px}
+.recetario h2{font-size:clamp(34px,4.2vw,50px);font-weight:700;margin-bottom:16px}
+.recetario .cab p{color:var(--gris)}
+.columnas{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.col h3{font-size:22px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.col h3 i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px}
+.ok h3 i{background:#e4efe0;color:var(--hoja)} .medio h3 i{background:#fbf0d4;color:#8a6110} .mito h3 i{background:#f8e3dc;color:var(--alerta)}
+.col ul{list-style:none;border-top:2px solid var(--tinta)}
+.col li{padding:12px 0;border-bottom:1px solid var(--linea)}
+.col li small{display:block;color:var(--gris);font-size:15px}
+.mito li s{text-decoration-color:rgba(181,72,46,.55);text-decoration-thickness:2px}
+.fuente{margin-top:26px;font-size:15px;color:var(--gris)}
+@media (max-width:860px){.columnas{grid-template-columns:1fr}}
+
+/* Comparación */
+.compara{background:#fff;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:88px 0}
+.compara h2{font-size:clamp(32px,4vw,46px);font-weight:700;margin-bottom:28px;max-width:20ch}
+table{width:100%;border-collapse:collapse;font-size:17px}
+th,td{text-align:left;padding:15px 12px;border-bottom:1px solid var(--linea);vertical-align:top}
+thead th{font-family:"Bricolage Grotesque",sans-serif;font-size:19px}
+thead th:nth-child(2){color:var(--hoja)}
+td:nth-child(2){font-weight:700}
+td:nth-child(3){color:var(--gris)}
+.nota{font-size:14px;color:var(--gris);margin-top:14px}
+
+/* Instalar */
+.instalar{background:var(--selva);color:#fff;padding:96px 0}
+.instalar h2{font-size:clamp(36px,4.6vw,56px);font-weight:800;margin-bottom:40px;max-width:16ch}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;list-style:none;counter-reset:p}
+.pasos li{counter-increment:p;border-top:2px solid rgba(255,255,255,.2);padding-top:20px}
+.pasos li::before{content:counter(p);display:block;font:800 52px/1 "Bricolage Grotesque",sans-serif;color:var(--brote);margin-bottom:12px}
+.pasos b{display:block;font-size:20px;margin-bottom:6px}
+.pasos p{color:rgba(255,255,255,.78);font-size:17px}
+.instalar .ctas{margin-top:44px;display:flex;gap:14px;flex-wrap:wrap}
+@media (max-width:860px){.pasos{grid-template-columns:1fr}}
+
+/* Preguntas */
+.preguntas{padding:96px 0}
+.preguntas h2{font-size:clamp(32px,4vw,46px);font-weight:700;margin-bottom:24px}
+details{border-bottom:1px solid var(--linea);max-width:760px}
+summary{cursor:pointer;list-style:none;padding:20px 40px 20px 0;font:700 20px "Atkinson Hyperlegible",sans-serif;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:6px;top:14px;font:500 30px "Bricolage Grotesque",sans-serif;color:var(--hoja);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 22px;color:var(--gris);max-width:62ch}
+
+footer{border-top:1px solid var(--linea);padding:36px 0 48px;color:var(--gris);font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#"><img src="img/icono.png" alt="">Mi Jardín</a>
+    <nav aria-label="Secciones">
+      <a href="#funciones">Qué hace</a>
+      <a href="#recetario">Recetario</a>
+      <a href="#instalar">Instalar</a>
+      <a href="#preguntas">Preguntas</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Tus plantas, cuidadas a tiempo.</h1>
+      <p class="lead">Mi Jardín te recuerda cuándo regar y abonar, reconoce tus plantas con una foto y te dice qué hacer si se enferman. Gratis y para toda la familia.</p>
+      <div class="ctas">
+        <a class="btn btn-brote" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a>
+        <a class="btn btn-linea" href="#instalar">Cómo instalarla</a>
+      </div>
+      <div class="facts"><span>Sin suscripción</span><span>iPhone y Android</span><span>Funciona sin internet</span></div>
+    </div>
+    <div class="phone"><img src="img/hoy.webp" alt="Pantalla Hoy de Mi Jardín: una tarea prioritaria, el clima de la casa y la finca, y un limón en tratamiento" width="390" height="844"></div>
+  </div>
+</section>
+
+<section class="funciones" id="funciones">
+  <div class="wrap">
+    <div class="fila">
+      <div class="texto">
+        <h2>Una foto y ya sabe cuál es</h2>
+        <p>Tómale una foto a tu planta: la app la reconoce y la agrega con su nombre, su categoría y una ficha de cuidados para el clima de Costa Rica.</p>
+        <ul>
+          <li>Si ya tienes una igual, te pregunta cuál de las dos es.</li>
+          <li>Ordena tus plantas por lugar, interior, exterior o tipo.</li>
+          <li>Árboles y frutales con su época de flor y cosecha.</li>
+        </ul>
+      </div>
+      <div class="phone"><img src="img/plantas.webp" alt="Lista de plantas filtrada por lugar y categoría" loading="lazy" width="390" height="844"></div>
+    </div>
+
+    <div class="fila inv">
+      <div class="texto">
+        <h2>Si se enferma, un plan día por día</h2>
+        <p>Cuenta qué ves o sube una foto: recibes un diagnóstico y un plan con prioridad. Cada paso aparece el día que toca y lo marcas al terminar.</p>
+        <ul>
+          <li>Foto de control para ver si mejoró o empeoró.</li>
+          <li>Consejos para que no vuelva a pasar.</li>
+          <li>Solo remedios que los especialistas confirman que funcionan.</li>
+        </ul>
+      </div>
+      <div class="phone"><img src="img/plan.webp" alt="Plan de tratamiento de un limón con pulgones, con pasos marcados y botones de receta" loading="lazy" width="390" height="650"></div>
+    </div>
+
+    <div class="fila">
+      <div class="texto">
+        <h2>La familia cuida junta</h2>
+        <p>Invita a quien te ayuda con las plantas usando su correo. Todos ven el mismo jardín, desde cualquier teléfono, y nada se pierde si cambias de celular.</p>
+        <ul>
+          <li>Cada planta puede tener su responsable.</li>
+          <li>El historial dice quién regó, abonó o cosechó.</li>
+          <li>Nadie riega dos veces ni se olvida de hacerlo.</li>
+        </ul>
+      </div>
+      <div class="phone"><img src="img/planta.webp" alt="Ficha de un limón mandarina con su lugar, responsable y estado de salud" loading="lazy" width="390" height="844"></div>
+    </div>
+
+    <div class="fila inv">
+      <div class="texto">
+        <h2>Hidroponía bajo control</h2>
+        <p>Anota el pH, la conductividad (EC) y la temperatura del agua. La app te avisa cuando algo se sale del rango y cómo corregirlo, y te recuerda cuándo cambiar la solución.</p>
+      </div>
+      <div class="phone"><img src="img/hidro.webp" alt="Pantalla de hidroponía con medición de pH fuera de rango" loading="lazy" width="390" height="844"></div>
+    </div>
+  </div>
+</section>
+
+<section class="clima" aria-labelledby="t-clima">
+  <div class="wrap">
+    <div>
+      <h2 id="t-clima">Sabe si va a llover donde están tus plantas</h2>
+      <p>Guarda tus lugares con su ubicación: la casa, la finca, la oficina. Cada mañana revisa el pronóstico de cada zona y te dice si puedes saltarte el riego de las plantas de afuera.</p>
+    </div>
+    <div class="pronos" aria-label="Ejemplo del clima por lugar">
+      <div class="lugar"><span class="ic" aria-hidden="true">🌧️</span><div><b>Finca · Zarcero</b><small>Hoy 14–22 °C, 14 mm de lluvia</small></div><p class="dice">Lloverá: las 3 plantas de afuera no necesitan riego hoy.</p></div>
+      <div class="lugar"><span class="ic" aria-hidden="true">☀️</span><div><b>Casa · La Fortuna</b><small>Hoy 22–31 °C, sin lluvia</small></div><p class="dice">Mucho calor: revisa la tierra en la tarde.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="recetario" id="recetario">
+  <div class="wrap">
+    <div class="cab">
+      <h2>Remedios caseros que sí funcionan</h2>
+      <p>Internet está lleno de trucos que no sirven o que dañan la planta. El recetario de Mi Jardín solo incluye lo que confirman los servicios de extensión agrícola de universidades, con cantidades y cuidados.</p>
+    </div>
+    <div class="columnas">
+      <div class="col ok">
+        <h3><i aria-hidden="true">✓</i>Funcionan</h3>
+        <ul>
+          <li>Chorro de agua<small>Ácaros y pulgones</small></li>
+          <li>Jabón insecticida de vivero<small>Insectos de cuerpo blando</small></li>
+          <li>Bicarbonato con aceite<small>Oídio, al primer síntoma</small></li>
+          <li>Poda con tijera desinfectada<small>Hojas con hongos</small></li>
+        </ul>
+      </div>
+      <div class="col medio">
+        <h3><i aria-hidden="true">~</i>A medias</h3>
+        <ul>
+          <li>Leche diluida<small>Solo para prevenir el oídio</small></li>
+          <li>Canela en esquejes<small>Efecto pequeño</small></li>
+        </ul>
+      </div>
+      <div class="col mito">
+        <h3><i aria-hidden="true">✕</i>Mitos</h3>
+        <ul>
+          <li><s>Vinagre</s><small>Quema la planta</small></li>
+          <li><s>Jabón de lavar platos</s><small>Daña hojas y tierra</small></li>
+          <li><s>Borra de café directa</s><small>No acidifica y compacta</small></li>
+          <li><s>Sal</s><small>Se queda en la tierra</small></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fuente">Fuentes: University of Florida IFAS, UC Master Gardeners, Colorado State University Extension, NC State Extension y Wisconsin Horticulture.</p>
+  </div>
+</section>
+
+<section class="compara" aria-labelledby="t-compara">
+  <div class="wrap">
+    <h2 id="t-compara">Lo que en otras apps se paga</h2>
+    <table>
+      <thead><tr><th scope="col"></th><th scope="col">Mi Jardín</th><th scope="col">Apps comunes</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Identificar con foto</th><td>Gratis</td><td>Casi siempre con suscripción</td></tr>
+        <tr><th scope="row">Diagnóstico y plan de tratamiento</th><td>Gratis</td><td>Casi siempre con suscripción</td></tr>
+        <tr><th scope="row">Compartir con la familia</th><td>Gratis</td><td>Versión de pago o no existe</td></tr>
+        <tr><th scope="row">Riego que se ajusta a la lluvia</th><td>Sí, por zona</td><td>Calendario fijo</td></tr>
+        <tr><th scope="row">Remedios con fuente</th><td>Sí</td><td>Pocas veces</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">Comparación general según reseñas públicas de apps de cuidado de plantas; cada app tiene sus propias condiciones.</p>
+  </div>
+</section>
+
+<section class="instalar" id="instalar">
+  <div class="wrap">
+    <h2>Lista en dos minutos, sin tienda de apps</h2>
+    <ol class="pasos">
+      <li><b>Abre la app</b><p>En el iPhone usa Safari; en Android, Chrome. Entra a la dirección de Mi Jardín.</p></li>
+      <li><b>Agrégala al inicio</b><p>iPhone: botón Compartir y «Agregar a pantalla de inicio». Android: menú ⋮ e «Instalar app».</p></li>
+      <li><b>Entra con tu correo</b><p>Te llega un código. Desde ahí tu jardín queda guardado en la nube y puedes invitar a tu familia.</p></li>
+    </ol>
+    <div class="ctas"><a class="btn btn-brote" href="https://jescobaras84.github.io/mi-jardin/">Abrir Mi Jardín</a></div>
+  </div>
+</section>
+
+<section class="preguntas" id="preguntas">
+  <div class="wrap">
+    <h2>Preguntas frecuentes</h2>
+    <details><summary>¿Cuesta algo?</summary><p>No. La identificación y los diagnósticos usan el nivel gratuito de Google Gemini. Si mucha gente la usa al mismo tiempo, puede tardar unos segundos más o pedirte que intentes un rato después.</p></details>
+    <details><summary>¿Dónde quedan mis datos y mis fotos?</summary><p>En tu teléfono y en tu cuenta. Solo los ven las personas que invites a tu jardín. Puedes descargar un respaldo completo cuando quieras desde Ajustes.</p></details>
+    <details><summary>¿Funciona sin internet?</summary><p>Sí: tus tareas, el historial, el recetario y la guía de síntomas funcionan sin señal. La identificación con foto, el diagnóstico con IA y el clima necesitan internet, y todo se sincroniza al volver la señal.</p></details>
+    <details><summary>¿Sirve para árboles, frutales e hidroponía?</summary><p>Sí. Puedes registrar cosechas, ver la época de flor y fruto, y llevar el pH y la conductividad de tus cultivos hidropónicos.</p></details>
+    <details><summary>¿Cómo invito a mi familia?</summary><p>En Ajustes escribe su correo y toca Invitar. Esa persona instala la app, entra con ese mismo correo y ve tu jardín.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap"><span>Mi Jardín · Hecho en Costa Rica</span><span>Las imágenes muestran datos de ejemplo.</span></div>
+</footer>
+</body>
+</html>
