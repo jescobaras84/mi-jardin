@@ -183,7 +183,7 @@ textarea{min-height:70px;resize:vertical}
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.6.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.7.1";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -311,7 +311,7 @@ var SEVCOL={sana:"#4f9a5c",atencion:"#e0a526",grave:"#b5482e"};
 function timeline(p){
   var t=plantLog(p.id).filter(function(l){return (l.kind==="foto"||l.kind==="salud"||(l.kind==="nota"&&l.thumb));});
   var hasFirst=t.some(function(l){return l.first;});
-  if(p.thumb&&!hasFirst&&!t.some(function(l){return l.thumb===p.thumb;}))t.push({id:"_ini",d:p.created||today(),t:0,kind:"foto",thumb:p.thumb,title:"Foto inicial",first:true});
+  if(p.thumb&&!hasFirst&&!t.some(function(l){return l.thumb===p.thumb;}))t.push({id:"_ini",d:p.created||today(),t:0,kind:"foto",thumb:p.thumb,photoId:p.photoId,title:"Foto inicial",first:true});
   return t.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.t||0)-(b.t||0);});
 }
 function photosOf(p){return timeline(p).filter(function(l){return l.thumb;});}
@@ -400,6 +400,7 @@ function render(){
   if(ui.toast)h+='<div class="toast" role="status"><span style="flex:1">'+esc(ui.toast.msg)+'</span>'+(ui.toast.undo?'<button data-a="toastundo">Deshacer</button>':'')+'</div>';
   r.innerHTML=h;
   [["photo",onPhoto],["idphoto",onIdPhoto],["nphoto",onNotePhoto],["impfile",onImportFile]].forEach(function(x){var el=document.getElementById(x[0]);if(el)el.addEventListener("change",x[1]);});
+  setTimeout(hydratePhotos,0);
   Array.prototype.forEach.call(document.querySelectorAll("input[data-fu]"),function(el){el.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)followUp(el.getAttribute("data-fu"),f);});});
 }
 
@@ -692,7 +693,7 @@ function viewForm(){
 }
 function viewPlant(p){
   if(!p)return '<button class="x" data-a="close">✕</button><p>Planta no encontrada.</p>';
-  var h='<button class="x" data-a="close">✕</button>'+(p.thumb?'<img class="hero-img" src="'+p.thumb+'" alt="">':'<div style="font-size:44px">'+p.emoji+'</div>')+'<h2 style="margin-bottom:2px">'+(p.thumb?p.emoji+" ":"")+esc(p.name)+'</h2>'+(p.sci?'<i style="color:var(--muted);font-size:14px">'+esc(p.sci)+'</i><br>':'')+'<small style="color:var(--muted)">'+esc(catOf(p))+' · '+(p.type==="hidro"?"Hidroponía":"En tierra")+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+famLine(p);
+  var h='<button class="x" data-a="close">✕</button>'+(p.thumb?'<img class="hero-img" data-photo="'+(p.photoId||"")+'" src="'+p.thumb+'" alt="">':'<div style="font-size:44px">'+p.emoji+'</div>')+'<h2 style="margin-bottom:2px">'+(p.thumb?p.emoji+" ":"")+esc(p.name)+'</h2>'+(p.sci?'<i style="color:var(--muted);font-size:14px">'+esc(p.sci)+'</i><br>':'')+'<small style="color:var(--muted)">'+esc(catOf(p))+' · '+(p.type==="hidro"?"Hidroponía":"En tierra")+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+famLine(p);
   var hh=healthOf(p);
   if(hh)h+='<div class="read" style="background:var(--rustbg);color:var(--rust)">🩺 '+esc(hh.title)+' ('+nice(hh.d)+')</div>';
   var al=readingAlert(p);
@@ -721,7 +722,7 @@ function evoCard(p){
   var h='<div class="sec">Evolución</div><div class="card">';
   if(!tl.length)return h+'<p style="color:var(--muted);font-size:14px">Toma una «Foto de seguimiento» cada semana para ver cómo cambia tu planta.</p></div>';
   if(ph.length>=2){var a=ph[0],b=ph[ph.length-1],dd=diff(b.d,a.d);
-    h+='<div class="cmp"><figure><img src="'+a.thumb+'" alt="Antes"><figcaption>Antes · '+short(a.d)+'</figcaption></figure><figure><img src="'+b.thumb+'" alt="Ahora"><figcaption>Ahora · '+short(b.d)+'</figcaption></figure></div><p style="text-align:center;font-size:13px;color:var(--muted);margin:6px 0 10px">'+(dd>0?dd+(dd===1?" día":" días")+" de diferencia":"mismo día")+'</p>';}
+    h+='<div class="cmp"><figure><img data-photo="'+(a.photoId||"")+'" src="'+a.thumb+'" alt="Antes"><figcaption>Antes · '+short(a.d)+'</figcaption></figure><figure><img data-photo="'+(b.photoId||"")+'" src="'+b.thumb+'" alt="Ahora"><figcaption>Ahora · '+short(b.d)+'</figcaption></figure></div><p style="text-align:center;font-size:13px;color:var(--muted);margin:6px 0 10px">'+(dd>0?dd+(dd===1?" día":" días")+" de diferencia":"mismo día")+'</p>';}
   var sv=tl.filter(function(l){return l.sev;});
   if(sv.length)h+='<small style="color:var(--muted)">Estado en el tiempo</small><div class="dots">'+sv.map(function(l){return '<i title="'+short(l.d)+'" style="background:'+SEVCOL[l.sev]+'"></i>';}).join("")+'</div><small style="color:var(--muted);font-size:11px">🟩 sana · 🟨 atención · 🟥 grave</small>';
   h+='<div class="tl" style="margin-top:12px">'+tl.slice().reverse().slice(0,12).map(function(l){
@@ -798,7 +799,7 @@ function diaryCard(p){
   var h='<div class="sec">Diario de la planta</div><div class="card">';
   h+='<textarea id="n-text" placeholder="Ej.: Le salió una flor nueva, la cambié de lugar…">'+esc(ui.noteText||"")+'</textarea>';
   h+='<div class="actions" style="align-items:center">'+(ui.noteThumb?'<img src="'+ui.noteThumb+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px" alt="">':'')+'<label class="btn sm line" for="nphoto">📷 '+(ui.noteThumb?"Cambiar foto":"Agregar foto")+'</label><input id="nphoto" type="file" accept="image/*" capture="environment" style="display:none"><button class="btn sm" style="margin-left:auto" data-a="noteadd" data-p="'+p.id+'">Guardar nota</button></div>';
-  ns.slice(0,10).forEach(function(n){h+='<div class="diary">'+(n.thumb?'<img src="'+n.thumb+'" alt="">':'')+'<div><small style="color:var(--muted)">'+short(n.d)+'</small><br>'+esc(n.text||"")+'</div><button style="margin-left:auto;color:var(--muted);align-self:flex-start" data-a="undo" data-v="'+n.id+'" aria-label="Borrar nota">✕</button></div>';});
+  ns.slice(0,10).forEach(function(n){h+='<div class="diary">'+(n.thumb?'<img data-photo="'+(n.photoId||"")+'" src="'+n.thumb+'" alt="">':'')+'<div><small style="color:var(--muted)">'+short(n.d)+'</small><br>'+esc(n.text||"")+'</div><button style="margin-left:auto;color:var(--muted);align-self:flex-start" data-a="undo" data-v="'+n.id+'" aria-label="Borrar nota">✕</button></div>';});
   return h+'</div>';
 }
 function viewMedir(p){
@@ -844,12 +845,37 @@ function onPhoto(e){
   };
   img.src=url;
 }
+/* ---- Fotos completas: se guardan en el teléfono y se suben a Supabase Storage ---- */
+var PHOTO_URL={};
+function keepPhoto(blob){
+  if(!blob||!window.MJStore||!MJStore.putBlob)return null;
+  var id="ph"+uid()+uid();
+  try{PHOTO_URL[id]=URL.createObjectURL(blob);}catch(e){}
+  MJStore.putBlob(id,blob).then(function(){if(window.MJSync)MJSync.changed();}).catch(function(){});
+  return id;
+}
+function photoUrl(id){
+  if(!id)return Promise.resolve(null);
+  if(PHOTO_URL[id])return Promise.resolve(PHOTO_URL[id]);
+  return MJStore.getBlob(id).then(function(b){
+    if(b){PHOTO_URL[id]=URL.createObjectURL(b);return PHOTO_URL[id];}
+    if(window.MJSync&&MJSync.photoUrl)return MJSync.photoUrl(id).then(function(u){if(u)PHOTO_URL[id]=u;return u;});
+    return null;
+  }).catch(function(){return null;});
+}
+function hydratePhotos(){
+  Array.prototype.forEach.call(document.querySelectorAll("img[data-photo]"),function(img){
+    var id=img.getAttribute("data-photo");if(!id||img.getAttribute("data-done")===id)return;
+    img.setAttribute("data-done",id);
+    photoUrl(id).then(function(u){if(u&&img.isConnected)img.src=u;});
+  });
+}
 function makeImages(file,cb){
   var img=new Image(),url=URL.createObjectURL(file);
   img.onload=function(){
     function draw(max){var sc=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c;}
-    var big=draw(1024),small=draw(320),thumb=small.toDataURL("image/jpeg",.72);
-    big.toBlob(function(b){URL.revokeObjectURL(url);cb(b,thumb);},"image/jpeg",.85);
+    var big=draw(1280),small=draw(240),thumb=small.toDataURL("image/jpeg",.7);
+    big.toBlob(function(b){URL.revokeObjectURL(url);cb(b,thumb);},"image/jpeg",.82);
   };
   img.onerror=function(){URL.revokeObjectURL(url);cb(null,"");};
   img.src=url;
@@ -874,7 +900,7 @@ function followUpImg(pid,blob,thumb){
   (function(){
     if(!blob){ui.fuBusy=null;render();return;}
     function done(r){
-      r.kind="foto";r.plantId=pid;r.thumb=thumb;
+      r.kind="foto";r.plantId=pid;r.thumb=thumb;var phid=keepPhoto(blob);if(phid){r.photoId=phid;p.photoId=phid;}
       if(!prev&&!p.thumb)r.first=true;
       addLog(r);p.thumb=thumb;autoPlan(p);ui.fuBusy=null;save();render();
     }
@@ -889,7 +915,7 @@ function followUpImg(pid,blob,thumb){
     .catch(function(){done({title:"Foto de seguimiento",src:"manual"});});
   })();
 }
-function onNotePhoto(e){var file=e.target.files&&e.target.files[0];if(!file)return;var t=document.getElementById("n-text");if(t)ui.noteText=t.value;makeImages(file,function(b,th){ui.noteThumb=th;render();});}
+function onNotePhoto(e){var file=e.target.files&&e.target.files[0];if(!file)return;var t=document.getElementById("n-text");if(t)ui.noteText=t.value;makeImages(file,function(b,th){ui.noteThumb=th;ui.noteBlob=b;render();});}
 function onPlantPhoto(e){var file=e.target.files&&e.target.files[0];if(!file||!ui.sheet)return;var p=plant(ui.sheet.pid);makeImages(file,function(b,th){if(p&&th){p.thumb=th;save();render();}});}
 function clampN(x,lo,hi,def){x=parseFloat(x);return isNaN(x)?def:Math.min(hi,Math.max(lo,x));}
 function careFrom(r){
@@ -901,14 +927,14 @@ function remsFrom(r){
 }
 var CARE_SCHEMA='"care":{"light":"luz que necesita, frase corta","water":"cómo regarla, frase corta","humidity":"humedad ideal, frase corta","temp":"rango de temperatura","season":"solo si florece o da fruto o cosecha: en qué meses ocurre en Costa Rica; si no aplica, vacío","tips":["2 a 4 consejos prácticos para Costa Rica"]},"reminders":[{"label":"tarea extra de cuidado (NO riego ni abono), máx 4 palabras","every":días,"icon":"un emoji"}] (1 a 3)';
 function identify(blob,thumb){
-  function manual(msg){var f=newForm("tierra");f.thumb=thumb;ui.form=f;ui.idBusy=null;ui.idInfo=msg;openSheet({k:"form"});}
+  function manual(msg){var f=newForm("tierra");f.thumb=thumb;f.photoId=keepPhoto(blob);ui.form=f;ui.idBusy=null;ui.idInfo=msg;openSheet({k:"form"});}
   if(!SAMPLE){manual("No pude conectar con Claude para reconocerla. Completa el nombre a mano; la foto ya quedó guardada.");return;}
   var prompt="Eres botánico y experto en huertos e hidroponía en Costa Rica. Identifica la planta de la foto.\nResponde SOLO con JSON válido en español:\n{\"found\":true|false,\"name\":\"nombre común usado en Costa Rica\",\"sci\":\"nombre científico\",\"confidence\":\"alta\"|\"media\"|\"baja\",\"emoji\":\"uno de: "+EMOJIS.join(" ")+"\",\"category\":\"una de: "+CATS.join(", ")+"\",\"type\":\"tierra\" o \"hidro\" (hidro solo si se ven raíces en agua, canastillas o tubos),\"water\":días entre riegos en clima tropical,\"feed\":días entre abonos,\"check\":días entre mediciones pH/EC si es hidro,\"sol\":días entre cambios de solución si es hidro,\"phMin\":n,\"phMax\":n,\"ecMin\":n,\"ecMax\":n,"+CARE_SCHEMA+",\"health\":\"sana\"|\"atencion\"|\"grave\",\"healthNote\":\"si se ve algún problema, nómbralo en máx 6 palabras; si no, vacío\"}\nSi no es una planta o no se distingue, found=false.";
   SAMPLE.limits().then(function(l){if(!l||!l.images)throw {code:"noimg"};return SAMPLE.json(prompt,{images:[blob],modelTier:"default"});})
   .then(function(r){
     if(!r||r.found===false||!r.name){ui.idBusy=null;ui.idErr="No logré reconocer una planta en la foto. Prueba de más cerca, con buena luz y una hoja completa.";render();return;}
     var f=newForm(r.type==="hidro"?"hidro":"tierra");
-    f.name=String(r.name).slice(0,40);f.sci=String(r.sci||"").slice(0,60);f.thumb=thumb;
+    f.name=String(r.name).slice(0,40);f.sci=String(r.sci||"").slice(0,60);f.thumb=thumb;f.photoId=null;
     f.emoji=EMOJIS.indexOf(r.emoji)>=0?r.emoji:"🪴";f.category=CATS.indexOf(r.category)>=0?r.category:"Otras";
     f.water=Math.round(clampN(r.water,1,60,3));f.feed=Math.round(clampN(r.feed,3,120,21));f.check=Math.round(clampN(r.check,1,14,3));f.sol=Math.round(clampN(r.sol,3,45,14));
     f.phMin=clampN(r.phMin,4,8,5.5);f.phMax=clampN(r.phMax,4,8.5,6.5);f.ecMin=clampN(r.ecMin,0.2,5,1.0);f.ecMax=clampN(r.ecMax,0.3,6,1.6);
@@ -916,12 +942,13 @@ function identify(blob,thumb){
     if(r.health&&r.health!=="sana"&&r.healthNote)f._health={sev:r.health==="grave"?"grave":"atencion",title:String(r.healthNote).slice(0,60)};
     ui.idBusy=null;
     ui.idInfo='<b>Es '+esc(f.name)+'</b>'+(f.sci?' <i>('+esc(f.sci)+')</i>':'')+'<br>Confianza '+esc(r.confidence||"media")+' · '+esc(f.category)+'. Revisa los datos y toca «Agregar planta».'+(f._health?'<br>⚠️ Noté: '+esc(f._health.title)+'. Revísala en Salud.':'');
+    ui.pendingBlob=blob;
     var cands=sameKind(f);
     if(cands.length){ui.pending={f:f,blob:blob,thumb:thumb,cands:cands.map(function(c){return c.id;}),guess:null,why:"",busy:true};openSheet({k:"match"});guessMatch();return;}
     ui.form=f;openSheet({k:"form"});
   }).catch(function(e){
     if(e&&e.code==="rate_limited"){ui.idBusy=null;ui.idErr="Muchas fotos seguidas. Espera un minuto e inténtalo de nuevo.";render();return;}
-    manual("No pude reconocerla esta vez. Escribe el nombre a mano; la foto ya quedó guardada.");
+    manual("No pude reconocerla esta vez"+(e&&e.message?" ("+esc(e.message)+")":"")+". Escribe el nombre a mano; la foto ya quedó guardada. Si se repite, ve a ⚙️ → «Probar IA».");
   });
 }
 function normName(x){return String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\(.*?\)/g,"").replace(/\s+\d+$/,"").trim();}
@@ -963,7 +990,8 @@ function viewAjustes(){
     h+='<div class="confirm" style="background:var(--sunbg)"><b>¿Reemplazar tus datos con «'+esc(imp.name)+'»?</b><p style="font-size:14px;margin-top:6px">Trae '+imp.s.plants.length+' plantas, '+imp.s.log.length+' registros y '+fotos+' fotos. Lo que hay ahora en este teléfono ('+S.plants.length+' plantas) se reemplaza.</p><div class="actions"><button class="btn sm" data-a="impok">Sí, importar</button><button class="btn sm line" data-a="impno">Cancelar</button></div></div>';}
   h+='</div>';
   h+='<div class="sec">Instalar en el teléfono</div><div class="card" style="font-size:14px"><b>iPhone:</b> abre esta página en Safari → botón Compartir → «Agregar a pantalla de inicio».<br><b>Android:</b> menú ⋮ de Chrome → «Instalar app».<br><span style="color:var(--muted)">'+(isStandalone()?"✅ Ya la estás usando como app instalada.":"Ahora la estás viendo en el navegador.")+'</span></div>';
-  h+='<div class="sec">Inteligencia artificial</div><div class="card" style="font-size:14px">'+(SAMPLE?'✅ Activa con Google Gemini (gratis). Identifica plantas por foto, diagnostica y arma planes.':'<span style="color:var(--muted)">Se activa cuando entras con tu correo. Sin conexión funciona la guía de síntomas.</span>')+'</div>';
+  var aiT=ui.aiTest;
+  h+='<div class="sec">Inteligencia artificial</div><div class="card" style="font-size:14px">'+(SAMPLE?'✅ Conectada con Google Gemini (gratis): identifica plantas, diagnostica y arma planes.':'<span style="color:var(--rust)">⛔ Inactiva: entra con tu correo en «Tu cuenta» (arriba) para activarla.</span>')+(SAMPLE?'<div class="actions"><button class="btn sm ghost" data-a="ai-test"'+(aiT&&aiT.busy?" disabled":"")+'>'+(aiT&&aiT.busy?"Probando…":"🧪 Probar IA")+'</button></div>':'')+(aiT&&aiT.msg?'<p class="note" style="color:'+(aiT.ok?"var(--leaf)":"var(--rust)")+'">'+esc(aiT.msg)+'</p>':'')+'</div>';
   h+='<p class="note" style="text-align:center">Mi Jardín · versión '+APP_VERSION+'</p>';
   return h;
 }
@@ -978,8 +1006,9 @@ function accountCard(){
     if(a.err)h+='<p class="note" style="color:var(--rust)">'+esc(a.err)+'</p>';
     return h+'</div>';
   }
+  var pend=window.MJSync&&MJSync.pendingPhotos?MJSync.pendingPhotos():0;
   var lab={syncing:"⏳ Sincronizando…",ok:"☁️ Todo guardado en la nube",error:"⚠️ No se pudo sincronizar: "+(i.err||""),offline:"📴 Sin conexión: se sincroniza al volver la señal"}[i.status]||"";
-  h+='<p>Conectado como <b>'+esc(i.email)+'</b></p><p style="color:var(--muted);margin:4px 0 10px">'+esc(lab)+'</p>';
+  h+='<p>Conectado como <b>'+esc(i.email)+'</b></p><p style="color:var(--muted);margin:4px 0 10px">'+esc(lab)+(pend?" · 📤 "+pend+(pend===1?" foto por subir":" fotos por subir"):"")+'</p>';
   var mm=ui.members;
   h+='<b>Personas en este jardín</b>';
   if(!mm)h+='<p style="color:var(--muted)">Cargando…</p>';
@@ -1141,7 +1170,7 @@ function analyze(){
 }
 function finishDiag(r){
   var d=ui.diag;
-  r.kind="salud";r.plantId=d.plant||null;if(d.thumb)r.thumb=d.thumb;
+  r.kind="salud";r.plantId=d.plant||null;if(d.thumb)r.thumb=d.thumb;if(d.img)r.photoId=keepPhoto(d.img);
   addLog(r);autoPlan(plant(d.plant));
   ui.diag={plant:d.plant,sym:[],img:null,imgUrl:"",busy:false,err:"",note:""};
   save();render();
@@ -1160,6 +1189,7 @@ document.addEventListener("click",function(e){
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
   else if(a==="pcat"){ui.pcat=v;render();}
+  else if(a==="ai-test"){ui.aiTest={busy:true};render();SAMPLE.json('Responde SOLO este JSON: {"ok":true,"planta":"nombre de una planta común en Costa Rica"}').then(function(r){ui.aiTest={ok:true,msg:"✅ La IA responde bien ("+(r&&r.planta||"ok")+"). Ya puedes identificar con foto."};render();}).catch(function(e){var m=(e&&e.message)||"error";ui.aiTest={ok:false,msg:"❌ "+m+(/404|not found|Failed to send|non-2xx/i.test(m)?" → Revisa que la función «ia» esté creada en Supabase (Edge Functions).":/GEMINI_API_KEY/.test(m)?" → Falta el secreto GEMINI_API_KEY en Supabase.":/401|Entra/.test(m)?" → Cierra sesión y vuelve a entrar.":/403|400/.test(m)?" → Revisa que la clave de Gemini sea correcta.":"")};render();});}
   else if(a==="pexp"){ui.pexp=v;render();}
   else if(a==="fexp"){readForm();ui.form.exp=v;render();}
   else if(a==="cosecha"){openSheet({k:"cosecha",pid:pid});}
@@ -1209,7 +1239,7 @@ document.addEventListener("click",function(e){
   else if(a==="remsug"){var pp=plant(pid),sg=String(v).split("|");pp.reminders=pp.reminders||[];pp.reminders.push({id:uid(),icon:sg[0],label:sg[1],every:+sg[2]||30,start:today()});save();render();}
   else if(a==="remadd"){var pp2=plant(pid),lb=(document.getElementById("r-label").value||"").trim(),ev=parseInt(document.getElementById("r-every").value,10);if(!lb){document.getElementById("r-label").focus();return;}pp2.reminders=pp2.reminders||[];pp2.reminders.push({id:uid(),icon:"🔔",label:lb.slice(0,40),every:Math.max(1,ev||7),start:today()});save();render();}
   else if(a==="remdel"){var pp3=plant(pid);pp3.reminders=(pp3.reminders||[]).filter(function(r){return r.id!==v;});save();render();}
-  else if(a==="noteadd"){var tx=(document.getElementById("n-text").value||"").trim();if(!tx&&!ui.noteThumb){document.getElementById("n-text").focus();return;}var ne={plantId:pid,kind:"nota",text:tx.slice(0,500)};if(ui.noteThumb)ne.thumb=ui.noteThumb;addLog(ne);ui.noteText="";ui.noteThumb="";save();render();}
+  else if(a==="noteadd"){var tx=(document.getElementById("n-text").value||"").trim();if(!tx&&!ui.noteThumb){document.getElementById("n-text").focus();return;}var ne={plantId:pid,kind:"nota",text:tx.slice(0,500)};if(ui.noteThumb){ne.thumb=ui.noteThumb;if(ui.noteBlob)ne.photoId=keepPhoto(ui.noteBlob);}ui.noteBlob=null;addLog(ne);ui.noteText="";ui.noteThumb="";save();render();}
   else if(a==="edit"){var p=plant(pid);ui.form=JSON.parse(JSON.stringify(p));openSheet({k:"form"});}
   else if(a==="ftype"){readForm();ui.form.type=v;if(v==="hidro"&&ui.form.emoji==="🪴")ui.form.emoji="🥬";render();}
   else if(a==="femo"){readForm();ui.form.emoji=v;render();}
@@ -1218,7 +1248,7 @@ document.addEventListener("click",function(e){
     readForm();var f=ui.form;
     if(!f.name.trim()){var ni=document.getElementById("f-name");if(ni){ni.focus();ni.style.borderColor="var(--rust)";}return;}
     if(f.id){var i=S.plants.findIndex(function(x){return x.id===f.id;});S.plants[i]=f;}
-    else{f.name=uniqueName(f.name.trim());f.id=uid();f.created=today();var hl=f._health;delete f._health;S.plants.push(f);if(f.thumb)addLog({plantId:f.id,kind:"foto",thumb:f.thumb,first:true,title:hl?hl.title:"Foto inicial",why:hl?"Detectado al identificar la planta.":"",sev:hl?hl.sev:"sana",src:"ia"});}
+    else{f.name=uniqueName(f.name.trim());f.id=uid();f.created=today();var hl=f._health;delete f._health;S.plants.push(f);if(f.thumb&&!f.photoId&&ui.pendingBlob){f.photoId=keepPhoto(ui.pendingBlob);}ui.pendingBlob=null;if(f.thumb)addLog({plantId:f.id,kind:"foto",thumb:f.thumb,photoId:f.photoId||null,first:true,title:hl?hl.title:"Foto inicial",why:hl?"Detectado al identificar la planta.":"",sev:hl?hl.sev:"sana",src:"ia"});}
     ui.idInfo=null;
     ui.sheet={k:"plant",pid:f.id};save();render();
   }

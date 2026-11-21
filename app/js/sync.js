@@ -60,7 +60,7 @@
     if (!st.gid || !sb) return;
     if (busy) { again = true; return; }
     busy = true; set("status", "syncing");
-    push().then(pull).then(function(){
+    push().then(pull).then(uploadPhotos).then(function(){
       st.err = null; set("status", "ok");
     }).catch(fail).then(function(){ busy = false; if (again) { again = false; run(); } });
   }
@@ -120,6 +120,32 @@
     });
   }
 
+  // Fotos completas guardadas en el teléfono → Storage privado (carpeta = id del jardín)
+  var pendingN = 0, urlCache = {};
+  function uploadPhotos(){
+    if (!window.MJStore || !MJStore.blobKeys) return Promise.resolve();
+    return MJStore.blobKeys().then(function(keys){
+      pendingN = keys.length;
+      var chain = Promise.resolve();
+      keys.forEach(function(id){
+        chain = chain.then(function(){ return MJStore.getBlob(id); }).then(function(b){
+          if (!b) return;
+          return sb.storage.from("fotos").upload(st.gid + "/" + id + ".jpg", b, { upsert: true, contentType: "image/jpeg" })
+            .then(function(r){ if (r.error) throw r.error; return MJStore.delBlob(id); })
+            .then(function(){ pendingN = Math.max(0, pendingN - 1); });
+        });
+      });
+      return chain;
+    });
+  }
+  function photoUrl(id){
+    if (!st.gid || !sb) return Promise.resolve(null);
+    if (urlCache[id]) return Promise.resolve(urlCache[id]);
+    return sb.storage.from("fotos").createSignedUrl(st.gid + "/" + id + ".jpg", 60 * 60 * 24 * 6).then(function(r){
+      if (r.error || !r.data) return null; urlCache[id] = r.data.signedUrl; return urlCache[id];
+    }).catch(function(){ return null; });
+  }
+
   function sendCode(email){
     return sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } }).then(chk);
   }
@@ -142,7 +168,7 @@
       return sb.from("garden_invites").upsert({ garden_id: st.gid, email: String(email).trim().toLowerCase(), invited_by: u.data.user.id }).then(chk);
     });
   }
-  window.MJSync = { init: init, changed: changed, run: run, info: function(){ return st; }, enabled: enabled,
+  window.MJSync = { photoUrl: photoUrl, pendingPhotos: function(){ return pendingN; }, init: init, changed: changed, run: run, info: function(){ return st; }, enabled: enabled,
     sendCode: sendCode, verify: verify, logout: logout, members: members, invite: invite };
 })();
 /* IA: llama a la función "ia" de Supabase (Gemini gratis). Devuelve el JSON de la respuesta. */
@@ -155,8 +181,10 @@
       return sbc.functions.invoke("ia", { body: { prompt: prompt + REGLA_REMEDIOS, images: imgs } });
     }).then(function(r){
       if (r.error) {
-        var st = r.error.context && r.error.context.status;
-        throw { code: st === 429 ? "rate_limited" : st === 401 ? "not_granted" : "unavailable", message: r.error.message };
+        var ctx = r.error.context, st = ctx && ctx.status;
+        var base = { code: st === 429 ? "rate_limited" : st === 401 ? "not_granted" : "unavailable", message: (st ? "Error " + st + ": " : "") + r.error.message };
+        if (ctx && ctx.json) return ctx.json().then(function(b){ base.message = (st ? "Error " + st + ": " : "") + ((b && (b.message + (b.detail ? " — " + b.detail : ""))) || r.error.message); throw base; }, function(){ throw base; });
+        throw base;
       }
       if (!r.data || r.data.json == null) throw { code: (r.data && r.data.code) || "unavailable", message: (r.data && r.data.message) || "Sin respuesta" };
       return r.data.json;
