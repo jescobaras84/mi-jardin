@@ -40,13 +40,18 @@ Deno.serve(async (req) => {
     ...images.map((data) => ({ inline_data: { mime_type: "image/jpeg", data } })),
     { text: prompt + "\n\nResponde únicamente con el JSON pedido, sin texto antes ni después." },
   ];
-  const payload = JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json" } });
+  // Sin "pensamiento" extra: responde mucho más rápido y para esto no hace falta.
+  const base = { contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json" } };
+  const rapido = JSON.stringify({ ...base, generationConfig: { ...base.generationConfig, thinkingConfig: { thinkingBudget: 0 } } });
+  const normal = JSON.stringify(base);
+  const llamar = (m: string, body: string) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body,
+  });
   let r: Response | null = null, model = "", last = "";
   for (const m of models) {
     model = m;
-    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
-      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: payload,
-    });
+    r = await llamar(m, rapido);
+    if (r.status === 400) r = await llamar(m, normal); // modelo que no acepta apagar el pensamiento
     if (r.ok) break;
     last = `${m} → ${r.status}: ${(await r.text()).slice(0, 200)}`;
     if (![429, 500, 503, 404].includes(r.status)) break; // error de clave o de pedido: no tiene caso seguir

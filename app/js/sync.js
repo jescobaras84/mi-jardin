@@ -174,12 +174,35 @@
 /* IA: llama a la función "ia" de Supabase (Gemini gratis). Devuelve el JSON de la respuesta. */
 (function(){
   var REGLA_REMEDIOS = "\n\nREGLA DE REMEDIOS: si recomiendas tratamientos caseros, usa SOLO estos, que tienen respaldo de servicios de extensión agrícola: chorro de agua en el envés, jabón insecticida o potásico de vivero (no jabón de platos), aceite de neem comercial según etiqueta, bicarbonato con aceite (solo oídio al inicio), poda sanitaria con tijera desinfectada, trampas amarillas y dejar secar la tierra. NUNCA recomiendes vinagre, jabón de lavar platos, borra de café directa, sal, ajo, agua oxigenada ni té de compost. Indica siempre probar en pocas hojas 24 h y no aplicar con sol fuerte.";
+  // Achica la foto a 800 px antes de enviarla: viaja más rápido y alcanza para identificar.
+  function shrink(blob){
+    if (!blob || blob.size < 180000 || !window.createImageBitmap) return Promise.resolve(blob);
+    return createImageBitmap(blob).then(function(bm){
+      var sc = Math.min(1, 800 / Math.max(bm.width, bm.height)), c = document.createElement("canvas");
+      c.width = Math.round(bm.width * sc); c.height = Math.round(bm.height * sc);
+      c.getContext("2d").drawImage(bm, 0, 0, c.width, c.height);
+      return new Promise(function(res){ c.toBlob(function(b){ res(b || blob); }, "image/jpeg", 0.8); });
+    }).catch(function(){ return blob; });
+  }
+  // Aviso flotante con los segundos de espera, para que no parezca trabado.
+  var waitEl = null, waitT = null, waitN = 0;
+  function waitStart(){
+    waitN++; if (waitEl) return;
+    var t0 = Date.now();
+    waitEl = document.createElement("div");
+    waitEl.setAttribute("role", "status");
+    waitEl.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));z-index:70;background:#1f2a1f;color:#fff;border-radius:99px;padding:9px 16px;font:500 14px Inter,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.2)";
+    var paint = function(){ var s = Math.round((Date.now() - t0) / 1000); waitEl.textContent = "🌿 La IA está analizando… " + s + " s" + (s >= 15 ? " (Gemini gratis puede tardar)" : ""); };
+    paint(); document.body.appendChild(waitEl); waitT = setInterval(paint, 1000);
+  }
+  function waitEnd(){ waitN = Math.max(0, waitN - 1); if (waitN || !waitEl) return; clearInterval(waitT); waitEl.remove(); waitEl = null; }
   function b64(blob){ return new Promise(function(res, rej){ var r = new FileReader(); r.onload = function(){ res(String(r.result).split(",")[1] || ""); }; r.onerror = rej; r.readAsDataURL(blob); }); }
   function ai(prompt, blobs){
     var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
     var t0 = Date.now();
     var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej({ code: "unavailable", message: "La IA no respondió en 60 s (la solicitud no volvió de Supabase)" }); }, 60000); });
-    return Promise.race([timeout, Promise.all((blobs || []).map(b64)).then(function(imgs){
+    waitStart();
+    return Promise.race([timeout, Promise.all((blobs || []).map(function(b){ return shrink(b).then(b64); })).then(function(imgs){
       // Prueba el nombre configurado y, si no existe o no responde, los otros nombres posibles de la función.
       var names = [(window.MJ_CONFIG && MJ_CONFIG.IA_FUNCTION) || "ia", "ia", "bright-handler"].filter(function(n, i, a){ return a.indexOf(n) === i; });
       var body = { prompt: prompt + REGLA_REMEDIOS, images: imgs };
@@ -203,7 +226,7 @@
       if (!r.data || r.data.json == null) throw { code: (r.data && r.data.code) || "unavailable", message: (r.data && r.data.message) || "Sin respuesta" };
       window.__mjLastAiMs = Date.now() - t0;
       return r.data.json;
-    })]);
+    })]).then(function(v){ waitEnd(); return v; }, function(e){ waitEnd(); throw e; });
   }
   function makeSample(){
     var f = function(prompt, opts){ return f.json(prompt, opts).then(function(j){ return { text: JSON.stringify(j) }; }); };
