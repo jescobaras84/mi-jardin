@@ -34,4 +34,5 @@ app/ (index.html, js/, css/, icons/, manifest.webmanifest, sw.js) · worker/ · 
 - Hecho: cuenta por correo con código (Supabase Auth + Gmail SMTP), sincronización por registro (supabase/migrations/001), invitar familia.
 - Hecho: IA Gemini gratis vía Supabase Edge Function supabase/functions/ia (secreto GEMINI_API_KEY; opcional GEMINI_MODEL, por defecto gemini-flash-latest). La app la usa solo con sesión iniciada.
 - Cambio de arquitectura: ya no se usa Cloudflare Worker; IA y (luego) avisos van en Supabase. Ver CAMBIOS.md.
-- Siguiente: probar IA con fotos reales (MJ-13) · fotos a Supabase Storage (MJ-18) · avisos diarios 7:00 a. m. con Web Push desde Supabase (MJ-20/21).
+- Hecho: recetario con respaldo (app/js/recetas.js) · lugares (registros log kind "lugar": nombre, zona, lat/lon, aire libre) con clima Open-Meteo y geolocalización/BigDataCloud · responsable por planta (plant.resp) · «hecho por» (log.by) · botón «Llovió».
+- Siguiente: botón «tierra húmeda, posponer» · avisos por persona · probar IA con fotos reales (MJ-13) · fotos a Supabase Storage (MJ-18) · avisos diarios 7:00 a. m. con Web Push desde Supabase (MJ-20/21).

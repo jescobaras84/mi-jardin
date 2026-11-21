@@ -164,6 +164,9 @@ textarea{min-height:70px;resize:vertical}
 .lvl{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;display:inline-block}
 .l-ok{background:var(--leafbg);color:var(--leaf)} .l-parcial{background:var(--sunbg);color:#8a6110} .l-mito{background:var(--rustbg);color:var(--rust)}
 .recbtn{font-size:12px;font-weight:600;color:var(--leaf);background:var(--leafbg);border-radius:99px;padding:3px 9px;margin-top:4px;display:inline-block}
+.wx{display:flex;gap:10px;align-items:center;background:#eef3fa;border-radius:14px;padding:10px 12px;margin-top:8px;font-size:14px;color:#244a68}
+.wx b{color:#1d3c56}
+.who{font-size:11px;font-weight:600;color:var(--water);background:var(--waterbg);border-radius:99px;padding:1px 7px;margin-left:4px}
 .spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
 .banner{background:var(--sunbg);color:#7a560e;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
 .tip{background:var(--leafbg);border-radius:14px;padding:12px 14px;font-size:14px;color:#24502c}
@@ -180,7 +183,7 @@ textarea{min-height:70px;resize:vertical}
 <script id="app-js">
 (function(){
 "use strict";
-var LS_KEY="miJardin.v1", APP_VERSION="0.4.0";
+var LS_KEY="miJardin.v1", APP_VERSION="0.5.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -322,7 +325,7 @@ function save(){
   if(window.MJSync)MJSync.changed();
 }
 var softT=null;
-function aiHook(){if(!window.MJSync||!MJSync.makeSample)return;var g=MJSync.info().gid;if(g&&!SAMPLE)SAMPLE=MJSync.makeSample();if(!g)SAMPLE=null;}
+function aiHook(){if(!window.MJSync||!MJSync.makeSample)return;var g=MJSync.info().gid;if(g&&!ui.members&&!ui.memLoading){ui.memLoading=true;MJSync.members().then(function(r){ui.members=r;ui.memLoading=false;softRender();}).catch(function(){ui.memLoading=false;});}if(g&&!SAMPLE)SAMPLE=MJSync.makeSample();if(!g)SAMPLE=null;}
 function softRender(){aiHook();var ae=document.activeElement;if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA")&&ae.type!=="file"){clearTimeout(softT);softT=setTimeout(softRender,1500);return;}render();}
 function syncInfo(){return window.MJSync?MJSync.info():{status:"off"};}
 function cloudPill(){
@@ -355,7 +358,7 @@ function showToast(msg,undo,ms){
   try{sessionStorage.setItem("miJardin.toast",JSON.stringify(ui.toast));}catch(e){}
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){ui.toast=null;try{sessionStorage.removeItem("miJardin.toast");}catch(e){}render();},ms);
 }
-function addLog(entry){entry.id=uid();entry.t=Date.now();entry.d=entry.d||today();S.log.push(entry);}
+function addLog(entry){entry.id=uid();entry.t=Date.now();entry.d=entry.d||today();if(myEmail()&&!entry.by)entry.by=myEmail();S.log.push(entry);}
 function doTask(pid,kind,remId){
   if(kind==="medicion"){openSheet({k:"medir",pid:pid});return;}
   if(kind==="trat"){
@@ -409,6 +412,9 @@ function taskRow(t){
   else right='<button class="btn sm" data-a="done" data-p="'+t.p.id+'" data-k="'+t.kind+'"'+(t.remId||t.stepId?' data-r="'+(t.remId||t.stepId)+'"':'')+'>'+(t.kind==="medicion"?"Medir":"Listo ✓")+'</button>';
   if(ui.fuBusy===t.p.id&&t.kind==="control")right='<span class="spin">🌿</span>';
   var title=t.kind==="trat"?esc(t.label):esc(t.label)+' · '+esc(t.p.name);
+  if(t.p.resp)title+='<span class="who">👤 '+esc(shortName(t.p.resp))+'</span>';
+  var plx=placeOf(t.p);
+  if(t.kind==="agua"&&t.days<=0&&plx&&plx.out&&rainsToday(plx))right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="rained" data-p="'+t.p.id+'">🌧️ Llovió</button><button class="btn sm ghost" data-a="done" data-p="'+t.p.id+'" data-k="agua">Regué</button></div>';
   return '<div class="task'+(late||pr===1?" late":"")+'"><div class="ico i-'+t.kind+'">'+(t.icon||ICON[t.kind])+'</div><div class="t">'+chip+'<b>'+title+'</b><small>'+(t.kind==="trat"?t.p.emoji+' '+esc(t.p.name)+' · ':t.p.emoji+' ')+when+'</small></div>'+right+'</div>';
 }
 
@@ -430,6 +436,7 @@ function viewHoy(){
   var h='<div class="hero"><h2>'+title+'</h2><p>'+sub+'</p><div class="stats"><div class="stat"><b>'+urg+'</b><span>prioritarias</span></div><div class="stat"><b>'+care+'</b><span>de cuidado</span></div><div class="stat"><b>'+alerts.filter(function(a){return a.sick;}).length+'</b><span>en tratamiento</span></div></div></div>';
   var st=seasonTips();
   h+='<div class="season"><button data-a="season" style="display:flex;width:100%;text-align:left;color:inherit"><b style="flex:1">'+st.t+'</b><span>'+(ui.seasonOpen?"▲":"▼")+'</span></button>'+(ui.seasonOpen?'<ul>'+st.tips.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul>':'')+'</div>';
+  places().forEach(function(pl){if(S.plants.some(function(p){return p.placeId===pl.id;}))h+=wxLine(pl);});
   if(alerts.length){h+='<div class="sec">Plantas que necesitan atención</div>';alerts.forEach(function(a){h+=alertCard(a);});}
   if(now.length){h+='<div class="sec">Para hoy, por prioridad</div>';now.forEach(function(t){h+=taskRow(t);});}
   if(soon.length){h+='<div class="sec">Próximos 7 días</div>';soon.forEach(function(t){h+=taskRow(t);});}
@@ -454,16 +461,19 @@ function plantCard(p){
   var ts=tasksFor(p), late=ts.filter(function(t){return t.days<=0;}), hh=healthOf(p), al=readingAlert(p);
   var badge=hh?'<span class="badge b-bad">Revisar salud</span>':al?'<span class="badge b-bad">Fuera de rango</span>':late.length?'<span class="badge b-warn">'+late.map(function(t){return t.label.split(" ")[0];}).join(" · ")+'</span>':'<span class="badge b-ok">Al día</span>';
   var next=ts.slice().sort(function(a,b){return a.days-b.days;})[0];
-  return '<button class="pcard" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img class="thumb" src="'+p.thumb+'" alt="">':'<span class="em">'+p.emoji+'</span>')+'<b>'+(p.thumb?p.emoji+' ':'')+esc(p.name)+'</b><small>'+(p.type==="hidro"?"💧 Hidroponía":"Tierra")+(p.place?" · "+esc(p.place):"")+'</small>'+badge+'<small>'+next.label+': '+nice(next.due)+'</small>'+(function(){var lp=photosOf(p).slice(-1)[0];return lp?'<small>📸 Última foto: '+nice(lp.d)+'</small>':'';})()+'</button>';
+  return '<button class="pcard" data-a="open" data-p="'+p.id+'">'+(p.thumb?'<img class="thumb" src="'+p.thumb+'" alt="">':'<span class="em">'+p.emoji+'</span>')+'<b>'+(p.thumb?p.emoji+' ':'')+esc(p.name)+'</b><small>'+(p.type==="hidro"?"💧 Hidroponía":"Tierra")+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+badge+'<small>'+next.label+': '+nice(next.due)+'</small>'+(function(){var lp=photosOf(p).slice(-1)[0];return lp?'<small>📸 Última foto: '+nice(lp.d)+'</small>':'';})()+'</button>';
 }
 function catOf(p){return p.category&&CATS.indexOf(p.category)>=0?p.category:"Otras";}
 function viewPlantas(){
   if(!S.plants.length)return '<div class="empty"><div class="big">📷</div><p>Toma una foto de tu planta y la identifico por ti.</p><br><button class="btn" data-a="new">+ Agregar planta</button></div>';
-  var used=CATS.filter(function(c){return S.plants.some(function(p){return catOf(p)===c;});});
+  var PLs=places().filter(function(pl){return S.plants.some(function(p){return p.placeId===pl.id;});});
+  var src=ui.pcat?S.plants.filter(function(p){return ui.pcat==="_none"?!p.placeId:p.placeId===ui.pcat;}):S.plants;
+  var plChips=PLs.length?'<div class="chips" style="margin-bottom:6px">'+[["","📍 Todos los lugares"]].concat(PLs.map(function(pl){return [pl.id,(pl.out?"🌤️ ":"🏠 ")+pl.name];})).map(function(x){return '<button class="chip'+((ui.pcat||"")===x[0]?" on":"")+'" data-a="pcat" data-v="'+x[0]+'">'+esc(x[1])+'</button>';}).join("")+'</div>':'';
+  var used=CATS.filter(function(c){return src.some(function(p){return catOf(p)===c;});});
   if(ui.cat&&used.indexOf(ui.cat)<0)ui.cat="";
-  var h='<div class="chips" style="margin-bottom:6px"><button class="chip'+(!ui.cat?" on":"")+'" data-a="cat" data-v="">Todas ('+S.plants.length+')</button>'+used.map(function(c){var n=S.plants.filter(function(p){return catOf(p)===c;}).length;return '<button class="chip'+(ui.cat===c?" on":"")+'" data-a="cat" data-v="'+esc(c)+'">'+esc(c)+' ('+n+')</button>';}).join("")+'</div>';
+  var h=plChips+'<div class="chips" style="margin-bottom:6px"><button class="chip'+(!ui.cat?" on":"")+'" data-a="cat" data-v="">Todas ('+src.length+')</button>'+used.map(function(c){var n=src.filter(function(p){return catOf(p)===c;}).length;return '<button class="chip'+(ui.cat===c?" on":"")+'" data-a="cat" data-v="'+esc(c)+'">'+esc(c)+' ('+n+')</button>';}).join("")+'</div>';
   (ui.cat?[ui.cat]:used).forEach(function(c){
-    var list=S.plants.filter(function(p){return catOf(p)===c;});
+    var list=src.filter(function(p){return catOf(p)===c;});
     h+='<div class="sec">'+esc(c)+'</div><div class="grid">'+list.map(plantCard).join("")+'</div>';
   });
   return h;
@@ -536,6 +546,26 @@ function recetario(){
   R.filter(function(r){return !c||r.cat===c;}).forEach(function(r){h+='<button class="rec" data-a="receta" data-v="'+r.id+'"><span class="re">'+r.emoji+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(r.nombre)+'</b><small style="color:var(--muted)">'+esc(r.para.join(" · "))+'</small><br><span class="lvl '+LVL[r.nivel][1]+'">'+LVL[r.nivel][0]+'</span></span><span style="color:var(--muted)">›</span></button>';});
   return h+'</div>';
 }
+function viewLugar(){
+  var L=ui.lugar||(ui.lugar={id:null,name:"",area:"",lat:null,lon:null,out:false,busy:false,err:""});
+  var h='<button class="x" data-a="close">✕</button><h2>'+(L.id?"Editar lugar":"Nuevo lugar")+'</h2>';
+  h+='<label class="f"><span>Nombre</span><input type="text" id="pl-name" value="'+esc(L.name)+'" placeholder="Ej.: Casa, Finca, Oficina"></label>';
+  h+='<div class="seg"><button data-a="pl-out" data-v="0" class="'+(!L.out?"on":"")+'">🏠 Bajo techo</button><button data-a="pl-out" data-v="1" class="'+(L.out?"on":"")+'">🌤️ Al aire libre</button></div>';
+  h+='<div class="card" style="font-size:14px"><b>Ubicación</b>'+(L.area?'<p style="margin:6px 0">📍 '+esc(L.area)+(L.lat!=null?' <span style="color:var(--muted)">('+L.lat.toFixed(3)+', '+L.lon.toFixed(3)+')</span>':'')+'</p>':'<p style="color:var(--muted);margin:6px 0">Sirve para el clima y los consejos de cada zona.</p>');
+  h+='<button class="btn sm block" data-a="pl-geo"'+(L.busy?" disabled":"")+'>'+(L.busy?"Buscando…":"📍 Usar mi ubicación actual")+'</button>';
+  h+='<div class="row" style="align-items:flex-end;margin-top:10px"><label class="f" style="flex:2;margin:0"><span>O escribe la zona</span><input type="text" id="pl-q" placeholder="Ej.: La Fortuna, San Carlos"></label><button class="btn sm ghost" style="flex:none" data-a="pl-search">Buscar</button></div>';
+  if(L.opts&&L.opts.length)h+='<div style="margin-top:8px">'+L.opts.map(function(o,i){return '<button class="chip" style="margin:3px" data-a="pl-pick" data-v="'+i+'">'+esc(o.label)+'</button>';}).join("")+'</div>';
+  if(L.err)h+='<p class="note" style="color:var(--rust)">'+esc(L.err)+'</p>';
+  h+='</div><button class="btn block" data-a="pl-save">Guardar lugar</button>';
+  if(L.id)h+='<button class="btn sm danger" style="margin-top:10px" data-a="pl-del">Eliminar lugar</button>';
+  return h;
+}
+function geoName(lat,lon){
+  return fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+lat+"&longitude="+lon+"&localityLanguage=es")
+    .then(function(r){return r.json();}).then(function(j){var a=[j.locality||j.city,j.principalSubdivision].filter(Boolean);return a.join(", ")||(lat.toFixed(3)+", "+lon.toFixed(3));})
+    .catch(function(){return lat.toFixed(3)+", "+lon.toFixed(3);});
+}
+function readLugar(){var L=ui.lugar,n=document.getElementById("pl-name");if(n)L.name=n.value;}
 function viewReceta(id){
   var r=(window.MJ_RECETAS||[]).filter(function(x){return x.id===id;})[0];
   if(!r)return '<button class="x" data-a="close">✕</button><p>Receta no encontrada.</p>';
@@ -550,6 +580,40 @@ function viewReceta(id){
 }
 var REC_KEYS=[[/jab[oó]n/i,"jabon"],[/neem/i,"neem"],[/bicarbonato/i,"bicarbonato"],[/leche/i,"leche"],[/chorro|a presi[oó]n/i,"agua"],[/tijera|poda/i,"poda"],[/trampa/i,"trampas"],[/canela/i,"canela"]];
 function recFor(text){for(var i=0;i<REC_KEYS.length;i++)if(REC_KEYS[i][0].test(text||""))return REC_KEYS[i][1];return null;}
+/* ---- Lugares (se guardan como registros kind "lugar" para que se sincronicen) ---- */
+function places(){return S.log.filter(function(l){return l.kind==="lugar";}).sort(function(a,b){return (a.t||0)-(b.t||0);});}
+function placeById(id){return places().filter(function(x){return x.id===id;})[0]||null;}
+function placeOf(p){return p&&p.placeId?placeById(p.placeId):null;}
+function placeLabel(p){var pl=placeOf(p);return pl?(pl.name+(p.place?" · "+p.place:"")):(p&&p.place)||"";}
+function placeCtx(p){var pl=placeOf(p);if(!pl)return p.place||"";return pl.name+(pl.area?" ("+pl.area+", Costa Rica)":"")+(pl.out?", al aire libre":", bajo techo")+(p.place?", "+p.place:"");}
+/* ---- Clima por lugar: Open-Meteo, gratis y sin clave; se guarda 1 vez al día ---- */
+var WX={};
+function wxFor(pl){
+  if(!pl||pl.lat==null)return null;
+  var k="mj.wx."+pl.id+"."+today();
+  if(WX[k])return WX[k].d||null;
+  try{var c=localStorage.getItem(k);if(c){WX[k]={d:JSON.parse(c)};return WX[k].d;}}catch(e){}
+  WX[k]={d:null};
+  if(!navigator.onLine)return null;
+  fetch("https://api.open-meteo.com/v1/forecast?latitude="+pl.lat+"&longitude="+pl.lon+"&daily=precipitation_sum,precipitation_probability_max,temperature_2m_max,temperature_2m_min&timezone=America%2FCosta_Rica&forecast_days=3")
+    .then(function(r){return r.json();}).then(function(j){
+      var d=j&&j.daily;if(!d)return;
+      var o={rain:d.precipitation_sum,prob:d.precipitation_probability_max,tmax:d.temperature_2m_max,tmin:d.temperature_2m_min};
+      WX[k]={d:o};try{localStorage.setItem(k,JSON.stringify(o));}catch(e){}softRender();
+    }).catch(function(){});
+  return null;
+}
+function rainsToday(pl){var w=wxFor(pl);return !!(w&&((w.rain[0]||0)>=5||(w.prob[0]||0)>=70));}
+function wxLine(pl){
+  var w=wxFor(pl);if(!w)return "";
+  var r0=w.rain[0]||0,p0=w.prob[0]||0,r1=w.rain[1]||0;
+  var ic=r0>=5||p0>=70?"🌧️":r0>=1||p0>=40?"🌦️":"☀️";
+  var tip=r0>=5||p0>=70?(pl.out?"Lloverá: las plantas de aquí no necesitan riego hoy.":"Día lluvioso: ventila para evitar hongos."):((w.tmax[0]||0)>=31?"Mucho calor: revisa la tierra en la tarde.":r1>=5?"Mañana llueve.":"");
+  return '<div class="wx"><span style="font-size:24px">'+ic+'</span><span style="flex:1"><b>'+esc(pl.name)+(pl.area?' · '+esc(pl.area):'')+'</b><br>Hoy '+Math.round(w.tmin[0])+'–'+Math.round(w.tmax[0])+' °C · lluvia '+(Math.round(r0*10)/10)+' mm ('+p0+' %)'+(tip?'<br>'+esc(tip):'')+'</span></div>';
+}
+/* ---- Personas ---- */
+function myEmail(){var i=window.MJSync?MJSync.info():null;return i&&i.email||null;}
+function shortName(email){if(!email)return "";var n=String(email).split("@")[0].replace(/[._-]+/g," ");return n.charAt(0).toUpperCase()+n.slice(1);}
 function sevBadge(s){return s==="sana"?'<span class="badge b-ok">Sana</span>':s==="grave"?'<span class="badge b-bad">Grave</span>':'<span class="badge b-warn">Atención</span>';}
 function diagCard(l){
   var p=plant(l.plantId);
@@ -567,6 +631,7 @@ function viewSheet(){
   else if(s.k==="match")h+=viewMatch();
   else if(s.k==="ajustes")h+=viewAjustes();
   else if(s.k==="receta")h+=viewReceta(s.id);
+  else if(s.k==="lugar")h+=viewLugar();
   else if(s.k==="plant")h+=viewPlant(plant(s.pid));
   else if(s.k==="medir")h+=viewMedir(plant(s.pid));
   return h+'</div></div>';
@@ -588,7 +653,11 @@ function viewForm(){
   h+='<label class="f"><span>Nombre</span><input type="text" id="f-name" value="'+esc(f.name)+'" placeholder="Ej.: Albahaca de la cocina"></label>';
   h+='<div class="emo">'+EMOJIS.map(function(e){return '<button data-a="femo" data-v="'+e+'" class="'+(f.emoji===e?"on":"")+'">'+e+'</button>';}).join("")+'</div>';
   h+='<div class="row"><label class="f"><span>Categoría</span><select id="f-cat">'+CATS.map(function(c){return '<option'+((f.category||"Otras")===c?" selected":"")+'>'+c+'</option>';}).join("")+'</select></label><label class="f"><span>Nombre científico</span><input type="text" id="f-sci" value="'+esc(f.sci||"")+'" placeholder="Opcional"></label></div>';
-  h+='<label class="f"><span>Dónde está</span><input type="text" id="f-place" value="'+esc(f.place||"")+'" placeholder="Ej.: Balcón, cocina, patio"></label>';
+  var PL=places();
+  h+='<div class="row" style="align-items:flex-end"><label class="f" style="flex:2"><span>Lugar</span><select id="f-placeid"><option value="">— Sin lugar —</option>'+PL.map(function(x){return '<option value="'+x.id+'"'+(f.placeId===x.id?" selected":"")+'>'+esc(x.name)+(x.area?' · '+esc(x.area):'')+'</option>';}).join("")+'</select></label><button class="btn sm ghost" style="flex:none;margin-bottom:12px" data-a="newplace">＋ Lugar</button></div>';
+  h+='<label class="f"><span>Detalle de dónde está</span><input type="text" id="f-place" value="'+esc(f.place||"")+'" placeholder="Ej.: balcón, junto a la ventana"></label>';
+  var MM=(ui.members&&ui.members.m)||[];
+  if(MM.length>1||f.resp)h+='<label class="f"><span>Responsable</span><select id="f-resp"><option value="">Todos en el jardín</option>'+MM.map(function(m){return '<option value="'+esc(m.email)+'"'+(f.resp===m.email?" selected":"")+'>'+esc(shortName(m.email))+' ('+esc(m.email)+')</option>';}).join("")+'</select></label>';
   if(f.type==="tierra"){
     h+='<div class="row"><label class="f"><span>Regar cada (días)</span><input type="number" min="1" id="f-water" value="'+f.water+'"></label><label class="f"><span>Abonar cada (días)</span><input type="number" min="1" id="f-feed" value="'+f.feed+'"></label></div>';
     if(!f.id)h+='<div class="row"><label class="f"><span>Último riego</span><input type="date" id="f-lw" value="'+f.lastWater+'"></label><label class="f"><span>Último abono</span><input type="date" id="f-lf" value="'+f.lastFeed+'"></label></div>';
@@ -604,7 +673,7 @@ function viewForm(){
 }
 function viewPlant(p){
   if(!p)return '<button class="x" data-a="close">✕</button><p>Planta no encontrada.</p>';
-  var h='<button class="x" data-a="close">✕</button>'+(p.thumb?'<img class="hero-img" src="'+p.thumb+'" alt="">':'<div style="font-size:44px">'+p.emoji+'</div>')+'<h2 style="margin-bottom:2px">'+(p.thumb?p.emoji+" ":"")+esc(p.name)+'</h2>'+(p.sci?'<i style="color:var(--muted);font-size:14px">'+esc(p.sci)+'</i><br>':'')+'<small style="color:var(--muted)">'+esc(catOf(p))+' · '+(p.type==="hidro"?"Hidroponía":"En tierra")+(p.place?" · "+esc(p.place):"")+'</small>'+famLine(p);
+  var h='<button class="x" data-a="close">✕</button>'+(p.thumb?'<img class="hero-img" src="'+p.thumb+'" alt="">':'<div style="font-size:44px">'+p.emoji+'</div>')+'<h2 style="margin-bottom:2px">'+(p.thumb?p.emoji+" ":"")+esc(p.name)+'</h2>'+(p.sci?'<i style="color:var(--muted);font-size:14px">'+esc(p.sci)+'</i><br>':'')+'<small style="color:var(--muted)">'+esc(catOf(p))+' · '+(p.type==="hidro"?"Hidroponía":"En tierra")+(placeLabel(p)?" · "+esc(placeLabel(p)):"")+'</small>'+famLine(p);
   var hh=healthOf(p);
   if(hh)h+='<div class="read" style="background:var(--rustbg);color:var(--rust)">🩺 '+esc(hh.title)+' ('+nice(hh.d)+')</div>';
   var al=readingAlert(p);
@@ -622,7 +691,7 @@ function viewPlant(p){
   if(p.notes)h+='<div class="card" style="font-size:14px">📝 '+esc(p.notes)+'</div>';
   h+=treatCard(p)+evoCard(p)+careCard(p)+propCard(p)+remCard(p)+diaryCard(p);
   var lg=plantLog(p.id).slice(0,15);
-  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
+  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+(l.note==="lluvia"?" (lluvia)":"")+(l.by?' <span class="who">'+esc(shortName(l.by))+'</span>':'')+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
   h+='<div class="actions"><button class="btn sm line" data-a="edit" data-p="'+p.id+'">✏️ Editar</button><button class="btn sm danger" data-a="del">🗑 Eliminar</button></div>';
   if(ui.confirmDel)h+='<div class="confirm"><b>¿Eliminar «'+esc(p.name)+'» y su historial?</b><div class="actions"><button class="btn sm danger" data-a="delyes" data-p="'+p.id+'">Sí, eliminar</button><button class="btn sm line" data-a="delno">Cancelar</button></div></div>';
   return h;
@@ -730,6 +799,8 @@ function readForm(){
   function n(id,def){var x=parseFloat(v(id));return isNaN(x)?def:x;}
   if(v("f-name")!==undefined)f.name=v("f-name");
   if(v("f-place")!==undefined)f.place=v("f-place");
+  if(v("f-placeid")!==undefined)f.placeId=v("f-placeid")||null;
+  if(v("f-resp")!==undefined)f.resp=v("f-resp")||null;
   if(v("f-notes")!==undefined)f.notes=v("f-notes");
   if(v("f-cat")!==undefined)f.category=v("f-cat");
   if(v("f-sci")!==undefined)f.sci=v("f-sci");
@@ -852,7 +923,7 @@ function guessMatch(){
   var cs=u.cands.map(plant).filter(function(p){return p&&p.thumb;}).slice(0,4);
   if(!SAMPLE||!cs.length){u.busy=false;render();return;}
   var imgs=[u.blob].concat(cs.map(function(p){return dataUrlBlob(photosOf(p).slice(-1)[0].thumb);})).filter(Boolean);
-  var prompt="La PRIMERA imagen es una foto nueva de una planta. Las siguientes "+cs.length+" imágenes son las últimas fotos de plantas que el usuario ya tiene registradas, en este orden: "+cs.map(function(p,i){return (i+1)+") "+p.name+(p.place?" en "+p.place:"");}).join("; ")+".\nCompara la maceta, el soporte, el fondo, el tamaño y la forma de la planta. ¿La foto nueva es la MISMA planta que alguna de ellas, o es otra planta distinta?\nResponde SOLO JSON: {\"match\":número de 1 a "+cs.length+" o 0 si es otra planta,\"why\":\"razón corta en español, máx 12 palabras\"}";
+  var prompt="La PRIMERA imagen es una foto nueva de una planta. Las siguientes "+cs.length+" imágenes son las últimas fotos de plantas que el usuario ya tiene registradas, en este orden: "+cs.map(function(p,i){return (i+1)+") "+p.name+(placeLabel(p)?" en "+placeCtx(p):"");}).join("; ")+".\nCompara la maceta, el soporte, el fondo, el tamaño y la forma de la planta. ¿La foto nueva es la MISMA planta que alguna de ellas, o es otra planta distinta?\nResponde SOLO JSON: {\"match\":número de 1 a "+cs.length+" o 0 si es otra planta,\"why\":\"razón corta en español, máx 12 palabras\"}";
   SAMPLE.limits().then(function(l){if(!l||!l.images)throw 0;return SAMPLE.json(prompt,{images:imgs,modelTier:"default"});})
   .then(function(r){var m=parseInt(r.match,10);u.guess=m>0&&m<=cs.length?cs[m-1].id:"new";u.why=String(r.why||"");u.busy=false;render();})
   .catch(function(){u.busy=false;render();});
@@ -861,6 +932,8 @@ function viewAjustes(){
   var imp=ui.importData;
   var h='<button class="x" data-a="close">✕</button><h2>Ajustes</h2>';
   h+=accountCard();
+  var PL2=places();
+  h+='<div class="sec">Lugares</div><div class="card" style="font-size:14px">'+(PL2.length?PL2.map(function(x){var n=S.plants.filter(function(p){return p.placeId===x.id;}).length;return '<button class="rec" data-a="editplace" data-v="'+x.id+'"><span class="re">'+(x.out?"🌤️":"🏠")+'</span><span style="flex:1"><b>'+esc(x.name)+'</b><br><small style="color:var(--muted)">'+(x.area?"📍 "+esc(x.area)+" · ":"")+n+(n===1?" planta":" plantas")+'</small></span><span style="color:var(--muted)">›</span></button>';}).join(""):'<p style="color:var(--muted)">Agrega dónde tienes plantas (casa, finca, oficina) para ver el clima de cada zona.</p>')+'<button class="btn sm ghost" style="margin-top:8px" data-a="newplace">＋ Agregar lugar</button></div>';
   h+='<div class="sec">Respaldo</div><div class="card">';
   h+='<p style="font-size:14px;color:var(--muted);margin-bottom:10px">Tus datos se guardan en este teléfono. Descarga un respaldo de vez en cuando y guárdalo en tu Drive u OneDrive.</p>';
   h+='<div class="actions"><button class="btn sm" data-a="exportar">⬇️ Exportar respaldo</button><label class="btn sm ghost" for="impfile">⬆️ Importar respaldo</label><input id="impfile" type="file" accept=".json,.html,.htm,application/json,text/html" style="display:none"></div>';
@@ -931,7 +1004,7 @@ function viewMatch(){
   if(u.busy)h+='<p style="font-size:14px;color:var(--leaf);margin-bottom:10px"><span class="spin">🌿</span> Comparando con tus fotos…</p>';
   cs.forEach(function(p){
     var lp=photosOf(p).slice(-1)[0],g=u.guess===p.id;
-    h+='<button class="big-opt" data-a="matchpick" data-p="'+p.id+'" style="'+(g?"border:2px solid var(--leaf);background:var(--leafbg)":"")+'">'+(lp?'<img src="'+lp.thumb+'" style="width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none" alt="">':'<span class="bi">'+p.emoji+'</span>')+'<span style="flex:1"><b>'+esc(p.name)+'</b><small>'+(p.place?esc(p.place)+" · ":"")+(lp?"última foto "+nice(lp.d):"sin fotos")+'</small>'+(g?'<small style="display:block;color:var(--leaf);font-weight:600">✓ Parece esta'+(u.why?": "+esc(u.why):"")+'</small>':'')+'</span></button>';
+    h+='<button class="big-opt" data-a="matchpick" data-p="'+p.id+'" style="'+(g?"border:2px solid var(--leaf);background:var(--leafbg)":"")+'">'+(lp?'<img src="'+lp.thumb+'" style="width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none" alt="">':'<span class="bi">'+p.emoji+'</span>')+'<span style="flex:1"><b>'+esc(p.name)+'</b><small>'+(placeLabel(p)?esc(placeLabel(p))+" · ":"")+(lp?"última foto "+nice(lp.d):"sin fotos")+'</small>'+(g?'<small style="display:block;color:var(--leaf);font-weight:600">✓ Parece esta'+(u.why?": "+esc(u.why):"")+'</small>':'')+'</span></button>';
   });
   h+='<button class="big-opt" data-a="matchnew" style="'+(u.guess==="new"?"border:2px solid var(--leaf);background:var(--leafbg)":"")+'"><span class="bi" style="background:#ece8db">➕</span><span><b>Es otra planta nueva</b><small>Se agrega como «'+esc(uniqueName(u.f.name))+'»</small>'+(u.guess==="new"?'<small style="display:block;color:var(--leaf);font-weight:600">✓ Parece una planta distinta'+(u.why?": "+esc(u.why):"")+'</small>':'')+'</span></button>';
   return h;
@@ -974,7 +1047,7 @@ function mkPlan(p){
   var hh=lastHealth(p);
   if(!SAMPLE){if(hh&&hh.steps&&hh.steps.length){startPlan(p,planFromSteps(hh),hh.title,hh.sev);save();render();showToast("📋 Plan listo. Los pasos de hoy están en «Para hoy».");}else{ui.tab="salud";ui.sheet=null;ui.diag.plant=p.id;render();}return;}
   ui.planBusy=p.id;render();
-  var prompt="Eres agrónomo experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", "+(p.type==="hidro"?"hidroponía":"en tierra")+(p.place?", en "+p.place:"")+". Problema detectado: "+(hh?hh.title+(hh.why?" — "+hh.why:""):"no especificado")+".\nArma un plan de tratamiento por días. Responde SOLO JSON válido en español sencillo: {"+PLAN_SCHEMA.slice(1)+"}";
+  var prompt="Eres agrónomo experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", "+(p.type==="hidro"?"hidroponía":"en tierra")+(placeLabel(p)?", en "+placeCtx(p):"")+". Problema detectado: "+(hh?hh.title+(hh.why?" — "+hh.why:""):"no especificado")+".\nArma un plan de tratamiento por días. Responde SOLO JSON válido en español sencillo: {"+PLAN_SCHEMA.slice(1)+"}";
   SAMPLE.json(prompt,{modelTier:"default"}).then(function(r){startPlan(p,r,hh?hh.title:"Tratamiento",hh?hh.sev:"atencion");ui.planBusy=null;save();render();showToast("📋 Plan listo. Los pasos de hoy están en «Para hoy».");})
   .catch(function(){ui.planBusy=null;if(hh&&hh.steps&&hh.steps.length){startPlan(p,planFromSteps(hh),hh.title,hh.sev);save();showToast("📋 Plan armado con el diagnóstico.");}else showToast("No pude armar el plan ahora. Intenta en un momento.");render();});
 }
@@ -995,7 +1068,7 @@ function treatCard(p){
 function mkCare(p){
   if(!SAMPLE)return;
   ui.careBusy=p.id;render();
-  var prompt="Eres experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", cultivo "+(p.type==="hidro"?"hidropónico":"en tierra")+(p.place?", ubicada en "+p.place:"")+".\nResponde SOLO con JSON válido en español: {"+CARE_SCHEMA+",\"category\":\"una de: "+CATS.join(", ")+"\",\"sci\":\"nombre científico\"}";
+  var prompt="Eres experto en plantas en Costa Rica. Planta: "+p.name+(p.sci?" ("+p.sci+")":"")+", cultivo "+(p.type==="hidro"?"hidropónico":"en tierra")+(placeLabel(p)?", ubicada en "+placeCtx(p):"")+".\nResponde SOLO con JSON válido en español: {"+CARE_SCHEMA+",\"category\":\"una de: "+CATS.join(", ")+"\",\"sci\":\"nombre científico\"}";
   SAMPLE.json(prompt,{modelTier:"quick"}).then(function(r){
     p.care=careFrom(r);
     var add=remsFrom(r);p.reminders=p.reminders||[];
@@ -1024,7 +1097,7 @@ function analyze(){
     finishDiag(r);return;
   }
   d.busy=true;render();
-  var ctx="Planta: "+(p?p.name+" ("+(p.type==="hidro"?"hidroponía":"en tierra")+(p.place?", "+p.place:"")+")":"no especificada")+".\n";
+  var ctx="Planta: "+(p?p.name+" ("+(p.type==="hidro"?"hidroponía":"en tierra")+(placeLabel(p)?", "+placeCtx(p):"")+")":"no especificada")+".\n";
   if(p&&p.type==="hidro"){var m=lastOf(p.id,"medicion");if(m)ctx+="Última medición: pH "+m.ph+", EC "+m.ec+" mS/cm, agua "+(m.temp||"?")+" °C (metas pH "+p.phMin+"-"+p.phMax+", EC "+p.ecMin+"-"+p.ecMax+").\n";}
   if(p&&p.type!=="hidro"){var la=lastOf(p.id,"agua");ctx+="Riega cada "+p.water+" días; abona cada "+p.feed+" días."+(la?" Último riego: "+la.d+".":"")+"\n";}
   ctx+="Síntomas marcados: "+(d.sym.length?d.sym.map(function(s){return SYMPTOMS.filter(function(x){return x[0]===s;})[0][1];}).join(", "):"ninguno")+".\nNotas del dueño: "+((d.note||"").trim()||"ninguna")+".\n";
@@ -1060,10 +1133,30 @@ document.addEventListener("click",function(e){
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v"),pid=el.getAttribute("data-p");
   if(a==="bgclose"){if(e.target===el){ui.sheet=null;render();}return;}
   if(a==="tab"){ui.tab=v;ui.cat="";ui.sheet=null;try{history.replaceState(null,"","#"+v);}catch(x){location.hash=v;}render();window.scrollTo(0,0);}
+  else if(a==="close"&&ui.sheet&&ui.sheet.k==="lugar"){ui.sheet=ui.backTo||null;ui.backTo=null;ui.lugar=null;render();}
   else if(a==="close"){if(ui.sheet&&ui.sheet.k==="receta"&&ui.prevSheet){ui.sheet=ui.prevSheet;ui.prevSheet=null;}else ui.sheet=null;render();}
   else if(a==="new"){ui.addType=v||(ui.tab==="hidro"?"hidro":"tierra");ui.idErr="";ui.idBusy=null;openSheet({k:"add"});}
   else if(a==="manual"){ui.form=newForm(ui.addType||"tierra");ui.idInfo=null;openSheet({k:"form"});}
   else if(a==="cat"){ui.cat=v;render();}
+  else if(a==="pcat"){ui.pcat=v;render();}
+  else if(a==="newplace"){if(ui.sheet&&ui.sheet.k==="form")readForm();ui.backTo=ui.sheet;ui.lugar=null;openSheet({k:"lugar"});}
+  else if(a==="editplace"){var pe=placeById(v);ui.backTo=ui.sheet;ui.lugar={id:pe.id,name:pe.name,area:pe.area||"",lat:pe.lat,lon:pe.lon,out:!!pe.out,busy:false,err:""};openSheet({k:"lugar"});}
+  else if(a==="pl-out"){readLugar();ui.lugar.out=v==="1";render();}
+  else if(a==="pl-geo"){readLugar();var LL=ui.lugar;if(!navigator.geolocation){LL.err="Este teléfono no permite leer la ubicación. Escribe la zona.";render();return;}LL.busy=true;LL.err="";render();
+    navigator.geolocation.getCurrentPosition(function(pos){var la=pos.coords.latitude,lo=pos.coords.longitude;geoName(la,lo).then(function(nm){LL.lat=la;LL.lon=lo;LL.area=nm;LL.busy=false;LL.opts=null;render();});},function(){LL.busy=false;LL.err="No se pudo leer la ubicación (¿diste permiso?). Escribe la zona.";render();},{enableHighAccuracy:false,timeout:15000,maximumAge:600000});}
+  else if(a==="pl-search"){readLugar();var q=(document.getElementById("pl-q").value||"").trim();var L2=ui.lugar;if(!q)return;L2.err="";
+    fetch("https://geocoding-api.open-meteo.com/v1/search?count=5&language=es&name="+encodeURIComponent(q.split(",")[0].trim())).then(function(r){return r.json();}).then(function(j){
+      var rs=(j.results||[]).sort(function(a,b){return (b.country_code==="CR")-(a.country_code==="CR");});
+      if(!rs.length){L2.err="No encontré esa zona. Prueba solo con el nombre del pueblo.";render();return;}
+      L2.opts=rs.map(function(x){return {lat:x.latitude,lon:x.longitude,label:[x.name,x.admin2||x.admin1,x.country].filter(Boolean).join(", ")};});render();
+    }).catch(function(){L2.err="Sin conexión para buscar la zona.";render();});}
+  else if(a==="pl-pick"){readLugar();var o=ui.lugar.opts[+v];ui.lugar.lat=o.lat;ui.lugar.lon=o.lon;ui.lugar.area=o.label.replace(/, Costa Rica$/,"");ui.lugar.opts=null;render();}
+  else if(a==="pl-save"){readLugar();var L3=ui.lugar;if(!L3.name.trim()){document.getElementById("pl-name").focus();return;}
+    if(L3.id){var ex=S.log.filter(function(l){return l.id===L3.id;})[0];if(ex){ex.name=L3.name.trim();ex.area=L3.area;ex.lat=L3.lat;ex.lon=L3.lon;ex.out=L3.out;}}
+    else{var ne2={kind:"lugar",name:L3.name.trim(),area:L3.area,lat:L3.lat,lon:L3.lon,out:L3.out};addLog(ne2);L3.id=ne2.id;if(ui.backTo&&ui.backTo.k==="form"&&ui.form)ui.form.placeId=ne2.id;}
+    save();ui.sheet=ui.backTo||null;ui.backTo=null;ui.lugar=null;showToast("📍 Lugar guardado.");render();}
+  else if(a==="pl-del"){var did=ui.lugar.id;S.log=S.log.filter(function(l){return l.id!==did;});S.plants.forEach(function(pp){if(pp.placeId===did)pp.placeId=null;});save();ui.sheet=ui.backTo||null;ui.backTo=null;ui.lugar=null;render();}
+  else if(a==="rained"){var pr=plant(pid);addLog({plantId:pid,kind:"agua",note:"lluvia"});showToast("🌧️ Anotado: la lluvia regó "+pr.name+".");save();render();}
   else if(a==="reccat"){ui.recCat=v;render();}
   else if(a==="receta"){ui.prevSheet=ui.sheet&&ui.sheet.k!=="receta"?ui.sheet:null;openSheet({k:"receta",id:v});}
   else if(a==="ajustes"){ui.importData=null;ui.members=null;ui.confirmLogout=false;openSheet({k:"ajustes"});loadMembers();}
