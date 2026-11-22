@@ -18,4 +18,4 @@ jobs:
         with:
           version: latest
       - name: Publicar función ia
-        run: supabase functions deploy ia --project-ref "$PROJECT_REF" --use-api
+        run: supabase functions deploy ia --project-ref "$PROJECT_REF" --use-api --yes
