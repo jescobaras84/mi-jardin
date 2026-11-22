@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("GEMINI_API_KEY");
   if (!key) return json({ code: "unavailable", message: "Falta el secreto GEMINI_API_KEY" }, 500);
   // Varios modelos gratis: si uno está saturado (503/429/500), prueba el siguiente.
-  const models = (Deno.env.get("GEMINI_MODELS") || "gemini-flash-latest,gemini-flash-lite-latest,gemini-2.5-flash")
+  const models = (Deno.env.get("GEMINI_MODELS") || "gemini-flash-lite-latest,gemini-flash-latest,gemini-2.5-flash")
     .split(",").map((m) => m.trim()).filter(Boolean);
   const parts = [
     ...images.map((data) => ({ inline_data: { mime_type: "image/jpeg", data } })),
@@ -44,9 +44,11 @@ Deno.serve(async (req) => {
   const base = { contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json" } };
   const rapido = JSON.stringify({ ...base, generationConfig: { ...base.generationConfig, thinkingConfig: { thinkingBudget: 0 } } });
   const normal = JSON.stringify(base);
-  const llamar = (m: string, body: string) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
-    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body,
-  });
+  // Cada modelo tiene 20 s; si no responde, se pasa al siguiente (respuesta 504 simulada).
+  const llamar = (m: string, b: string) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: b, signal: AbortSignal.timeout(20000),
+  }).catch(() => new Response("tiempo agotado", { status: 504 }));
+  const t0 = Date.now();
   let r: Response | null = null, model = "", last = "";
   for (const m of models) {
     model = m;
@@ -54,11 +56,11 @@ Deno.serve(async (req) => {
     if (r.status === 400) r = await llamar(m, normal); // modelo que no acepta apagar el pensamiento
     if (r.ok) break;
     last = `${m} → ${r.status}: ${(await r.text()).slice(0, 200)}`;
-    if (![429, 500, 503, 404].includes(r.status)) break; // error de clave o de pedido: no tiene caso seguir
+    if (![429, 500, 503, 504, 404].includes(r.status)) break; // error de clave o de pedido: no tiene caso seguir
   }
   if (!r || !r.ok) {
     const st = r?.status ?? 502;
-    if (st === 429 || st === 503) return json({ code: "rate_limited", message: "Los modelos gratis de Gemini están saturados ahora. Intenta en unos minutos.", detail: last }, 429);
+    if (st === 429 || st === 503 || st === 504) return json({ code: "rate_limited", message: "Los modelos gratis de Gemini están saturados ahora. Intenta en unos minutos.", detail: last }, 429);
     return json({ code: "unavailable", message: "Gemini no respondió bien", detail: last }, 502);
   }
 
@@ -66,7 +68,7 @@ Deno.serve(async (req) => {
   const text = (out?.candidates?.[0]?.content?.parts ?? []).map((p: { text?: string }) => p.text ?? "").join("").trim();
   const clean = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   try {
-    return json({ json: JSON.parse(clean), model });
+    return json({ json: JSON.parse(clean), model, ms: Date.now() - t0 });
   } catch {
     return json({ code: "bad_response", message: "La IA no devolvió un JSON válido", text: text.slice(0, 500) }, 502);
   }

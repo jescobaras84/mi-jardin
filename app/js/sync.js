@@ -200,7 +200,7 @@
   function ai(prompt, blobs){
     var sbc = window.__mjSb; if (!sbc) return Promise.reject({ code: "not_granted", message: "Entra con tu correo para usar la IA" });
     var t0 = Date.now();
-    var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej({ code: "unavailable", message: "La IA no respondió en 60 s (la solicitud no volvió de Supabase)" }); }, 60000); });
+    var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej({ code: "unavailable", message: "La IA no respondió en 75 s. Revisa tu señal e intenta de nuevo" }); }, 75000); });
     waitStart();
     return Promise.race([timeout, Promise.all((blobs || []).map(function(b){ return shrink(b).then(b64); })).then(function(imgs){
       // Prueba el nombre configurado y, si no existe o no responde, los otros nombres posibles de la función.

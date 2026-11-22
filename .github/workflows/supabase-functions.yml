@@ -1,0 +1,21 @@
+# Publica las funciones de Supabase (carpeta supabase/functions) cada vez que cambian en main.
+# Requiere el secreto SUPABASE_ACCESS_TOKEN en GitHub → Settings → Secrets and variables → Actions.
+name: Publicar funciones de Supabase
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/functions/**"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: dinamuxieqpoiarruhks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Publicar función ia
+        run: supabase functions deploy ia --project-ref "$PROJECT_REF" --use-api
