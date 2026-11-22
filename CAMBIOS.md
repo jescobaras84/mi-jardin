@@ -7,3 +7,4 @@
 | 21 nov 2026 | IA gratuita | Gemini (nivel gratis) vía función de Supabase «ia» en vez de Cloudflare Worker: una cuenta menos. DeepSeek queda como opción v2 | Sin cambio de fecha |
 | 21 nov 2026 | Ideas de apps similares (Planta, PictureThis, PlantIn) | Aprobado: recetario con respaldo (hecho), responsable por planta, lugares con ubicación geográfica, avisos por persona, «hecho por», botón «tierra húmeda, posponer». A enero: zona afectada en la foto y tamaño de maceta | Sin cambio de fecha final |
 | 21 nov 2026 | Página de presentación en Netlify | Extra fuera del MVP, sin afectar la app (carpeta web/) | Sin cambio de fecha |
+| 21/11/2026 | Rediseño visual profesional (v0.8.0) alineado con la página web; preparación para tiendas de apps a futuro | Pedido por Jonathan | Solo estilo, sin cambios de funciones |
