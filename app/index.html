@@ -217,9 +217,9 @@ textarea{min-height:80px;resize:vertical}
 (function(){
 "use strict";
 /* Iconos: Lucide (licencia ISC, https://lucide.dev) */
-var ICS={"hoy": "<circle cx=\"12\" cy=\"12\" r=\"4\"/> <path d=\"M12 2v2\"/> <path d=\"M12 20v2\"/> <path d=\"m4.93 4.93 1.41 1.41\"/> <path d=\"m17.66 17.66 1.41 1.41\"/> <path d=\"M2 12h2\"/> <path d=\"M20 12h2\"/> <path d=\"m6.34 17.66-1.41 1.41\"/> <path d=\"m19.07 4.93-1.41 1.41\"/>", "plantas": "<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\"/> <path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\"/> <path d=\"M5 21h14\"/>", "hidro": "<path d=\"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z\"/> <path d=\"M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97\"/>", "salud": "<path d=\"M11 2v2\"/> <path d=\"M5 2v2\"/> <path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/> <path d=\"M8 15a6 6 0 0 0 12 0v-3\"/> <circle cx=\"20\" cy=\"10\" r=\"2\"/>", "ajustes": "<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mas": "<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>", "agua": "<path d=\"M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z\"/>", "abono": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\"/> <path d=\"M6.453 15h11.094\"/> <path d=\"M8.5 2h7\"/>", "medicion": "<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\"/> <path d=\"m14.5 12.5 2-2\"/> <path d=\"m11.5 9.5 2-2\"/> <path d=\"m8.5 6.5 2-2\"/> <path d=\"m17.5 15.5 2-2\"/>", "solucion": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>", "rem": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\"/> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\"/>", "inspeccion": "<path d=\"m21 21-4.34-4.34\"/> <circle cx=\"11\" cy=\"11\" r=\"8\"/>", "foto": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>", "control": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>", "trat": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\"/> <path d=\"M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27\"/>", "cosecha": "<path d=\"m15 11-1 9\"/> <path d=\"m19 11-4-7\"/> <path d=\"M2 11h20\"/> <path d=\"m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4\"/> <path d=\"M4.5 15.5h15\"/> <path d=\"m5 11 4-7\"/> <path d=\"m9 11 1 9\"/>", "nota": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\"/> <path d=\"M2 6h4\"/> <path d=\"M2 10h4\"/> <path d=\"M2 14h4\"/> <path d=\"M2 18h4\"/> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\"/>", "nube": "<path d=\"M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z\"/>", "sinnube": "<path d=\"M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057\"/> <path d=\"M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78\"/> <path d=\"m2 2 20 20\"/>", "persona": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>", "ok": "<path d=\"M20 6 9 17l-5-5\"/>", "ir": "<path d=\"m9 18 6-6-6-6\"/>", "cerrar": "<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>", "lluvia": "<path d=\"M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242\"/> <path d=\"M16 14v6\"/> <path d=\"M8 14v6\"/> <path d=\"M12 16v6\"/>", "hoja": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\"/> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\"/>", "lugar": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/> <circle cx=\"12\" cy=\"10\" r=\"3\"/>", "salud2": "<path d=\"M11 2v2\"/> <path d=\"M5 2v2\"/> <path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/> <path d=\"M8 15a6 6 0 0 0 12 0v-3\"/> <circle cx=\"20\" cy=\"10\" r=\"2\"/>"};
+var ICS={"hoy": "<circle cx=\"12\" cy=\"12\" r=\"4\"/> <path d=\"M12 2v2\"/> <path d=\"M12 20v2\"/> <path d=\"m4.93 4.93 1.41 1.41\"/> <path d=\"m17.66 17.66 1.41 1.41\"/> <path d=\"M2 12h2\"/> <path d=\"M20 12h2\"/> <path d=\"m6.34 17.66-1.41 1.41\"/> <path d=\"m19.07 4.93-1.41 1.41\"/>", "plantas": "<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\"/> <path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\"/> <path d=\"M5 21h14\"/>", "hidro": "<path d=\"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z\"/> <path d=\"M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97\"/>", "salud": "<path d=\"M11 2v2\"/> <path d=\"M5 2v2\"/> <path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/> <path d=\"M8 15a6 6 0 0 0 12 0v-3\"/> <circle cx=\"20\" cy=\"10\" r=\"2\"/>", "ajustes": "<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mas": "<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>", "agua": "<path d=\"M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z\"/>", "abono": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\"/> <path d=\"M6.453 15h11.094\"/> <path d=\"M8.5 2h7\"/>", "medicion": "<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\"/> <path d=\"m14.5 12.5 2-2\"/> <path d=\"m11.5 9.5 2-2\"/> <path d=\"m8.5 6.5 2-2\"/> <path d=\"m17.5 15.5 2-2\"/>", "solucion": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>", "rem": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\"/> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\"/>", "inspeccion": "<path d=\"m21 21-4.34-4.34\"/> <circle cx=\"11\" cy=\"11\" r=\"8\"/>", "foto": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>", "control": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>", "trat": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\"/> <path d=\"M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27\"/>", "cosecha": "<path d=\"m15 11-1 9\"/> <path d=\"m19 11-4-7\"/> <path d=\"M2 11h20\"/> <path d=\"m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4\"/> <path d=\"M4.5 15.5h15\"/> <path d=\"m5 11 4-7\"/> <path d=\"m9 11 1 9\"/>", "nota": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\"/> <path d=\"M2 6h4\"/> <path d=\"M2 10h4\"/> <path d=\"M2 14h4\"/> <path d=\"M2 18h4\"/> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\"/>", "nube": "<path d=\"M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z\"/>", "sinnube": "<path d=\"M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057\"/> <path d=\"M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78\"/> <path d=\"m2 2 20 20\"/>", "persona": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>", "ok": "<path d=\"M20 6 9 17l-5-5\"/>", "ir": "<path d=\"m9 18 6-6-6-6\"/>", "cerrar": "<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>", "lluvia": "<path d=\"M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242\"/> <path d=\"M16 14v6\"/> <path d=\"M8 14v6\"/> <path d=\"M12 16v6\"/>", "hoja": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\"/> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\"/>", "lugar": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/> <circle cx=\"12\" cy=\"10\" r=\"3\"/>", "salud2": "<path d=\"M11 2v2\"/> <path d=\"M5 2v2\"/> <path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/> <path d=\"M8 15a6 6 0 0 0 12 0v-3\"/> <circle cx=\"20\" cy=\"10\" r=\"2\"/>", "spray": "<path d=\"m12 19 8-3\"/> <path d=\"M14 6h-2\"/> <path d=\"M18 8.172V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v3.172\"/> <path d=\"m20 11-8 3\"/> <path d=\"M20 20a2 2 0 01-2 2h-4a2 2 0 01-2-2v-9a3 3 0 013-3h2a3 3 0 013 3z\"/> <path d=\"M4 10h.01\"/> <path d=\"M4 2h.01\"/> <path d=\"M4 6h.01\"/> <path d=\"M8 4h.01\"/> <path d=\"M8 8h.01\"/>", "producto": "<path d=\"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z\"/> <path d=\"M12 22V12\"/> <polyline points=\"3.29 7 12 12 20.71 7\"/> <path d=\"m7.5 4.27 9 5.15\"/>"};
 function ic(n,c){return '<svg class="ic'+(c?" "+c:"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICS[n]||"")+'</svg>';}
-var LS_KEY="miJardin.v1", APP_VERSION="0.8.1";
+var LS_KEY="miJardin.v1", APP_VERSION="0.9.0";
 var ART=null, SAMPLE=null, pubTimer=null, ui={tab:"hoy",sheet:null,form:null,diag:{plant:"",sym:[],img:null,imgUrl:"",busy:false,err:""},confirmDel:false};
 
 /* ---------- datos ---------- */
@@ -300,7 +300,10 @@ function tasksFor(p){
     out.push({kind:"solucion",label:"Cambiar solución nutritiva",due:addDays(ls?ls.d:(p.lastSol||p.created),p.sol||14)});
   }else{
     var la=lastOf(p.id,"agua"), lf=lastOf(p.id,"abono");
-    out.push({kind:"agua",label:"Regar",due:addDays(la?la.d:(p.lastWater||p.created),p.water||3)});
+    var lh=lastOf(p.id,"humeda"),dueA=addDays(la?la.d:(p.lastWater||p.created),p.water||3);
+    // «Tierra húmeda»: si es posterior al último riego, el riego se corre unos días sin anotar un riego.
+    if(lh&&(!la||lh.d>la.d||(lh.d===la.d&&(lh.t||0)>(la.t||0))))dueA=addDays(lh.d,lh.dias||2);
+    out.push({kind:"agua",label:"Regar",due:dueA});
     out.push({kind:"abono",label:"Abonar",due:addDays(lf?lf.d:(p.lastFeed||p.created),p.feed||21)});
   }
   (p.reminders||[]).forEach(function(r){
@@ -351,9 +354,9 @@ function timeline(p){
   return t.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.t||0)-(b.t||0);});
 }
 function photosOf(p){return timeline(p).filter(function(l){return l.thumb;});}
-var ICON={};["cosecha","agua","abono","medicion","solucion","nota","rem","inspeccion","foto","control","trat"].forEach(function(k){ICON[k]=ic(k);});ICON.salud=ic("salud");
+var ICON={};["cosecha","agua","abono","medicion","solucion","nota","rem","inspeccion","foto","control","trat"].forEach(function(k){ICON[k]=ic(k);});ICON.salud=ic("salud");ICON.humeda=ic("agua");ICON.aplica=ic("spray");
 var SPIN='<span class="spinner" aria-hidden="true"></span>';
-var KINDNAME={agua:"Riego",abono:"Abono",medicion:"Medición",solucion:"Cambio de solución",salud:"Revisión de salud",nota:"Nota",cosecha:"Cosecha",rem:"Recordatorio",inspeccion:"Inspección preventiva",foto:"Foto de seguimiento"};
+var KINDNAME={agua:"Riego",abono:"Abono",medicion:"Medición",solucion:"Cambio de solución",salud:"Revisión de salud",nota:"Nota",cosecha:"Cosecha",rem:"Recordatorio",inspeccion:"Inspección preventiva",foto:"Foto de seguimiento",humeda:"Tierra húmeda: riego pospuesto",aplica:"Aplicación"};
 
 /* ---------- guardar ---------- */
 function save(){
@@ -397,7 +400,13 @@ function showToast(msg,undo,ms){
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){ui.toast=null;try{sessionStorage.removeItem("miJardin.toast");}catch(e){}render();},ms);
 }
 function addLog(entry){entry.id=uid();entry.t=Date.now();entry.d=entry.d||today();if(myEmail()&&!entry.by)entry.by=myEmail();S.log.push(entry);}
+/* Mis productos: registros log kind "producto" (sin planta) {name, uso: abono|plaga|hongo|otro, dosis, casero, recId} */
+var USO={abono:"Abono",plaga:"Plagas",hongo:"Hongos",otro:"Otro"};
+function productos(uso){return S.log.filter(function(l){return l.kind==="producto"&&(!uso||(Array.isArray(uso)?uso.indexOf(l.uso)>=0:l.uso===uso));}).sort(function(a,b){return (a.name||"").localeCompare(b.name||"");});}
+function wetSuggest(p){if(!p||p.type==="hidro")return null;var lim=addDays(today(),-30),desde=p.waterAdjOn||"";var n=plantLog(p.id).filter(function(l){return l.kind==="humeda"&&l.d>=lim&&l.d>desde;}).length;return n>=3?{n:n,cada:(p.water||3)+2}:null;}
 function doTask(pid,kind,remId){
+  if(kind==="abono"&&!ui.prodPicked&&productos("abono").length){ui.usarBack=ui.sheet;openSheet({k:"usar",pid:pid,kind:"abono"});return;}
+  var pick=ui.prodPicked;ui.prodPicked=null;
   if(kind==="medicion"){openSheet({k:"medir",pid:pid});return;}
   if(kind==="trat"){
     var pt=plant(pid),tr=pt&&pt.treatment;if(!tr)return;
@@ -410,7 +419,7 @@ function doTask(pid,kind,remId){
   }
   var dup=S.log.filter(function(l){return l.plantId===pid&&l.kind===kind&&(l.remId||null)===(remId||null)&&l.d===today();})[0];
   if(dup){var p0=plant(pid),n0=tasksFor(p0).filter(function(t){return t.kind===kind&&(t.remId||null)===(remId||null);})[0];showToast("👍 Ya estaba anotado hoy. Próximo: "+(n0?nice(n0.due):"—")+".");render();return;}
-  var e={plantId:pid,kind:kind}; if(remId)e.remId=remId;
+  var e={plantId:pid,kind:kind}; if(remId)e.remId=remId; if(pick&&pick.id){e.prodId=pick.id;e.prod=pick.name;}
   addLog(e);
   var p=plant(pid),nt=tasksFor(p).filter(function(t){return t.kind===kind&&(t.remId||null)===(remId||null);})[0];
   var what={agua:"Riego",abono:"Abono",solucion:"Cambio de solución",inspeccion:"Inspección",rem:nt?nt.label:"Tarea"}[kind]||"Tarea";
@@ -453,6 +462,7 @@ function taskRow(t){
   var title=t.kind==="trat"?esc(t.label):esc(t.label)+' · '+esc(t.p.name);
   if(t.p.resp)title+='<span class="who">'+esc(shortName(t.p.resp))+'</span>';
   var plx=placeOf(t.p);
+  if(t.kind==="agua"&&t.days<=0)right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="done" data-p="'+t.p.id+'" data-k="agua">Listo</button><button class="btn sm ghost" data-a="wet" data-p="'+t.p.id+'">Húmeda</button></div>';
   if(t.kind==="agua"&&t.days<=0&&plx&&plantOut(t.p)&&rainsToday(plx))right='<div style="display:flex;flex-direction:column;gap:4px"><button class="btn sm" data-a="rained" data-p="'+t.p.id+'">'+ic("lluvia","sm")+' Llovió</button><button class="btn sm ghost" data-a="done" data-p="'+t.p.id+'" data-k="agua">Regué</button></div>';
   return '<div class="task'+(late||pr===1?" late":"")+'"><div class="ico i-'+t.kind+'">'+(ICON[t.kind]||t.icon)+'</div><div class="t">'+chip+'<b>'+title+'</b><small>'+(t.kind==="trat"?t.p.emoji+' '+esc(t.p.name)+' · ':t.p.emoji+' ')+when+'</small></div>'+right+'</div>';
 }
@@ -582,8 +592,8 @@ var LVL={ok:["✅ Funciona","l-ok"],parcial:["⚠️ A medias","l-parcial"],mito
 function recetario(){
   var R=window.MJ_RECETAS||[];if(!R.length)return "";
   var c=ui.recCat||"";
-  var h='<div class="sec">Recetario casero con respaldo</div><div class="card"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Solo remedios que los especialistas agrícolas confirman que funcionan, y los mitos que conviene evitar.</p>';
-  h+='<div class="chips" style="margin-bottom:6px">'+[["","Todos"],["plagas","🐛 Plagas"],["hongos","🍄 Hongos"],["esquejes","🌱 Esquejes"],["mitos","🚫 Mitos"]].map(function(x){return '<button class="chip'+(c===x[0]?" on":"")+'" data-a="reccat" data-v="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>';
+  var h=misProductos()+'<div class="sec">Recetario casero con respaldo</div><div class="card"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Solo remedios que los especialistas agrícolas confirman que funcionan, y los mitos que conviene evitar.</p>';
+  h+='<div class="chips" style="margin-bottom:6px">'+[["","Todos"],["plagas","🐛 Plagas"],["hongos","🍄 Hongos"],["abonos","Abonos caseros"],["esquejes","🌱 Esquejes"],["mitos","🚫 Mitos"]].map(function(x){return '<button class="chip'+(c===x[0]?" on":"")+'" data-a="reccat" data-v="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>';
   R.filter(function(r){return !c||r.cat===c;}).forEach(function(r){h+='<button class="rec" data-a="receta" data-v="'+r.id+'"><span class="re">'+r.emoji+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(r.nombre)+'</b><small style="color:var(--muted)">'+esc(r.para.join(" · "))+'</small><br><span class="lvl '+LVL[r.nivel][1]+'">'+LVL[r.nivel][0]+'</span></span><span style="color:var(--faint)">'+ic("ir")+'</span></button>';});
   return h+'</div>';
 }
@@ -616,6 +626,30 @@ function geoName(lat,lon){
     .catch(function(){return lat.toFixed(3)+", "+lon.toFixed(3);});
 }
 function readLugar(){var L=ui.lugar,n=document.getElementById("pl-name");if(n)L.name=n.value;}
+function viewUsar(s){
+  var p=plant(s.pid),ab=s.kind==="abono",lista=ab?productos("abono"):productos(["plaga","hongo","otro"]);if(!lista.length)lista=productos();
+  var h='<button class="x" data-a="close">✕</button><h2>'+(ab?"¿Con qué abonaste?":"¿Qué aplicaste?")+'</h2><p style="color:var(--muted);font-size:14px;margin:-6px 0 12px">'+esc(p?p.name:"")+' · queda en su historial.</p><div class="card">';
+  h+=lista.map(function(x){return '<button class="rec" data-a="usar-ok" data-v="'+x.id+'" data-p="'+s.pid+'" data-k="'+s.kind+'"><span class="re">'+ic(x.uso==="abono"?"abono":"spray")+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(x.name)+'</b><small style="color:var(--muted)">'+(x.casero?"Casero · ":"")+esc(x.dosis||USO[x.uso]||"")+'</small></span></button>';}).join("")+(lista.length?'':'<p style="color:var(--muted);font-size:14px">Todavía no tienes productos guardados.</p>')+'</div>';
+  h+='<div class="actions">'+(ab?'<button class="btn sm line" data-a="usar-ok" data-v="" data-p="'+s.pid+'" data-k="abono">Otro / sin anotar</button>':'')+'<button class="btn sm ghost" data-a="prod-new" data-v="'+(ab?"abono":"plaga")+'">'+ic("mas","sm")+' Agregar producto</button></div>';
+  return h;
+}
+function viewProducto(s){
+  var x=s.id?S.log.filter(function(l){return l.id===s.id;})[0]:null,f=x||{name:"",uso:s.uso||"abono",dosis:"",casero:false,nota:""};
+  var h='<button class="x" data-a="close">✕</button><h2>'+(x?"Editar producto":"Nuevo producto")+'</h2>';
+  h+='<label class="f"><span>Nombre</span><input type="text" id="pr-n" value="'+esc(f.name)+'" placeholder="Ej.: Abono 15-15-15, jabón potásico, compost casero"></label>';
+  h+='<label class="f"><span>Para qué es</span><select id="pr-u">'+Object.keys(USO).map(function(k){return '<option value="'+k+'"'+(f.uso===k?" selected":"")+'>'+USO[k]+'</option>';}).join("")+'</select></label>';
+  h+='<label class="f"><span>Dosis o cómo se usa</span><input type="text" id="pr-d" value="'+esc(f.dosis||"")+'" placeholder="Ej.: 5 ml por litro, cada 15 días"></label>';
+  h+='<label class="f" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="pr-c"'+(f.casero?" checked":"")+' style="width:20px;height:20px"><span style="margin:0;color:var(--ink)">Lo preparé en casa</span></label>';
+  h+='<label class="f"><span>Nota (opcional)</span><input type="text" id="pr-o" value="'+esc(f.nota||"")+'" placeholder="Dónde lo compré, precio, cuidados"></label>';
+  h+='<button class="btn block" data-a="prod-save" data-v="'+(x?x.id:"")+'">Guardar</button>';
+  if(x){var usos=S.log.filter(function(l){return l.prodId===x.id;}).length;h+='<p class="note">Usado '+usos+(usos===1?" vez":" veces")+' en tus plantas.</p><div class="actions"><button class="btn sm danger" data-a="prod-del" data-v="'+x.id+'">Eliminar producto</button></div>';}
+  return h;
+}
+function misProductos(){
+  var L=productos(),h='<div class="sec">Mis productos</div><div class="card"><p style="font-size:13px;color:var(--muted);margin-bottom:6px">Lo que compras o preparas para abonar y fumigar. Al abonar o aplicar, eliges cuál usaste y queda en el historial de la planta.</p>';
+  h+=L.map(function(x){var n=S.log.filter(function(l){return l.prodId===x.id;}).length;return '<button class="rec" data-a="prod-edit" data-v="'+x.id+'"><span class="re">'+ic(x.uso==="abono"?"abono":"spray")+'</span><span style="flex:1;min-width:0"><b style="display:block">'+esc(x.name)+'</b><small style="color:var(--muted)">'+USO[x.uso]+(x.casero?" · casero":"")+(x.dosis?" · "+esc(x.dosis):"")+(n?" · usado "+n+(n===1?" vez":" veces"):"")+'</small></span><span style="color:var(--faint)">'+ic("ir")+'</span></button>';}).join("");
+  return h+'<div class="actions" style="margin-bottom:0"><button class="btn sm ghost" data-a="prod-new" data-v="abono">'+ic("mas","sm")+' Agregar producto</button></div></div>';
+}
 function viewReceta(id){
   var r=(window.MJ_RECETAS||[]).filter(function(x){return x.id===id;})[0];
   if(!r)return '<button class="x" data-a="close">✕</button><p>Receta no encontrada.</p>';
@@ -624,6 +658,7 @@ function viewReceta(id){
   if(r.ingredientes.length)h+='<div class="card"><b>Necesitas</b><ul style="padding-left:18px;margin-top:6px;font-size:14px">'+r.ingredientes.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>';
   if(r.pasos.length)h+='<div class="card"><b>Cómo se hace</b><ol style="padding-left:20px;margin-top:6px;font-size:14px">'+r.pasos.map(function(x){return '<li style="margin-bottom:4px">'+esc(x)+'</li>';}).join("")+'</ol>'+(r.frecuencia?'<p style="font-size:14px;margin-top:6px"><b>Frecuencia:</b> '+esc(r.frecuencia)+'</p>':'')+'</div>';
   h+='<div class="card" style="background:'+(r.nivel==="mito"?"var(--rustbg)":"var(--sunbg)")+';border:0"><b>'+(r.nivel==="mito"?"Por qué no":"⚠️ Cuidado")+'</b><ul style="padding-left:18px;margin-top:6px;font-size:14px">'+r.cuidado.map(function(x){return '<li style="margin-bottom:3px">'+esc(x)+'</li>';}).join("")+'</ul></div>';
+  if(r.nivel!=="mito"&&r.cat!=="esquejes")h+='<div class="actions"><button class="btn sm" data-a="rec-prod" data-v="'+r.id+'">'+ic("producto","sm")+' La preparé: guardar en mis productos</button></div>';
   if(r.fuente)h+='<p class="note">Fuente: <a href="'+esc(r.fuente.u)+'" target="_blank" rel="noopener" style="color:var(--leaf)">'+esc(r.fuente.t)+'</a></p>';
   h+='<p class="note">Es orientación general. Si usas un producto comprado, manda lo que diga su etiqueta.</p>';
   return h;
@@ -687,6 +722,8 @@ function viewSheet(){
   else if(s.k==="receta")h+=viewReceta(s.id);
   else if(s.k==="lugar")h+=viewLugar();
   else if(s.k==="cosecha")h+=viewCosecha(plant(s.pid));
+  else if(s.k==="usar")h+=viewUsar(s);
+  else if(s.k==="producto")h+=viewProducto(s);
   else if(s.k==="plant")h+=viewPlant(plant(s.pid));
   else if(s.k==="medir")h+=viewMedir(plant(s.pid));
   return h+'</div></div>';
@@ -737,7 +774,7 @@ function viewPlant(p){
   if(al)h+='<div class="read" style="background:var(--rustbg);color:var(--rust)">'+esc(al.join(", "))+'</div>';
   h+='<div class="actions">';
   if(p.type==="hidro")h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="medicion">'+ic("medicion","sm")+' Medir</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="solucion">'+ic("solucion","sm")+' Cambié solución</button>';
-  else h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="agua">'+ic("agua","sm")+' Regué</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="abono">'+ic("abono","sm")+' Aboné</button>';
+  else h+='<button class="btn sm" data-a="done" data-p="'+p.id+'" data-k="agua">'+ic("agua","sm")+' Regué</button><button class="btn sm ghost" data-a="done" data-p="'+p.id+'" data-k="abono">'+ic("abono","sm")+' Aboné</button><button class="btn sm ghost" data-a="aplica" data-p="'+p.id+'">'+ic("spray","sm")+' Fumigué / apliqué</button>';
   if(canHarvest(p))h+='<button class="btn sm ghost" data-a="cosecha" data-p="'+p.id+'">'+ic("cosecha","sm")+' Cosecha</button>';
   h+='<label class="btn sm line" for="fu-d-'+p.id+'">'+ic("foto","sm")+' Foto de seguimiento</label><input type="file" accept="image/*" capture="environment" id="fu-d-'+p.id+'" data-fu="'+p.id+'" style="display:none"><button class="btn sm line" data-a="checkhealth" data-p="'+p.id+'">'+ic("salud","sm")+' Revisar salud</button></div>';
   if(ui.fuBusy===p.id)h+='<div class="read" style="background:var(--leafbg);color:var(--leaf)">'+SPIN+' Comparando con la foto anterior…</div>';
@@ -746,10 +783,11 @@ function viewPlant(p){
   if(p.type==="hidro")h+='<div class="kv"><span>pH meta</span><b>'+p.phMin+'–'+p.phMax+'</b></div><div class="kv"><span>EC meta</span><b>'+p.ecMin+'–'+p.ecMax+' mS/cm</b></div>';
   else h+='<div class="kv"><span>Frecuencia</span><b>Riego c/'+p.water+' d · Abono c/'+p.feed+' d</b></div>';
   h+='</div>';
+  var ws=wetSuggest(p);if(ws)h+='<div class="tip" style="margin-bottom:12px"><b>La tierra suele seguir húmeda cuando toca regar</b> ('+ws.n+' veces este mes). Prueba regar cada '+ws.cada+' días en vez de '+(p.water||3)+'.<div class="actions" style="margin:8px 0 0"><button class="btn sm" data-a="water-adj" data-p="'+p.id+'" data-v="'+ws.cada+'">Regar cada '+ws.cada+' días</button><button class="btn sm line" data-a="water-keep" data-p="'+p.id+'">Dejar igual</button></div></div>';
   if(p.notes)h+='<div class="card" style="font-size:14px">'+ic("nota","sm")+' '+esc(p.notes)+'</div>';
   h+=treatCard(p)+evoCard(p)+careCard(p)+propCard(p)+remCard(p)+diaryCard(p);
   var lg=plantLog(p.id).slice(0,15);
-  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="cosecha"?": "+(l.qty!=null?l.qty+" ":"")+(l.unit||""):l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:"";return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+(l.note==="lluvia"?" (lluvia)":"")+(l.by?' <span class="who">'+esc(shortName(l.by))+'</span>':'')+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
+  h+='<div class="sec">Historial</div><div class="card">'+(lg.length?lg.map(function(l){var rr=l.kind==="rem"?(p.reminders||[]).filter(function(r){return r.id===l.remId;})[0]:null;var extra=l.kind==="cosecha"?": "+(l.qty!=null?l.qty+" ":"")+(l.unit||""):l.kind==="rem"?": "+(rr?rr.label:"(eliminado)"):l.kind==="nota"?": "+(l.text||"").slice(0,40):l.kind==="medicion"?" — pH "+(l.ph||"–")+", EC "+(l.ec||"–")+(l.temp?", "+l.temp+" °C":""):l.kind==="salud"?" — "+l.title:(l.prod?": "+l.prod:"");return '<div class="log"><span class="d">'+short(l.d)+'</span><span>'+ICON[l.kind]+' '+KINDNAME[l.kind]+esc(extra)+(l.note==="lluvia"?" (lluvia)":"")+(l.by?' <span class="who">'+esc(shortName(l.by))+'</span>':'')+'</span>'+(l.kind!=="salud"?'<button style="margin-left:auto;color:var(--muted)" data-a="undo" data-v="'+l.id+'" aria-label="Borrar registro">✕</button>':'')+'</div>';}).join(""):'<p style="color:var(--muted);font-size:14px">Sin registros todavía.</p>')+'</div>';
   h+='<div class="actions"><button class="btn sm line" data-a="edit" data-p="'+p.id+'">Editar</button><button class="btn sm danger" data-a="del">Eliminar</button></div>';
   if(ui.confirmDel)h+='<div class="confirm"><b>¿Eliminar «'+esc(p.name)+'» y su historial?</b><div class="actions"><button class="btn sm danger" data-a="delyes" data-p="'+p.id+'">Sí, eliminar</button><button class="btn sm line" data-a="delno">Cancelar</button></div></div>';
   return h;
@@ -1237,6 +1275,21 @@ document.addEventListener("click",function(e){
   else if(a==="pexp"){ui.pexp=v;render();}
   else if(a==="fexp"){readForm();ui.form.exp=v;render();}
   else if(a==="cosecha"){openSheet({k:"cosecha",pid:pid});}
+  else if(a==="wet"){var pw=plant(pid),ew={plantId:pid,kind:"humeda",dias:2};addLog(ew);var nw=tasksFor(pw).filter(function(t){return t.kind==="agua";})[0];var sg=wetSuggest(pw);showToast("Anotado: tierra húmeda en "+pw.name+". Te recuerdo regar "+(nw?nice(nw.due):"en 2 días")+"."+(sg?" Revisa la ficha: hay una sugerencia de riego.":""),ew.id);save();render();}
+  else if(a==="water-adj"){var pa=plant(pid);pa.water=parseInt(v,10)||pa.water;pa.waterAdjOn=today();save();showToast("Listo: "+pa.name+" se riega cada "+pa.water+" días.");render();}
+  else if(a==="water-keep"){var pk=plant(pid);pk.waterAdjOn=today();save();render();}
+  else if(a==="aplica"){ui.usarBack=ui.sheet;openSheet({k:"usar",pid:pid,kind:"aplica"});}
+  else if(a==="usar-ok"){var uk=el.getAttribute("data-k"),pr=v?S.log.filter(function(l){return l.id===v;})[0]:null;ui.sheet=ui.usarBack||null;ui.usarBack=null;
+    if(uk==="abono"){ui.prodPicked=pr||{id:null};doTask(pid,"abono");}
+    else{var pu=plant(pid),eu={plantId:pid,kind:"aplica"};if(pr){eu.prodId=pr.id;eu.prod=pr.name;}addLog(eu);showToast("Anotado: "+(pr?pr.name:"aplicación")+" en "+pu.name+".",eu.id);save();render();}}
+  else if(a==="prod-new"){ui.prevSheet=ui.sheet&&ui.sheet.k==="usar"?ui.sheet:null;ui.sheet={k:"producto",uso:v||"abono"};render();}
+  else if(a==="prod-edit"){ui.prevSheet=null;openSheet({k:"producto",id:v});}
+  else if(a==="prod-save"){var pn=(document.getElementById("pr-n").value||"").trim();if(!pn){showToast("Escribe el nombre del producto.");render();return;}
+    var pf={name:pn,uso:document.getElementById("pr-u").value,dosis:(document.getElementById("pr-d").value||"").trim(),casero:document.getElementById("pr-c").checked,nota:(document.getElementById("pr-o").value||"").trim()};
+    var px=v?S.log.filter(function(l){return l.id===v;})[0]:null;if(px){Object.keys(pf).forEach(function(k){px[k]=pf[k];});px.t=Date.now();}else{pf.kind="producto";addLog(pf);}
+    save();showToast("Guardado: "+pn+".");ui.sheet=ui.prevSheet||null;ui.prevSheet=null;render();}
+  else if(a==="prod-del"){S.log=S.log.filter(function(l){return l.id!==v;});save();ui.sheet=null;showToast("Producto eliminado. Los registros de uso se conservan.");render();}
+  else if(a==="rec-prod"){var rr=(window.MJ_RECETAS||[]).filter(function(x){return x.id===v;})[0];if(rr){var ya=productos().filter(function(x){return x.recId===rr.id;})[0];if(ya){showToast("Ya está en tus productos.");render();}else{addLog({kind:"producto",name:rr.nombre,uso:rr.cat==="abonos"?"abono":rr.cat==="hongos"?"hongo":"plaga",dosis:rr.frecuencia||"",casero:true,recId:rr.id});save();showToast("Guardado en mis productos: "+rr.nombre+".");render();}}}
   else if(a==="cos-save"){var q=parseFloat(document.getElementById("cs-q").value),un=(document.getElementById("cs-u").value||"").trim(),nt=(document.getElementById("cs-n").value||"").trim();addLog({plantId:pid,kind:"cosecha",qty:isNaN(q)?null:q,unit:un||"unidades",text:nt});var pc=plant(pid);showToast("🧺 Cosecha anotada: "+(isNaN(q)?"":q+" ")+(un||"unidades")+" de "+pc.name+".");ui.sheet={k:"plant",pid:pid};save();render();}
   else if(a==="newplace"){if(ui.sheet&&ui.sheet.k==="form")readForm();ui.backTo=ui.sheet;ui.lugar=null;openSheet({k:"lugar"});}
   else if(a==="editplace"){var pe=placeById(v);ui.backTo=ui.sheet;ui.lugar={id:pe.id,name:pe.name,area:pe.area||"",lat:pe.lat,lon:pe.lon,out:!!pe.out,busy:false,err:""};openSheet({k:"lugar"});}
