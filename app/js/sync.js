@@ -163,13 +163,25 @@
       sb.from("garden_invites").select("email").eq("garden_id", st.gid).then(chk)
     ]).then(function(r){ return { m: r[0].data || [], i: r[1].data || [] }; });
   }
+  // Quitar a alguien: invitación pendiente (cualquier miembro) o persona ya dentro (solo el dueño, nunca a sí mismo).
+  function remove(email, invited){
+    if (!st.gid) return Promise.reject(new Error("Sin jardín"));
+    var e = String(email).trim().toLowerCase();
+    var q = invited ? sb.from("garden_invites").delete().eq("garden_id", st.gid).eq("email", e)
+                    : sb.from("garden_members").delete().eq("garden_id", st.gid).ilike("email", e);
+    return q.select().then(function(r){
+      if (r.error) throw r.error;
+      if (!r.data || !r.data.length) throw new Error(invited ? "No se encontró la invitación" : "Solo el dueño del jardín puede quitar personas");
+      return r.data;
+    });
+  }
   function invite(email){
     return sb.auth.getUser().then(function(u){
       return sb.from("garden_invites").upsert({ garden_id: st.gid, email: String(email).trim().toLowerCase(), invited_by: u.data.user.id }).then(chk);
     });
   }
   window.MJSync = { photoUrl: photoUrl, pendingPhotos: function(){ return pendingN; }, init: init, changed: changed, run: run, info: function(){ return st; }, enabled: enabled,
-    sendCode: sendCode, verify: verify, logout: logout, members: members, invite: invite };
+    sendCode: sendCode, verify: verify, logout: logout, members: members, invite: invite, remove: remove };
 })();
 /* IA: llama a la función "ia" de Supabase (Gemini gratis). Devuelve el JSON de la respuesta. */
 (function(){

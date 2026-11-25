@@ -8,3 +8,4 @@
 | 21 nov 2026 | Ideas de apps similares (Planta, PictureThis, PlantIn) | Aprobado: recetario con respaldo (hecho), responsable por planta, lugares con ubicación geográfica, avisos por persona, «hecho por», botón «tierra húmeda, posponer». A enero: zona afectada en la foto y tamaño de maceta | Sin cambio de fecha final |
 | 21 nov 2026 | Página de presentación en Netlify | Extra fuera del MVP, sin afectar la app (carpeta web/) | Sin cambio de fecha |
 | 21/11/2026 | Rediseño visual profesional (v0.8.0) alineado con la página web; preparación para tiendas de apps a futuro | Pedido por Jonathan | Solo estilo, sin cambios de funciones |
+| 25/11/2026 | Quitar invitados y personas del jardín desde Ajustes (v0.8.1) | Reportado por Jonathan | Corrección pequeña de la historia de familia ya entregada |
