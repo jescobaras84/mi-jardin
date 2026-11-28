@@ -10,3 +10,4 @@
 | 21/11/2026 | Rediseño visual profesional (v0.8.0) alineado con la página web; preparación para tiendas de apps a futuro | Pedido por Jonathan | Solo estilo, sin cambios de funciones |
 | 25/11/2026 | Quitar invitados y personas del jardín desde Ajustes (v0.8.1) | Reportado por Jonathan | Corrección pequeña de la historia de familia ya entregada |
 | 25/11/2026 | Mis productos (abonos y fumigación con registro de uso) + abonos caseros en el recetario; junto con el botón «tierra húmeda» (v0.9.0) | Pedido por Jonathan | Entra en el Sprint 3 sin mover el cierre del 23/12 |
+| 28/11/2026 | Pulido visual con la skill unslop de Damir Sokolovsky (CC BY 4.0) (v0.9.1) | Pedido por Jonathan | Solo estilo; mismas funciones |
